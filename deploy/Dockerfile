@@ -2,8 +2,27 @@
 # Note: audio + llama-server access require running with host devices/network:
 #   docker run --device /dev/snd --network host coco-egg:dev
 FROM python:3.12-slim-bookworm
+
+# Runtime audio libs + build tools for whisper.cpp.
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    alsa-utils libportaudio2 && rm -rf /var/lib/apt/lists/*
+      alsa-utils libportaudio2 \
+      git cmake build-essential ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
+
+# whisper.cpp CLI (spec §7 local ASR). Installs whisper-cli + libwhisper.so
+# into /usr/local via cmake --install; ldconfig refreshes the loader cache
+# so the dynamic linker finds libwhisper.so.1 at runtime.
+RUN git clone --depth 1 https://github.com/ggerganov/whisper.cpp /tmp/whisper.cpp \
+    && cmake -B /tmp/whisper.cpp/build /tmp/whisper.cpp -DCMAKE_BUILD_TYPE=Release \
+    && cmake --build /tmp/whisper.cpp/build -j --config Release \
+    && cmake --install /tmp/whisper.cpp/build \
+    && ldconfig \
+    && rm -rf /tmp/whisper.cpp \
+    && apt-get purge -y --auto-remove git cmake build-essential
+
+# Piper TTS CLI (spec §7 local TTS). Provides /usr/local/bin/piper.
+RUN pip install --no-cache-dir piper-tts
+
 WORKDIR /app
 COPY device/ ./device/
 COPY fixtures/ ./fixtures/
