@@ -33,7 +33,7 @@ MENU = (
     "[q]     text:  sample question -> LLM -> TTS\n"
     "[r]     reply: sample reply -> TTS\n"
     "[Space] toggle output: audio device / file\n"
-    "[Ctrl-C] exit\n"
+    "[Ctrl-C] exit"
 )
 
 
@@ -167,8 +167,8 @@ def run() -> None:
     try:
         tty.setcbreak(fd)
         while True:
-            print(f"Output: {output_mode}")
             print(MENU, flush=True)
+            print(f"Output: {output_mode}\n")
             ch = sys.stdin.read(1)
             if not ch:  # stdin closed
                 break
@@ -184,7 +184,6 @@ def run() -> None:
                         bench_turn(cfg, "reply", output_mode)
                     case " ":
                         output_mode = "file" if output_mode == "device" else "device"
-                        print(f"Output: {output_mode}", flush=True)
             except Exception as e:  # keep the loop alive on the bench
                 print("\n")
                 set_ui(UiState.ERROR)
