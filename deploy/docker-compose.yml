@@ -2,7 +2,7 @@ services:
   egg:
     image: coco-egg:dev
     build: { context: .., dockerfile: deploy/Dockerfile }
-    network_mode: host          # reach host Ollama on 127.0.0.1:11434
+    network_mode: host          # reach host llama-server on 127.0.0.1:8080
     devices: ["/dev/snd:/dev/snd"]
     volumes:
       - ../models:/app/models:ro

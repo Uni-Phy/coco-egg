@@ -1,1 +1,1 @@
-from .ollama_client import answer  # noqa: F401
+from .llama_client import stream_sentences  # noqa: F401

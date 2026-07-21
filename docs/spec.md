@@ -175,7 +175,8 @@ Offline-degraded mode (§4) rules out Pi Zero–class boards — the device must
   - Wake word: openWakeWord · VAD: Silero VAD
   - ASR: whisper.cpp (base/small — benchmark both on target board for latency vs accuracy)
   - TTS: Piper — local, low latency, decent voices. Stays the default even after cloud enablement; cloud TTS only if voice quality demands it.
-  - **Tutor LLM: small quantized model (1–3B class), scoped to launch use cases.** Start with an off-the-shelf instruct model + tight system prompt + local RAG over the curriculum content pack (pushed down from the CoCo node). This ships v0.
+  - **Tutor LLM — [FIXED 2026-07-21]: Qwen3-1.7B (Q4_K_M) served by llama-server (llama.cpp), thinking mode disabled.** Rationale: on a memory-bandwidth-bound Pi 5, a ~1.2GB model sustains ~10–13 tok/s where 3–4B models drop to 4–7; Apache-2.0 license keeps the node fine-tune → OTA loop clean; strong multilingual for the India path. llama.cpp direct (no Ollama) from the start — one runtime family with whisper.cpp, finer quant/flag control. Off-the-shelf + tight system prompt + local RAG over the curriculum content pack (pushed down from the CoCo node) ships v0; refine with real usage.
+  - **Streaming is the loop architecture, not an optimization:** the LLM reply streams and TTS speaks sentence-by-sentence, so first audio never waits for full generation. Reasoning/thinking token modes stay off — hidden chain-of-thought is silence to the learner.
   - Audio I/O + state machine + LED controller as the device app.
 
 **Model evolution path (the node's job):**
@@ -193,7 +194,7 @@ Offline-degraded mode (§4) rules out Pi Zero–class boards — the device must
 |---|---|---|
 | Wake word / VAD / AEC | device | device |
 | ASR | device (whisper.cpp) | cloud streaming ASR optional |
-| Tutor reasoning (LLM) | **device (small local LLM + curriculum RAG)** | cloud LLM with local fallback |
+| Tutor reasoning (LLM) | **device (Qwen3-1.7B via llama.cpp + curriculum RAG)** | cloud LLM with local fallback |
 | TTS | device (Piper) | device (Piper) — cloud only if quality demands |
 | Curriculum content packs | **CoCo node** (async, pushed down) | same |
 | Transcript analysis / eval set | **CoCo node** (async) | same |
@@ -276,7 +277,7 @@ This device records children's voices in classrooms. Treat this as a first-class
 | 5 | Trigger | button / wake word / both | Product | v0 build |
 | 6 | AI HAT needed for local model latency? | yes / no | Eng | after M0 latency benchmarks |
 | 7 | BOM cost ceiling | ₹___ / unit | Naveen | before parts order |
-| 8 | Base small model + cloud providers | TBD | Eng | model: M0 · cloud: M2 |
+| 8 | ~~Base small model~~ **Resolved 2026-07-21: Qwen3-1.7B Q4_K_M on llama-server (llama.cpp), thinking off; refine with field usage.** Cloud providers still open | cloud: TBD | Eng | cloud: M2 |
 | 9 | OTA at scale | UpdateHub / Mender / RAUC | Eng | before M2 |
 | 10 | Data retention + jurisdiction | TBD | Naveen | before pilot |
 

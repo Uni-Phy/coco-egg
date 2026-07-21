@@ -1,5 +1,5 @@
 # coco-egg device app container (spec §10: app updates = image pulls).
-# Note: audio + Ollama access require running with host devices/network:
+# Note: audio + llama-server access require running with host devices/network:
 #   docker run --device /dev/snd --network host coco-egg:dev
 FROM python:3.12-slim-bookworm
 RUN apt-get update && apt-get install -y --no-install-recommends \

@@ -27,9 +27,11 @@ DEFAULTS = {
         "language": "en",
     },
     "tutor": {
-        # Local LLM served by Ollama (same pattern as common-os).
-        "ollama_url": "http://127.0.0.1:11434",
-        "model": "llama3.2:3b",      # placeholder; swap for chosen small model
+        # Qwen3-1.7B via llama-server (llama.cpp) — locked, spec decision #8.
+        # Start it with `make serve`; the served model is whatever the server
+        # loaded, so there is no model name here.
+        "llama_url": "http://127.0.0.1:8080",
+        "temperature": 0.7,           # Qwen3 recommended non-thinking sampling
         "timeout_s": 30,
         "max_reply_chars": 600,       # keep spoken answers short
     },
@@ -41,7 +43,7 @@ DEFAULTS = {
         "transcript_dir": "transcripts",   # buffered locally; SYNC state ships these
     },
     "trigger": {
-        "mode": "keyboard",   # bench: spacebar. Device: "gpio" (M1, XVF3800 GPI)
+        "mode": "keyboard",   # bench: Enter key. Device: "gpio" (M1, XVF3800 GPI)
     },
 }
 

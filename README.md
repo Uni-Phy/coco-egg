@@ -11,9 +11,11 @@ rationale in [`docs/spec.md`](docs/spec.md).
 ## Architecture in one breath
 
 button → mic (eMeet M0 Plus / ReSpeaker XVF3800) → whisper.cpp →
-small local LLM via Ollama → Piper TTS → speaker. Transcripts buffer
-locally and sync opportunistically to the CoCo node, which fine-tunes the
-on-device model and ships it back via OTA. Fleet access via ShellHub.
+**Qwen3-1.7B via llama-server (llama.cpp), streamed** → Piper TTS spoken
+sentence-by-sentence → speaker. First audio never waits for the full reply.
+Transcripts buffer locally and sync opportunistically to the CoCo node,
+which fine-tunes the on-device model and ships it back via OTA. Fleet
+access via ShellHub.
 
 ## Repo layout
 
@@ -28,11 +30,13 @@ docs/       spec.md — the engineering scope & design doc
 
 1. Build [whisper.cpp](https://github.com/ggml-org/whisper.cpp) and put
    `ggml-base.en.bin` in `models/`.
-2. Install [Piper](https://github.com/rhasspy/piper) and a voice
+2. Build [llama.cpp](https://github.com/ggml-org/llama.cpp) so `llama-server`
+   is on your PATH, then `make model` to download Qwen3-1.7B Q4_K_M
+   (needs `pip install huggingface_hub` for the `hf` CLI).
+3. Install [Piper](https://github.com/rhasspy/piper) and a voice
    (`en_US-lessac-medium`) in `models/`.
-3. Install [Ollama](https://ollama.com) and `ollama pull llama3.2:3b`
-   (placeholder model — see spec open decision #1/#8).
-4. `make setup && make run` — press Enter, speak, listen.
+4. `make serve` in one terminal (llama-server, thinking disabled), then
+   `make setup && make run` in another — press Enter, speak, listen.
 
 Latency (end-of-speech → first audio) prints per turn; M0's job is to
 measure it honestly and set the bar (spec §16).

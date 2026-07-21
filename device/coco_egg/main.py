@@ -2,7 +2,7 @@
 
 Pipeline (spec §5): trigger -> record -> local ASR -> local tutor -> local TTS -> play.
 Fully offline. Cloud does not exist in this file; it arrives at M2 as an
-optional route inside answer(), never as a dependency.
+optional route inside stream_sentences(), never as a dependency.
 
 Bench trigger: press Enter to talk (keyboard mode). GPIO mode lands at M1.
 """
@@ -18,7 +18,7 @@ from .audio.io import write_wav
 from .states import UiState
 from .sync import log_interaction
 from .tts import synthesize
-from .tutor import answer
+from .tutor import stream_sentences
 
 
 def set_ui(state: UiState) -> None:
@@ -40,14 +40,22 @@ def one_turn(cfg: dict) -> None:
         set_ui(UiState.IDLE)
         return
     print(f"  heard: {question}")
-    reply = answer(question, cfg)
+    # Stream the reply sentence-by-sentence: speak each one as it lands, so
+    # first audio never waits for the full generation (spec §7).
+    first_audio = 0.0
+    spoken: list[str] = []
+    for sentence in stream_sentences(question, cfg):
+        speech = synthesize(sentence, cfg)
+        if not spoken:
+            first_audio = time.monotonic() - t0
+            print(f"  latency (end-of-speech -> first-audio): {first_audio:.2f}s")
+        spoken.append(sentence)
+        set_ui(UiState.SPEAKING)
+        play_wav(speech, cfg)
+    reply = " ".join(spoken)
     print(f"  reply: {reply}")
-    speech = synthesize(reply, cfg)
-    latency = time.monotonic() - t0
-    print(f"  latency (end-of-speech -> first-audio): {latency:.2f}s")
-    set_ui(UiState.SPEAKING)
-    play_wav(speech, cfg)
-    log_interaction(question, reply, latency, cfg)
+    if reply:
+        log_interaction(question, reply, first_audio, cfg)
     set_ui(UiState.IDLE)
 
 
