@@ -4,6 +4,8 @@ services:
     build: { context: .., dockerfile: deploy/Dockerfile }
     network_mode: host          # reach host llama-server on 127.0.0.1:8080
     devices: ["/dev/snd:/dev/snd"]
+    stdin_open: true            # keyboard trigger reads stdin via input()
+    tty: true
     volumes:
       - ../models:/app/models:ro
       - ../transcripts:/app/transcripts

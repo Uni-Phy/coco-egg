@@ -1,4 +1,4 @@
-.PHONY: setup model serve run test lint docker
+.PHONY: setup model serve run test lint docker up down
 
 TUTOR_GGUF = models/Qwen3-1.7B-Q4_K_M.gguf
 
@@ -23,3 +23,10 @@ lint:
 
 docker:
 	docker build -t coco-egg:dev -f deploy/Dockerfile .
+
+up:
+	touch egg.yaml
+	docker compose -f deploy/docker-compose.yml up --build
+
+down:
+	docker compose -f deploy/docker-compose.yml down

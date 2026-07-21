@@ -52,6 +52,11 @@ def load(path: str | None = None) -> dict:
     cfg = {k: dict(v) for k, v in DEFAULTS.items()}
     for candidate in ([path] if path else []) + ["egg.yaml", "/etc/coco/egg.yaml"]:
         if candidate and pathlib.Path(candidate).exists():
+            if not pathlib.Path(candidate).is_file():
+                raise SystemExit(
+                    f"coco-egg: {candidate} is a directory, not a file -"
+                    f"remove it and use 'make up' to start the stack."
+                )
             user = yaml.safe_load(pathlib.Path(candidate).read_text()) or {}
             for section, values in user.items():
                 cfg.setdefault(section, {}).update(values or {})
