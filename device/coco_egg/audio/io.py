@@ -14,6 +14,31 @@ import numpy as np
 import sounddevice as sd
 
 
+def resolve_input(cfg: dict) -> int | None:
+    """Pick the capture device from cfg, print it, or raise if missing."""
+    name = cfg["audio"]["input_device"]
+    inputs = [(i, d) for i, d in enumerate(sd.query_devices()) if d["max_input_channels"] > 0]
+    if not inputs:
+        raise RuntimeError(
+            "no capture devices found. Is the USB mic plugged in?"
+        )
+    if name == "default":
+        picked = sd.query_devices(kind="input")
+        index = None
+    else:
+        match = next(((i, d) for i, d in inputs if name.lower() in d["name"].lower()), None)
+        if not match:
+            listing = "\n  ".join(f"[{i}] {d['name']}" for i, d in inputs)
+            raise RuntimeError(f"input device {name!r} not found. Available:\n  {listing}")
+        index, picked = match
+    print(
+        f"audio: input = {picked['name']!r} "
+        f"(native {int(picked['default_samplerate'])} Hz, requested {cfg['audio']['sample_rate']} Hz)",
+        flush=True,
+    )
+    return index
+
+
 def record_utterance(cfg: dict) -> np.ndarray:
     """Record until trailing silence or max length. Returns int16 mono @16k."""
     a = cfg["audio"]
@@ -22,11 +47,12 @@ def record_utterance(cfg: dict) -> np.ndarray:
     silence_blocks_needed = int(a["silence_stop_s"] / 0.1)
     max_blocks = int(a["max_utterance_s"] / 0.1)
 
+    device = resolve_input(cfg)
     chunks: list[np.ndarray] = []
     silent = 0
     voiced_yet = False
     with sd.InputStream(samplerate=sr, channels=1, dtype="int16",
-                        device=a["input_device"] if a["input_device"] != "default" else None,
+                        device=device,
                         blocksize=block) as stream:
         for _ in range(max_blocks):
             data, _ = stream.read(block)
