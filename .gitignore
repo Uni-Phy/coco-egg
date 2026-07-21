@@ -14,3 +14,4 @@ models/
 !device/tests/fixtures/*.wav
 .env
 transcripts/
+egg.yaml
