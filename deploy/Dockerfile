@@ -6,6 +6,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     alsa-utils libportaudio2 && rm -rf /var/lib/apt/lists/*
 WORKDIR /app
 COPY device/ ./device/
+COPY fixtures/ ./fixtures/
 RUN pip install --no-cache-dir ./device
 # whisper.cpp + piper binaries and models are mounted from the host in v0;
 # they move into a fatter runtime image (or the OS image) at M1.

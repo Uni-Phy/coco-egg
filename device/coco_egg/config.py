@@ -45,6 +45,15 @@ DEFAULTS = {
     "trigger": {
         "mode": "keyboard",   # bench: Enter key. Device: "gpio" (M1, XVF3800 GPI)
     },
+    "bench": {
+        # Headless bench inputs. Used by the `w`/`q`/`r` keys in main.run() to
+        # exercise the pipeline without a microphone. Replace sample_question.wav
+        # with a real recording (e.g. `arecord -f S16_LE -r 16000 -c 1 -d 3 …`)
+        # for meaningful STT output; the shipped file is a placeholder.
+        "sample_wav": "fixtures/sample_question.wav",
+        "sample_question": "fixtures/sample_question.txt",
+        "sample_reply": "fixtures/sample_reply.txt",
+    },
 }
 
 
