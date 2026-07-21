@@ -7,7 +7,8 @@ setup:            ## install device app deps into .venv
 
 model:            ## download the locked tutor model (Qwen3-1.7B Q4_K_M)
 	mkdir -p models
-	hf download Qwen/Qwen3-1.7B-GGUF Qwen3-1.7B-Q4_K_M.gguf --local-dir models
+	# unsloth repo: the official Qwen/Qwen3-1.7B-GGUF only ships Q8_0
+	hf download unsloth/Qwen3-1.7B-GGUF Qwen3-1.7B-Q4_K_M.gguf --local-dir models
 
 serve:            ## run llama-server with the tutor model (thinking disabled)
 	llama-server -m $(TUTOR_GGUF) --port 8080 -c 4096 --reasoning-budget 0
