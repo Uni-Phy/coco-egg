@@ -7,6 +7,8 @@ services:
     stdin_open: true            # keyboard trigger reads stdin via input()
     tty: true
     volumes:
+      - ../device:/app/device                # editable install -> host edits + `make restart` reload
+      - ../fixtures:/app/fixtures:ro
       - ../models:/app/models:ro
       - ../transcripts:/app/transcripts
       - ../egg.yaml:/app/egg.yaml:ro

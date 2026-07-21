@@ -7,7 +7,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 WORKDIR /app
 COPY device/ ./device/
 COPY fixtures/ ./fixtures/
-RUN pip install --no-cache-dir ./device
+RUN pip install --no-cache-dir -e ./device
 # whisper.cpp + piper binaries and models are mounted from the host in v0;
 # they move into a fatter runtime image (or the OS image) at M1.
 CMD ["python", "-m", "coco_egg.main"]
