@@ -1,0 +1,11 @@
+services:
+  egg:
+    image: coco-egg:dev
+    build: { context: .., dockerfile: deploy/Dockerfile }
+    network_mode: host          # reach host Ollama on 127.0.0.1:11434
+    devices: ["/dev/snd:/dev/snd"]
+    volumes:
+      - ../models:/app/models:ro
+      - ../transcripts:/app/transcripts
+      - ../egg.yaml:/app/egg.yaml:ro
+    restart: unless-stopped
