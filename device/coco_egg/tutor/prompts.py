@@ -16,3 +16,18 @@ Rules:
 
 # Placeholder until decision #1 lands:
 DEFAULT_SCOPE = "basic mathematics, science, and English for middle school"
+
+# Appended to SYSTEM when the content pack retrieves relevant material.
+# Grounding rule: the model teaches from the pack, not from its own memory.
+GROUNDING = """
+Lesson material for this question:
+{material}
+
+Answer using ONLY the lesson material above. If it does not cover the
+question, say you don't know that yet and offer a topic from the material.
+"""
+
+# Spoken when nothing relevant is in the pack (or the LLM is unreachable and
+# no chunk matches). Keep it short and warm — this is a normal outcome.
+UNKNOWN = ("I don't know that one yet. But I can help with things like "
+           "photosynthesis, the water cycle, or fractions. What would you like?")

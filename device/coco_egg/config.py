@@ -34,6 +34,10 @@ DEFAULTS = {
         "temperature": 0.7,           # Qwen3 recommended non-thinking sampling
         "timeout_s": 30,
         "max_reply_chars": 600,       # keep spoken answers short
+        # Curriculum content pack (spec §7 RAG). Retrieval grounds the LLM;
+        # with no LLM reachable the pack's canned explanations are spoken
+        # directly. Real packs come from the CoCo node; this is the fixture.
+        "pack": "fixtures/content-pack.json",
     },
     "tts": {
         "piper_bin": "piper",

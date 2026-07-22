@@ -17,10 +17,44 @@ from typing import Iterator
 
 import requests
 
-from .prompts import DEFAULT_SCOPE, SYSTEM
+from .pack import Pack
+from .prompts import DEFAULT_SCOPE, GROUNDING, SYSTEM, UNKNOWN
 
 _SENTENCE_END = re.compile(r"(?<=[.!?])\s+")
 _THINK_PAIR = re.compile(r"<think>.*?</think>", re.DOTALL)
+
+_pack: Pack | None = None
+
+
+def _get_pack(cfg: dict) -> Pack | None:
+    global _pack
+    if _pack is None and cfg["tutor"].get("pack"):
+        _pack = Pack.load(cfg["tutor"]["pack"])
+    return _pack
+
+
+def _system_prompt(question: str, cfg: dict) -> tuple[str, list[dict]]:
+    """SYSTEM prompt, grounded in retrieved pack chunks when there are any."""
+    system = SYSTEM.format(scope=DEFAULT_SCOPE)
+    pack = _get_pack(cfg)
+    hits = pack.retrieve(question) if pack else []
+    if hits:
+        material = "\n\n".join(f"{c['title']}: {c['text']}" for c in hits)
+        system += GROUNDING.format(material=material)
+    return system, hits
+
+
+def _fallback_sentences(hits: list[dict]) -> Iterator[str]:
+    """No LLM reachable: speak the pack's pre-written explanation (or UNKNOWN).
+
+    This is the hardcoded-first path — the device still teaches with no
+    llama-server at all, which is also the production offline-degraded floor.
+    """
+    text = hits[0].get("explain") or hits[0]["text"] if hits else UNKNOWN
+    sentences, rest = split_ready_sentences(text + " ")
+    yield from sentences
+    if rest.strip():
+        yield rest.strip()
 
 
 def visible_text(raw: str) -> str:
@@ -38,22 +72,29 @@ def split_ready_sentences(buf: str) -> tuple[list[str], str]:
 
 def stream_sentences(question: str, cfg: dict) -> Iterator[str]:
     t = cfg["tutor"]
-    resp = requests.post(
-        f"{t['llama_url']}/v1/chat/completions",
-        json={
-            "stream": True,
-            "temperature": t["temperature"],
-            "top_p": 0.8,  # Qwen3 recommended non-thinking sampling
-            "chat_template_kwargs": {"enable_thinking": False},
-            "messages": [
-                {"role": "system", "content": SYSTEM.format(scope=DEFAULT_SCOPE)},
-                {"role": "user", "content": question},
-            ],
-        },
-        timeout=t["timeout_s"],
-        stream=True,
-    )
-    resp.raise_for_status()
+    system, hits = _system_prompt(question, cfg)
+    try:
+        resp = requests.post(
+            f"{t['llama_url']}/v1/chat/completions",
+            json={
+                "stream": True,
+                "temperature": t["temperature"],
+                "top_p": 0.8,  # Qwen3 recommended non-thinking sampling
+                "chat_template_kwargs": {"enable_thinking": False},
+                "messages": [
+                    {"role": "system", "content": system},
+                    {"role": "user", "content": question},
+                ],
+            },
+            timeout=t["timeout_s"],
+            stream=True,
+        )
+        resp.raise_for_status()
+    except requests.RequestException as e:
+        print(f"  tutor: llama-server unreachable ({e.__class__.__name__}), "
+              f"using pack fallback", flush=True)
+        yield from _fallback_sentences(hits)
+        return
     raw, yielded = "", 0
     try:
         # chunk_size=1: iter_lines buffers 512B by default, which would hold

@@ -1,0 +1,35 @@
+{
+  "topic": "Science and Maths — middle school sampler",
+  "chunks": [
+    {
+      "id": "photosynthesis",
+      "title": "Photosynthesis",
+      "text": "Green plants make their own food by photosynthesis. The leaves take in sunlight, water from the roots, and carbon dioxide from the air, and turn them into sugar and oxygen. The green colour in leaves comes from chlorophyll, which captures the sunlight.",
+      "explain": "Plants make their own food, and that is called photosynthesis. The leaves use sunlight, water, and air to make sugar for the plant, and they give out oxygen. The green colour in leaves is chlorophyll, and its job is to catch the sunlight."
+    },
+    {
+      "id": "plants-soil",
+      "title": "Why plants do not eat soil",
+      "text": "Plants do not eat soil. Soil gives plants water and minerals through the roots, but the food itself is made in the leaves by photosynthesis. That is why a plant kept in the dark becomes weak even in good soil.",
+      "explain": "Plants do not eat soil like we eat food. The soil only gives them water and minerals. Their real food is made in the leaves using sunlight, so a plant in the dark grows weak even in the best soil."
+    },
+    {
+      "id": "water-cycle",
+      "title": "The water cycle",
+      "text": "The water cycle moves water between the earth and the sky. The sun heats water in rivers and seas and it becomes vapour, which is evaporation. The vapour rises, cools, and forms clouds, which is condensation. When drops become heavy they fall as rain, which is precipitation.",
+      "explain": "The water cycle has three main steps. First the sun heats water and it rises as vapour, that is evaporation. Then the vapour cools high up and makes clouds, that is condensation. At last the drops get heavy and fall as rain."
+    },
+    {
+      "id": "fractions",
+      "title": "Fractions",
+      "text": "A fraction shows a part of a whole. If a roti is cut into four equal pieces and you take one, you have one fourth, written as 1/4. The bottom number tells how many equal parts the whole is cut into, and the top number tells how many parts you have.",
+      "explain": "A fraction is a part of a whole thing. Imagine cutting one roti into four equal pieces. If you take one piece, you have one fourth of the roti. The bottom number says how many pieces the whole was cut into, and the top number says how many pieces you took."
+    },
+    {
+      "id": "respiration",
+      "title": "Respiration in living things",
+      "text": "All living things respire. In respiration, food is broken down using oxygen to release energy for the body. Plants respire too, day and night, even while they also do photosynthesis in the daytime.",
+      "explain": "Every living thing breathes to get energy, and that is called respiration. Our body breaks down food using oxygen to release energy. Plants also respire, both day and night, even though they make food in the daytime."
+    }
+  ]
+}
