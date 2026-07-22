@@ -41,6 +41,21 @@ docs/       spec.md — the engineering scope & design doc
 Latency (end-of-speech → first audio) prints per turn; M0's job is to
 measure it honestly and set the bar (spec §16).
 
+## Content packs (curriculum RAG)
+
+The tutor grounds every answer in a content pack — chunks + spoken
+explanations + a lesson plan (spec §7). Build one from any document:
+
+```
+python tools/build_pack.py topic.pdf --llm http://127.0.0.1:8080 -o pack.json
+```
+
+Heuristic mode (no `--llm`) needs nothing and always works; `--llm` polishes
+titles/explanations through any OpenAI-compatible server (bench: llama-server;
+production: the CoCo node's big model). Point `tutor.pack` in egg.yaml at the
+result. With no llama-server reachable the device speaks the pack's canned
+explanations directly — teaching works with zero LLM.
+
 ## Reuse from common-os
 
 `os/wifi-manager` and the first-boot pattern are adapted from
