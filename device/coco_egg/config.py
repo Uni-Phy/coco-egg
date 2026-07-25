@@ -40,7 +40,6 @@ DEFAULTS = {
         "pack": "fixtures/content-pack.json",
     },
     "tts": {
-        "piper_bin": "piper",
         "voice": "models/en_US-lessac-medium.onnx",
     },
     "sync": {
