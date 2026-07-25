@@ -15,7 +15,7 @@ Rules:
 """
 
 # Placeholder until decision #1 lands:
-DEFAULT_SCOPE = "basic mathematics, science, and English for middle school"
+DEFAULT_SCOPE = "photosynthesis, the water cycle, fractions, plant biology, and respiration"
 
 # Appended to SYSTEM when the content pack retrieves relevant material.
 # Grounding rule: the model teaches from the pack, not from its own memory.
