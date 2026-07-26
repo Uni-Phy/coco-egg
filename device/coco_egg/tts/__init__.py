@@ -1,1 +1,1 @@
-from .piper_local import synthesize  # noqa: F401
+from .piper_local import preload, synthesize  # noqa: F401

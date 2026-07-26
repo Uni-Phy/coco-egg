@@ -17,6 +17,16 @@ def _load(model_path: str) -> PiperVoice:
     return voice
 
 
+def preload(cfg: dict) -> None:
+    """Load the voice before the first turn.
+
+    Measured on the Pi 5 bench: the first synthesize() pays ~2.1s of ONNX
+    voice load, every later one ~0.3s. Without this the first learner of the
+    day wears that load as latency.
+    """
+    _load(cfg["tts"]["voice"])
+
+
 def synthesize(text: str, cfg: dict) -> str:
     voice = _load(cfg["tts"]["voice"])
     out = tempfile.NamedTemporaryFile(suffix=".wav", delete=False)

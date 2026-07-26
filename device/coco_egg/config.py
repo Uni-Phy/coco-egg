@@ -17,7 +17,12 @@ DEFAULTS = {
         "sample_rate": 16000,
         "max_utterance_s": 30,
         "silence_stop_s": 1.2,   # stop recording after this much trailing silence
-        "silence_rms": 0.010,    # RMS threshold; tune on the bench
+        # RMS threshold, tuned on the M0 bench (Pi 5 + eMeet M0 Plus). Measured
+        # there: room noise floor sits at 0.00003 rms, while real speech sags to
+        # 0.014 mid-sentence. At the old 0.010 a learner who paused to think got
+        # cut off mid-question ("What is the" instead of the whole sentence), so
+        # this sits well under the speech sag and still 150x over the noise floor.
+        "silence_rms": 0.005,
     },
     "asr": {
         # Path to whisper.cpp CLI binary and model. Bench: build whisper.cpp

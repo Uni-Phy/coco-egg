@@ -41,6 +41,38 @@ docs/       spec.md — the engineering scope & design doc
 Latency (end-of-speech → first audio) prints per turn; M0's job is to
 measure it honestly and set the bar (spec §16).
 
+## Measured on real hardware (M0 bench)
+
+Pi 5 8GB / Cortex-A76 / DietPi (Debian 13), eMeet M0 Plus USB speakerphone.
+whisper.cpp `ggml-base.en` + Qwen3-1.7B Q4_K_M via llama-server + Piper
+`en_US-lessac-medium`. Median of 5 turns, voice preloaded, WiFi down:
+
+| stage | median | note |
+|---|---|---|
+| ASR (whisper-cli) | 1.79s | 1.44s of it is the encoder — a **fixed 30s-window cost**, independent of how short the utterance is. Model load is only 85ms. |
+| LLM → first sentence | 2.0–5.6s | dominated by prefill of the grounded prompt (~330 tok at k=3) at ~56 tok/s; decode runs ~10.4 tok/s |
+| TTS (Piper) | 0.3–1.5s | scales with sentence length, RTF ≈ 0.09. First call costs ~2.1s of voice load — `preload()` moves that off the learner's turn |
+| **end-of-speech → first audio** | **~6.4s** | includes the `silence_stop_s` = 1.2s hangover the learner waits through |
+
+**The bar is not met yet.** Spec §16 floated ~2–3s; the honest measured number
+is ~6.4s. Where the time actually goes, in priority order:
+
+1. **LLM prefill** — the biggest and most variable slice. The 124-token SYSTEM
+   preamble is a shared prefix that llama-server caches, but the retrieved pack
+   material after it differs per question and is re-prefilled every time.
+   Retrieving `k=1` instead of `k=3` cuts ~110 tokens (~2s).
+2. **ASR encoder** — whisper's fixed 30s window means a 1.6s question costs the
+   same 1.44s as a 25s one. `ggml-tiny.en` or a persistent whisper-server are
+   the levers; caching the model is not (load is already only 85ms).
+3. **Silence hangover** — 1.2s of dead air before work even starts. Lowering
+   `silence_stop_s` trades latency against clipping the learner.
+
+Note the mic is an eMeet M0 Plus with **hardware AEC**: it cancels its own
+speaker output almost completely (a full-volume tone played into it records at
+the noise floor). That is what stops the egg hearing itself, but it also means
+you cannot bench ASR by playing a question through the device's own speaker —
+that needs a human talking.
+
 ## Content packs (curriculum RAG)
 
 The tutor grounds every answer in a content pack — chunks + spoken

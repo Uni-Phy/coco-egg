@@ -23,7 +23,7 @@ from .audio import play_wav, record_utterance
 from .audio.io import write_wav
 from .states import UiState
 from .sync import log_interaction
-from .tts import synthesize
+from .tts import preload, synthesize
 from .tutor import stream_sentences
 
 
@@ -44,11 +44,12 @@ def set_ui(state: UiState) -> None:
 
 def one_turn(cfg: dict) -> None:
     set_ui(UiState.LISTENING)
-    audio = record_utterance(cfg)
+    # t0 is end-of-speech, not "recorder returned": the learner sits through
+    # the trailing-silence hangover too, so it counts as latency.
+    audio, t0 = record_utterance(cfg)
     if audio.size == 0:
         set_ui(UiState.IDLE)
         return
-    t0 = time.monotonic()
     set_ui(UiState.THINKING)
     wav = write_wav(audio, cfg["audio"]["sample_rate"])
     question = transcribe(wav, cfg)
@@ -159,6 +160,8 @@ def run() -> None:
         raise NotImplementedError("gpio trigger arrives at M1")
     if not sys.stdin.isatty():
         raise SystemExit("coco-egg: stdin is not a TTY. Run docker with -it (or compose tty:true).")
+
+    preload(cfg)   # pay the ~2.1s voice load now, not on the first learner
 
     output_mode = "device"
 

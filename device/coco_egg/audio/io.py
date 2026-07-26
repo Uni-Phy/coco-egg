@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import subprocess
 import tempfile
+import time
 import wave
 
 import numpy as np
@@ -39,8 +40,15 @@ def resolve_input(cfg: dict) -> int | None:
     return index
 
 
-def record_utterance(cfg: dict) -> np.ndarray:
-    """Record until trailing silence or max length. Returns int16 mono @16k."""
+def record_utterance(cfg: dict) -> tuple[np.ndarray, float]:
+    """Record until trailing silence or max length.
+
+    Returns (int16 mono @16k, monotonic time of end-of-speech). The second
+    value is when the learner stopped talking, NOT when this returns — the
+    silence_stop_s hangover sits between the two. The learner waits through
+    that hangover, so latency has to be measured from end-of-speech or M0
+    under-reports itself by silence_stop_s (spec §16 says measure honestly).
+    """
     a = cfg["audio"]
     sr = a["sample_rate"]
     block = int(sr * 0.1)
@@ -51,6 +59,7 @@ def record_utterance(cfg: dict) -> np.ndarray:
     chunks: list[np.ndarray] = []
     silent = 0
     voiced_yet = False
+    speech_end = time.monotonic()
     with sd.InputStream(samplerate=sr, channels=1, dtype="int16",
                         device=device,
                         blocksize=block) as stream:
@@ -61,11 +70,13 @@ def record_utterance(cfg: dict) -> np.ndarray:
             rms = float(np.sqrt(np.mean((mono.astype(np.float32) / 32768.0) ** 2)))
             if rms >= a["silence_rms"]:
                 voiced_yet, silent = True, 0
+                speech_end = time.monotonic()
             elif voiced_yet:
                 silent += 1
                 if silent >= silence_blocks_needed:
                     break
-    return np.concatenate(chunks) if chunks else np.zeros(0, dtype=np.int16)
+    audio = np.concatenate(chunks) if chunks else np.zeros(0, dtype=np.int16)
+    return audio, speech_end
 
 
 def write_wav(audio: np.ndarray, sr: int) -> str:
