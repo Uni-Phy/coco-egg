@@ -38,6 +38,18 @@ def main() -> None:
     cfg = config.load()
     wav = cfg["bench"]["sample_wav"]
     hangover = cfg["audio"]["silence_stop_s"]
+
+    # *.wav is gitignored, so this is not in a fresh clone — say so usefully
+    # rather than letting whisper-cli fail on a missing file. It has to be a
+    # real recording anyway: the numbers are only meaningful against real
+    # speech, so shipping a synthetic stand-in would flatter the ASR stage.
+    if not pathlib.Path(wav).exists():
+        sys.exit(
+            f"bench: {wav} is missing (*.wav is gitignored).\n"
+            f"Record a real question into it first, e.g.\n"
+            f"  arecord -f S16_LE -r 16000 -c 1 -d 3 {wav}"
+        )
+
     preload(cfg)   # as a long-running device would; keeps voice load out of turn 1
 
     rows = []
