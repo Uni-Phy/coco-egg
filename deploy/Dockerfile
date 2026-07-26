@@ -20,9 +20,6 @@ RUN git clone --depth 1 https://github.com/ggerganov/whisper.cpp /tmp/whisper.cp
     && rm -rf /tmp/whisper.cpp \
     && apt-get purge -y --auto-remove git cmake build-essential
 
-# Piper TTS CLI (spec §7 local TTS). Provides /usr/local/bin/piper.
-RUN pip install --no-cache-dir piper-tts
-
 WORKDIR /app
 COPY device/ ./device/
 COPY fixtures/ ./fixtures/

@@ -79,5 +79,11 @@ def write_wav(audio: np.ndarray, sr: int) -> str:
 
 
 def play_wav(path: str, cfg: dict) -> None:
-    # aplay keeps us on the ALSA default (the M0 Plus) without format fuss.
-    subprocess.run(["aplay", "-q", path], check=False)
+    # aplay keeps us out of format-conversion trouble. Honor output_device
+    # when set so egg.yaml pinning actually lands, not just the ALSA default.
+    dev = cfg["audio"]["output_device"]
+    args = ["aplay", "-q"]
+    if dev != "default":
+        args += ["-D", dev]
+    args.append(path)
+    subprocess.run(args, check=False)
