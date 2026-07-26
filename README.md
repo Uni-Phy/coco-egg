@@ -73,10 +73,33 @@ the noise floor). That is what stops the egg hearing itself, but it also means
 you cannot bench ASR by playing a question through the device's own speaker —
 that needs a human talking.
 
+## The tutor: open by default, specialist where we curate (v0.2)
+
+v0.1 hard-scoped the tutor to the content pack and refused everything else —
+ask it about game theory and it brushed you off. v0.2 inverts that: **the model
+answers from its own knowledge and reasoning**, and content packs are
+*specialist* knowledge that outranks the model on subjects we curate.
+
+So there are two paths, chosen per question by retrieval:
+
+- **No pack match** (the common case) — the model answers on its own.
+  *"Who was Ashoka?" → "Ashoka was a king from ancient India…"*
+- **Pack match** — the material is injected and outranks the model's memory,
+  so curated subjects get taught our way, with our examples.
+  *"What are fractions?" → answers with the roti example from the pack.*
+
+Retrieval therefore has to be *quiet*: a weak match is no longer harmless
+padding, it drags the answer off the question. It ignores stopwords and drops
+chunks scoring under `Pack.MIN_RATIO` of the best, so returning nothing is a
+normal, frequent outcome.
+
+Still hardcoded, and worth revisiting: one pack file at a time
+(`tutor.pack`), an English-only stopword list, and a `max_reply_chars` cut.
+
 ## Content packs (curriculum RAG)
 
-The tutor grounds every answer in a content pack — chunks + spoken
-explanations + a lesson plan (spec §7). Build one from any document:
+A pack is chunks + spoken explanations + a lesson plan (spec §7). Build one
+from any document:
 
 ```
 python tools/build_pack.py topic.pdf --llm http://127.0.0.1:8080 -o pack.json
@@ -86,7 +109,8 @@ Heuristic mode (no `--llm`) needs nothing and always works; `--llm` polishes
 titles/explanations through any OpenAI-compatible server (bench: llama-server;
 production: the CoCo node's big model). Point `tutor.pack` in egg.yaml at the
 result. With no llama-server reachable the device speaks the pack's canned
-explanations directly — teaching works with zero LLM.
+explanations directly — curated subjects still teach with zero LLM, which is
+the one case where v0.2 is still as narrow as v0.1.
 
 ## Reuse from common-os
 

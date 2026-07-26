@@ -18,7 +18,7 @@ from typing import Iterator
 import requests
 
 from .pack import Pack
-from .prompts import DEFAULT_SCOPE, GROUNDING, SYSTEM, UNKNOWN
+from .prompts import GROUNDING, SYSTEM, UNKNOWN
 
 _SENTENCE_END = re.compile(r"(?<=[.!?])\s+")
 _THINK_PAIR = re.compile(r"<think>.*?</think>", re.DOTALL)
@@ -34,8 +34,12 @@ def _get_pack(cfg: dict) -> Pack | None:
 
 
 def _system_prompt(question: str, cfg: dict) -> tuple[str, list[dict]]:
-    """SYSTEM prompt, grounded in retrieved pack chunks when there are any."""
-    system = SYSTEM.format(scope=DEFAULT_SCOPE)
+    """SYSTEM prompt, grounded in retrieved pack chunks when there are any.
+
+    No hit is the normal case in v0.2, not a failure — the model then answers
+    the question on its own. Grounding only fires on curated subjects.
+    """
+    system = SYSTEM
     pack = _get_pack(cfg)
     hits = pack.retrieve(question) if pack else []
     if hits:
