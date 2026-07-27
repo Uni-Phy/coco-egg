@@ -1,6 +1,6 @@
 """Local tutor LLM via llama-server (llama.cpp), OpenAI-compatible API.
 
-Locked stack (spec §7 / decision #8): Qwen3-1.7B Q4_K_M, thinking disabled.
+Tutor stack: Qwen3-0.6B Q4_K_M, thinking disabled.
 The reply is streamed and yielded sentence-by-sentence so TTS can start
 speaking while the model is still generating — time-to-first-audio is the
 product metric (spec §16 M0), so nothing waits for the full reply.

@@ -11,7 +11,7 @@ rationale in [`docs/spec.md`](docs/spec.md).
 ## Architecture in one breath
 
 button → mic (eMeet M0 Plus / ReSpeaker XVF3800) → whisper.cpp →
-**Qwen3-1.7B via llama-server (llama.cpp), streamed** → Piper TTS spoken
+**Qwen3-0.6B via llama-server (llama.cpp), streamed** → Piper TTS spoken
 sentence-by-sentence → speaker. First audio never waits for the full reply.
 Transcripts buffer locally and sync opportunistically to the CoCo node,
 which fine-tunes the on-device model and ships it back via OTA. Fleet
@@ -33,13 +33,11 @@ builds. The compose stack pulls the official
 [llama.cpp](https://github.com/ggml-org/llama.cpp) and
 [whisper.cpp](https://github.com/ggml-org/whisper.cpp) images.
 
-1. `make model` — downloads Qwen3-0.6B Q4_K_M into `models/` (needs
-   `pip install huggingface_hub` for the `hf` CLI).
-2. Fetch the whisper model into `models/`:
-   `wget -P models https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-base.en.bin`
-3. Install a [Piper](https://github.com/rhasspy/piper) voice
-   (`en_US-lessac-medium.onnx` + `.onnx.json`) into `models/`.
-4. `make up` — brings up the inference stack (llama-tutor, llama-embed,
+1. `make models` — downloads the tutor LLM (Qwen3-0.6B Q4_K_M), the whisper
+   ASR model (`ggml-base.en.bin`), the [Piper](https://github.com/rhasspy/piper)
+   voice (`en_US-lessac-medium.onnx` + `.onnx.json`), and retrieval embeddings
+   (`bge-small-en-v1.5-f16.gguf`) into `models/`.
+2. `make up` — brings up the inference stack (llama-tutor, llama-embed,
    whisper) and the egg app. Press Enter in the egg TTY, speak, listen.
 
 Latency (end-of-speech → first audio) prints per turn; M0's job is to
