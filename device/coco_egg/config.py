@@ -32,10 +32,12 @@ DEFAULTS = {
         "language": "en",
     },
     "tutor": {
-        # Qwen3-1.7B via llama-server (llama.cpp) — locked, spec decision #8.
-        # Start it with `make serve`; the served model is whatever the server
-        # loaded, so there is no model name here.
-        "llama_url": "http://127.0.0.1:8080",
+        # Qwen3-0.6B via llama-server (llama.cpp).
+        # Using the llama-cpp service from docker container by default.
+        # For testing with locally installed llama-cpp, override in egg.yaml:
+        # `tutor: {llama_url: http://127.0.0.1:8080}`.
+        # The served model is whatever the server loaded, so no name here.
+        "llama_url": "http://llama-tutor:8080",
         "temperature": 0.7,           # Qwen3 recommended non-thinking sampling
         "timeout_s": 30,
         "max_reply_chars": 600,       # keep spoken answers short
@@ -50,10 +52,10 @@ DEFAULTS = {
         # `learner:` block in egg.yaml. Schema-free on purpose — see
         # tutor/profile.py.
         "profile": "learner.yaml",
-        # Sentence-embedding server for retrieval (`make serve-embed`). Unset
-        # or unreachable => lexical retrieval, which still works but only when
-        # the learner uses the pack's own vocabulary. See tutor/embed.py.
-        "embed_url": "http://127.0.0.1:8082",
+        # Sentence-embedding server for retrieval. llama-embed docker service
+        # by default; override to 127.0.0.1:8082 for `make serve-embed`.
+        # Unreachable => lexical fallback (see tutor/embed.py).
+        "embed_url": "http://llama-embed:8082",
         "embed_timeout_s": 20,
         "embed_cache": ".embed-cache",
     },

@@ -1,8 +1,57 @@
 services:
+  llama-tutor:
+    image: ghcr.io/ggml-org/llama.cpp:server
+    command:
+      - -m
+      - /models/Qwen3-0.6B-Q4_K_M.gguf
+      - --port
+      - "8080"
+      - -c
+      - "1024"
+      - --reasoning-budget
+      - "0"
+    volumes:
+      - ../models:/models:ro
+    ports:
+      - "8080:8080" # host-side debugging (curl /health)
+    restart: unless-stopped
+
+  llama-embed:
+    # bge-small embedding server for semantic retrieval (tutor/embed.py).
+    image: ghcr.io/ggml-org/llama.cpp:server
+    command:
+      - -m
+      - /models/bge-small-en-v1.5-f16.gguf
+      - --port
+      - "8082"
+      - --embedding
+      - --pooling
+      - cls
+      - -c
+      - "512"
+    volumes:
+      - ../models:/models:ro
+    ports:
+      - "8082:8082"
+    restart: unless-stopped
+
+  whisper:
+    # ENTRYPOINT is ["bash", "-c"], so CMD must be a single shell string.
+    # Upstream's docker README binds to 127.0.0.1; that isn't reachable from
+    # a sibling container on the bridge, so bind to 0.0.0.0.
+    image: ghcr.io/ggml-org/whisper.cpp:main
+    command:
+      - whisper-server --host 0.0.0.0 --port 8081 -m /models/ggml-base.en.bin
+    volumes:
+      - ../models:/models:ro
+    ports:
+      - "8081:8081"
+    restart: unless-stopped
+
   egg:
     image: coco-egg:dev
     build: { context: .., dockerfile: deploy/Dockerfile }
-    network_mode: host          # reach host llama-server on 127.0.0.1:8080
+    depends_on: [llama-tutor, llama-embed, whisper]
     devices: ["/dev/snd:/dev/snd"]
     stdin_open: true            # keyboard trigger reads stdin via input()
     tty: true

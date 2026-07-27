@@ -28,15 +28,19 @@ docs/       spec.md — the engineering scope & design doc
 
 ## Bench quickstart (M0: Pi 5 + eMeet M0 Plus)
 
-1. Build [whisper.cpp](https://github.com/ggml-org/whisper.cpp) and put
-   `ggml-base.en.bin` in `models/`.
-2. Build [llama.cpp](https://github.com/ggml-org/llama.cpp) so `llama-server`
-   is on your PATH, then `make model` to download Qwen3-1.7B Q4_K_M
-   (needs `pip install huggingface_hub` for the `hf` CLI).
-3. Install [Piper](https://github.com/rhasspy/piper) and a voice
-   (`en_US-lessac-medium`) in `models/`.
-4. `make serve` in one terminal (llama-server, thinking disabled), then
-   `make setup && make run` in another — press Enter, speak, listen.
+Inference (llama-server, whisper-server) runs as containers now — no host
+builds. The compose stack pulls the official
+[llama.cpp](https://github.com/ggml-org/llama.cpp) and
+[whisper.cpp](https://github.com/ggml-org/whisper.cpp) images.
+
+1. `make model` — downloads Qwen3-0.6B Q4_K_M into `models/` (needs
+   `pip install huggingface_hub` for the `hf` CLI).
+2. Fetch the whisper model into `models/`:
+   `wget -P models https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-base.en.bin`
+3. Install a [Piper](https://github.com/rhasspy/piper) voice
+   (`en_US-lessac-medium.onnx` + `.onnx.json`) into `models/`.
+4. `make up` — brings up the inference stack (llama-tutor, llama-embed,
+   whisper) and the egg app. Press Enter in the egg TTY, speak, listen.
 
 Latency (end-of-speech → first audio) prints per turn; M0's job is to
 measure it honestly and set the bar (spec §16).
