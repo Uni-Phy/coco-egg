@@ -1,8 +1,8 @@
 # Work available — pickable in parallel
 
-Status as of `v0.3` @ 36ad560. Streams below are grouped so two people can work
-at once without colliding; each lists the files it owns. Sizes: **S** under half
-a day, **M** one to two days, **L** about a week.
+Status as of `v0.3` @ 3775963 (2026-07-28). Streams below are grouped so two
+people can work at once without colliding; each lists the files it owns. Sizes:
+**S** under half a day, **M** one to two days, **L** about a week.
 
 ## Where things stand
 
@@ -12,15 +12,23 @@ Running on the bench Pi (10.10.10.186, `~/coco-egg`, branch `v0.3`):
 |---|---|
 | tutor | Qwen3-0.6B Q4_K_M, llama-server `:8080`, `-c 1024` |
 | retrieval | bge-small-en-v1.5 (64MB), llama-server `:8082` `--embedding` |
-| ASR / TTS | whisper.cpp `ggml-base.en` / Piper `en_US-lessac-medium` |
-| memory | ~1072 MB with both servers, of 8 GB |
+| ASR | whisper-server `ggml-base.en` `:8081`, streaming (Jenya) |
+| TTS | Piper `en_US-lessac-medium` |
+| memory | ~1.4 GB with all three servers, of 8 GB |
 | latency | ~5.0–5.6s median perceived (spec §16 wanted 2–3s) |
-| retrieval | 87% recall / 29% false positives (`tools/eval_retrieval.py`) |
-| tests | 33 passing, ruff clean apart from a known `build_pack.py:62` |
-| subjects | **2 loaded — the demo needs 5** |
+| retrieval | 75% recall / 11% false positives at 143 chunks |
+| tests | 76 passing, ruff clean apart from a known `build_pack.py:62` |
+| subjects | **8 loaded, 143 chunks** |
 
-**Both llama-servers are manually started orphans (PPID 1). Nothing survives a
-reboot.** See task D1 before any demo you are not personally babysitting.
+Two things that bite:
+
+- **All three servers are manually started orphans (PPID 1). Nothing survives a
+  reboot** — see D1. And llama-server **leaks ~11 MB per request** (984 MB
+  fresh → 5.8 GB after 11 h), so **restart the tutor before any timing run or
+  demo** or you are measuring the leak (`docs/model-notes.md` §8).
+- The committed config names **docker service** hostnames (`llama-tutor`,
+  `whisper`, `llama-embed`). The bare-metal bench needs `egg.yaml` overrides
+  pointing at `127.0.0.1` — the Pi already has them, gitignored.
 
 Quick start on the device:
 
@@ -29,6 +37,37 @@ make serve        # tutor, :8080
 make serve-embed  # retrieval embeddings, :8082
 python tools/eval_retrieval.py && python tools/bench_loop.py 6
 ```
+
+## Landed 2026-07-28
+
+Six course subjects (12,978 words, 134 chunks) with per-course eval questions ·
+semantic retrieval (recall 33%→87% at 8 chunks) · conversation memory, free in
+prefill · complete transcripts off the event bus · an LLM-free profile builder ·
+console design + event bus · Jenya's whisper-server migration and streaming ASR.
+
+Bugs found and fixed, all from real use rather than review: possessives
+tokenising to a bare `s`, the reply stream decoded as latin-1 (which silently
+broke the Devanagari path), the 0.6B corrupting pack `explain` text when asked
+to polish it, and retrieval ignoring conversation context.
+
+## Open, in priority order
+
+1. **Model A/B — 0.6B vs 1.7B.** Not concluded. The 1.7B is on the device and
+   is measurably better at our failure modes (it resists bad grounding; the
+   0.6B builds whole wrong answers from it), but prefill is 56 t/s against 149,
+   so expect **+2–3s**. Run `tools/eval_retrieval.py` (unchanged — retrieval is
+   model-independent), `tools/bench_loop.py`, and the known failure cases.
+2. **The yes-bias.** The 0.6B answers "Yes" to yes/no questions regardless of
+   the material in front of it — *"Yes, a magnet can stick to an aluminum
+   spoon. It works on iron, nickel and cobalt, but not on aluminum."* Prompting
+   was tried and failed. This is the strongest case for the behaviour
+   fine-tune, not for a bigger prompt.
+3. **D1 systemd units** — now containment for the leak, not just hygiene.
+4. **Reconcile eval labels.** Reported recall (75%) understates reality: most
+   "misses" are the expected topic label disagreeing with the polished chunk id
+   (`breathing-and-oxygen` scored against a label of `respiration`). Real recall
+   is 75–90%. Do *not* fix by fitting labels to whatever currently retrieves —
+   that makes the eval tautological.
 
 ---
 
