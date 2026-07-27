@@ -174,3 +174,24 @@ targeting pictograph blocks only so Devanagari survives.
 Whichever we pick, it needs an eval set to decide it. The table in §3 was
 hand-judged on nine questions; that is enough to disqualify 0.6B-as-is, and
 not enough to choose between the options above.
+
+## 7. Correction: the v0.3 retrieval fix zeroed recall
+
+The topic-match rule in §5 was verified against 14 questions and called
+correct. Those questions all used the pack's own vocabulary ("What is
+photosynthesis?", "What are fractions?") — so precision was measured and
+**recall never was**. Re-measured on natural phrasing:
+
+| | recall | false positives |
+|---|---|---|
+| topic-match rule (shipped) | **0/7** | 0/3 |
+| any-overlap (v0.2) | 4/7 | 2/3 |
+
+"how does rain happen" does not find the water cycle; "what rights do I have"
+does not find the constitution; "what is one half" does not find fractions.
+Curated packs only fire when the learner already knows the technical term.
+
+Neither setting ships: 0/7 recall makes the library decorative, 2/3 false
+positives makes a 0.6B hallucinate from the wrong lesson. Token matching
+cannot deliver both, which makes semantic retrieval a prerequisite for the
+course library rather than an improvement to it. See docs/roadmap.md.
