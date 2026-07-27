@@ -166,3 +166,33 @@ def test_no_embed_url_configured_is_not_an_error(library):
     cfg = config.load(path=None)
     cfg["tutor"]["embed_url"] = None
     assert library.retrieve_semantic("anything", cfg) is None
+
+
+def test_stream_decodes_utf8_not_latin1(monkeypatch):
+    """llama-server emits UTF-8; requests guesses ISO-8859-1 without a charset.
+
+    Left unset, an emoji arrives as four latin-1 characters (slipping past the
+    pictograph strip, which matches real codepoints), and Devanagari arrives as
+    mojibake — which Piper then reads aloud. Found on the bench 2026-07-28.
+    """
+    import requests as _rq
+
+    captured = {}
+
+    class FakeResp:
+        encoding = "ISO-8859-1"          # what requests defaults to
+        def raise_for_status(self): pass
+        def close(self): pass
+        def iter_lines(self, **kw):
+            captured["encoding"] = self.encoding
+            payload = '{"choices":[{"delta":{"content":"पानी is water."}}]}'
+            yield "data: " + payload
+            yield "data: [DONE]"
+
+    monkeypatch.setattr(_rq, "post", lambda *a, **k: FakeResp())
+    cfg = config.load(path=None)
+    cfg["tutor"]["pack"] = None
+    monkeypatch.setattr(llama_client, "_pack", None)
+    out = " ".join(llama_client.stream_sentences("what is water", cfg))
+    assert captured["encoding"] == "utf-8"
+    assert "पानी" in out

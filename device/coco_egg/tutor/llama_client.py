@@ -147,6 +147,14 @@ def _stream(system: str, hits: list[dict], question: str, cfg: dict) -> Iterator
                     error=e.__class__.__name__)
         yield from _fallback_sentences(hits)
         return
+    # requests falls back to ISO-8859-1 for text/* with no charset in the
+    # header, and iter_lines(decode_unicode=True) honours that — so every
+    # multi-byte character arrived mangled: an emoji became four latin-1
+    # chars (slipping past the pictograph strip, which matches real
+    # codepoints), apostrophes and dashes became "a€™"-style debris, and
+    # "पानी" became "à¤ªà¤¾à¤¨à¥". Piper was being handed that to read aloud.
+    # llama-server emits UTF-8; say so.
+    resp.encoding = "utf-8"
     raw, yielded = "", 0
     try:
         # chunk_size=1: iter_lines buffers 512B by default, which would hold
