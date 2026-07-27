@@ -49,30 +49,59 @@ def _get_pack(cfg: dict) -> Pack | None:
     return _pack
 
 
-def _system_prompt(question: str, cfg: dict) -> tuple[str, list[dict]]:
-    """SYSTEM prompt, grounded in retrieved pack chunks when there are any.
+def _static_system(cfg: dict) -> str:
+    """The part of the prompt that does not change from turn to turn.
 
-    No hit is the normal case in v0.2, not a failure — the model then answers
-    the question on its own. Grounding only fires on curated subjects.
+    Stays first because llama-server reuses the longest common PREFIX: every
+    token before the first change is free on later turns, and everything from
+    the change onward is recomputed.
     """
     system = SYSTEM
     learner = profile.describe(profile.load(cfg))
     if learner:
         system += LEARNER.format(learner=learner)
+    return system
+
+
+def _retrieve(question: str, cfg: dict) -> list[dict]:
+    """Pack chunks for this question — semantic, falling back to lexical.
+
+    Lexical only fires when a learner happens to use the pack's own words,
+    which measured 0/7 on natural phrasing, so it is a degraded mode rather
+    than an equal path.
+    """
     pack = _get_pack(cfg)
-    # Semantic first — lexical only fires when a learner uses the pack's own
-    # words, which measured 0/7 on natural phrasing. Lexical stays as the
-    # fallback for when the embedding server is not running.
-    hits = []
-    if pack:
-        hits = pack.retrieve_semantic(question, cfg)
-        if hits is None:
-            events.emit("degraded", component="embed", fallback="lexical")
-            hits = pack.retrieve(question)
+    if not pack:
+        return []
+    hits = pack.retrieve_semantic(question, cfg)
+    if hits is None:
+        events.emit("degraded", component="embed", fallback="lexical")
+        hits = pack.retrieve(question)
+    return hits
+
+
+def build_messages(question: str, cfg: dict) -> tuple[list[dict], list[dict]]:
+    """Messages ordered by VOLATILITY: static first, most-changing last.
+
+    Grounding used to live inside the system message — the most-cached
+    position holding the most-volatile content. Measured on the bench, that
+    cost ~26 tokens of extra recompute for every turn of conversation kept,
+    growing without bound, because a new question changed the prompt at
+    position ~141 and invalidated everything after it. With the material moved
+    down beside the question, the computed count stays flat at ~423 tokens no
+    matter how deep the conversation goes.
+
+    So the ordering is the design, not a detail: anything appended here after
+    the volatile tail is free, and anything inserted above it is paid for on
+    every subsequent turn.
+    """
+    hits = _retrieve(question, cfg)
+    turn = question
     if hits:
         material = "\n\n".join(f"{c['title']}: {c['text']}" for c in hits)
-        system += GROUNDING.format(material=material)
-    return system, hits
+        turn = GROUNDING.format(material=material).strip() + "\n\n" + question
+    return [{"role": "system", "content": _static_system(cfg)},
+            {"role": "user", "content": turn}], hits
 
 
 def _fallback_sentences(hits: list[dict]) -> Iterator[str]:
@@ -110,10 +139,10 @@ def stream_sentences(question: str, cfg: dict) -> Iterator[str]:
     Both are lazy — nothing runs until the caller pulls the first sentence.
     """
     t0 = time.monotonic()
-    system, hits = _system_prompt(question, cfg)
+    messages, hits = build_messages(question, cfg)
     events.emit("stage", stage="retrieval", seconds=round(time.monotonic() - t0, 3))
     t0 = time.monotonic()
-    for i, sentence in enumerate(_stream(system, hits, question, cfg)):
+    for i, sentence in enumerate(_stream(messages, hits, cfg)):
         if i == 0:
             events.emit("stage", stage="llm_first_sentence",
                         seconds=round(time.monotonic() - t0, 3))
@@ -121,7 +150,7 @@ def stream_sentences(question: str, cfg: dict) -> Iterator[str]:
         yield sentence
 
 
-def _stream(system: str, hits: list[dict], question: str, cfg: dict) -> Iterator[str]:
+def _stream(messages: list[dict], hits: list[dict], cfg: dict) -> Iterator[str]:
     t = cfg["tutor"]
     try:
         resp = requests.post(
@@ -131,10 +160,7 @@ def _stream(system: str, hits: list[dict], question: str, cfg: dict) -> Iterator
                 "temperature": t["temperature"],
                 "top_p": 0.8,  # Qwen3 recommended non-thinking sampling
                 "chat_template_kwargs": {"enable_thinking": False},
-                "messages": [
-                    {"role": "system", "content": system},
-                    {"role": "user", "content": question},
-                ],
+                "messages": messages,
             },
             timeout=t["timeout_s"],
             stream=True,
