@@ -6,10 +6,18 @@ numbers in the README, so the bar can be re-checked after a change (smaller
 whisper model, fewer retrieved chunks, a different board) instead of being
 re-argued.
 
-Runs from a recorded WAV rather than the mic, so it is repeatable and needs
-no human. The mic path is unchanged and still what one_turn() uses; the
+ASR runs from a recorded WAV rather than the mic, so it is repeatable and
+needs no human. The mic path is unchanged and still what one_turn() uses; the
 recorder's trailing-silence hangover is added back in at the end because the
 learner waits through it.
+
+The tutor question ROTATES every turn, and that is load-bearing. llama-server
+caches the prompt prefix, so asking the same question twice reuses the whole
+prompt and prefill collapses from ~2.2s to ~0.10s — an earlier version of this
+bench repeated one question and reported a median ~2s faster than a learner
+will ever see. Rotating means every turn pays the prefill a genuinely new
+question costs. Only the shared SYSTEM preamble stays cached, which is exactly
+what happens in the field.
 
     python tools/bench_loop.py            # 5 turns, no audio out
     python tools/bench_loop.py 10 --speak # 10 turns, play each reply
@@ -28,6 +36,19 @@ from coco_egg.asr import transcribe              # noqa: E402
 from coco_egg.audio import play_wav              # noqa: E402
 from coco_egg.tts import preload, synthesize     # noqa: E402
 from coco_egg.tutor import stream_sentences      # noqa: E402
+
+# Rotated so no turn reuses the previous turn's cached prompt. Mixed on
+# purpose: pack-grounded, general knowledge, and arithmetic have different
+# prompt lengths and reply lengths, so a median over them is representative
+# of a real session rather than of one lucky question.
+BENCH_QUESTIONS = [
+    "What is photosynthesis?",      # grounded, long pack material
+    "Who was Ashoka?",              # general, no grounding
+    "Explain the water cycle.",     # grounded
+    "How does an aeroplane fly?",   # general
+    "What are fractions?",          # grounded
+    "What is half of 30?",          # general, short reply
+]
 
 
 def main() -> None:
@@ -55,10 +76,13 @@ def main() -> None:
     rows = []
     for i in range(n):
         t0 = time.monotonic()
-        question = transcribe(wav, cfg)
+        heard = transcribe(wav, cfg)
         asr_s = time.monotonic() - t0
-        if not question:
+        if not heard:
             sys.exit(f"bench: {wav} transcribed to nothing — record a real question into it")
+        # ASR cost is measured on the real recording; the tutor stage runs on a
+        # rotating question so prefill is never served from the prompt cache.
+        question = BENCH_QUESTIONS[i % len(BENCH_QUESTIONS)]
 
         llm_s = tts_s = first = None
         t_llm = time.monotonic()
@@ -77,9 +101,9 @@ def main() -> None:
 
         rows.append((asr_s, llm_s, tts_s, first))
         print(f"turn {i + 1}: asr={asr_s:.2f} llm_1st={llm_s:.2f} tts={tts_s:.2f} "
-              f"-> first_audio={first:.2f}s (perceived {first + hangover:.2f}s)")
+              f"-> first_audio={first:.2f}s (perceived {first + hangover:.2f}s)  [{question}]")
         if i == 0:
-            print(f"   heard: {question}")
+            print(f"   ASR heard: {heard!r} (from {wav})")
             print(f"   reply: {' '.join(spoken)}")
 
     print(f"\nn={n}, perceived adds silence_stop_s={hangover}s of hangover")

@@ -50,12 +50,18 @@ whisper.cpp `ggml-base.en` + Qwen3-1.7B Q4_K_M via llama-server + Piper
 | stage | median | note |
 |---|---|---|
 | ASR (whisper-cli) | 1.79s | 1.44s of it is the encoder — a **fixed 30s-window cost**, independent of how short the utterance is. Model load is only 85ms. |
-| LLM → first sentence | 2.0–5.6s | dominated by prefill of the grounded prompt (~330 tok at k=3) at ~56 tok/s; decode runs ~10.4 tok/s |
-| TTS (Piper) | 0.3–1.5s | scales with sentence length, RTF ≈ 0.09. First call costs ~2.1s of voice load — `preload()` moves that off the learner's turn |
-| **end-of-speech → first audio** | **~6.4s** | includes the `silence_stop_s` = 1.2s hangover the learner waits through |
+| LLM → first sentence | 3.80s (1.34–4.09) | dominated by prefill of the grounded prompt at ~56 tok/s; decode runs ~9.8 tok/s |
+| TTS (Piper) | 0.60s (0.42–1.62) | scales with sentence length, RTF ≈ 0.09. First call costs ~2.1s of voice load — `preload()` moves that off the learner's turn |
+| **end-of-speech → first audio** | **7.31s (4.96–8.63)** | includes the `silence_stop_s` = 1.2s hangover the learner waits through |
+
+> An earlier revision of this table said ~6.4s. That was wrong, and the bug is
+> worth naming: the bench asked the *same* question every turn, so
+> llama-server replayed a cached prompt and prefill collapsed from ~2.2s to
+> ~0.10s from turn 2 on. `bench_loop.py` now rotates questions so every turn
+> pays what a new question really costs.
 
 **The bar is not met yet.** Spec §16 floated ~2–3s; the honest measured number
-is ~6.4s. Where the time actually goes, in priority order:
+is ~7.3s. Where the time actually goes, in priority order:
 
 1. **LLM prefill** — the biggest and most variable slice. The 124-token SYSTEM
    preamble is a shared prefix that llama-server caches, but the retrieved pack
