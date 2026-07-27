@@ -50,7 +50,7 @@ whisper.cpp `ggml-base.en` + **Qwen3-0.6B Q4_K_M** via llama-server (`-c 1024`)
 | stage | median | note |
 |---|---|---|
 | ASR (whisper-cli) | 1.79s | 1.44s of it is the encoder — a **fixed 30s-window cost**, independent of how short the utterance is. Model load is only 85ms. |
-| LLM → first sentence | 1.60s (0.70–3.53) | prefill ~149 tok/s, decode ~23.8 tok/s on the 0.6B |
+| LLM → first sentence | 1.60s (0.70–3.53) | prefill ~149 tok/s, decode ~23.8 tok/s on the 0.6B. Includes retrieval; the `llm_first_sentence` turn event splits retrieval out separately so the console's stages sum to `first_audio` |
 | TTS (Piper) | 0.58s (0.30–1.76) | scales with sentence length, RTF ≈ 0.09. First call costs ~2.1s of voice load — `preload()` moves that off the learner's turn |
 | **end-of-speech → first audio** | **5.01s (4.01–7.67)** | includes the `silence_stop_s` = 1.2s hangover the learner waits through |
 

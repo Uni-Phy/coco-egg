@@ -17,7 +17,7 @@ import time
 import tty
 import wave
 
-from . import config
+from . import config, events
 from .asr import transcribe
 from .audio import play_wav, record_utterance
 from .audio.io import write_wav
@@ -39,21 +39,31 @@ MENU = (
 
 def set_ui(state: UiState) -> None:
     # M1: drive the LED ring here (XVF3800 GPO / Pi GPIO). Bench: print.
+    events.emit("state", state=state.name)
     print(f"[{state.name}]", flush=True)
 
 
 def one_turn(cfg: dict) -> None:
+    events.begin_turn()
     set_ui(UiState.LISTENING)
     # t0 is end-of-speech, not "recorder returned": the learner sits through
     # the trailing-silence hangover too, so it counts as latency.
     audio, t0 = record_utterance(cfg)
     if audio.size == 0:
+        events.end_turn(reason="no-audio")
         set_ui(UiState.IDLE)
         return
     set_ui(UiState.THINKING)
+    # The hangover is dead air the learner waits through before any work
+    # starts — 1.2s of the ~5s (README). It is a stage like the others.
+    events.emit("stage", stage="hangover", seconds=round(time.monotonic() - t0, 3))
     wav = write_wav(audio, cfg["audio"]["sample_rate"])
+    t_asr = time.monotonic()
     question = transcribe(wav, cfg)
+    events.emit("stage", stage="asr", seconds=round(time.monotonic() - t_asr, 3))
+    events.emit("heard", text=question)
     if not question:
+        events.end_turn(reason="no-speech")
         set_ui(UiState.IDLE)
         return
     print(f"  heard: {question}")
@@ -62,17 +72,22 @@ def one_turn(cfg: dict) -> None:
     first_audio = 0.0
     spoken: list[str] = []
     for sentence in stream_sentences(question, cfg):
+        t_tts = time.monotonic()
         speech = synthesize(sentence, cfg)
         if not spoken:
             first_audio = time.monotonic() - t0
+            events.emit("stage", stage="tts", seconds=round(time.monotonic() - t_tts, 3))
+            events.emit("stage", stage="first_audio", seconds=round(first_audio, 3))
             print(f"  latency (end-of-speech -> first-audio): {first_audio:.2f}s")
         spoken.append(sentence)
         set_ui(UiState.SPEAKING)
         play_wav(speech, cfg)
+        events.emit("spoken", index=len(spoken) - 1, text=sentence)
     reply = " ".join(spoken)
     print(f"  reply: {reply}")
     if reply:
         log_interaction(question, reply, first_audio, cfg)
+    events.end_turn(reason="ok", reply=reply, latency_s=round(first_audio, 3))
     set_ui(UiState.IDLE)
 
 
@@ -106,6 +121,7 @@ def _speak(sentences, cfg: dict, output_mode: str, t0: float) -> tuple[list[str]
         match output_mode:
             case "device":
                 play_wav(speech, cfg)
+                events.emit("spoken", index=len(spoken) - 1, text=sentence)
             case "file":
                 speech_paths.append(speech)
     if output_mode == "file" and speech_paths:
@@ -125,6 +141,7 @@ def bench_turn(cfg: dict, start_at: str, output_mode: str) -> None:
     microphone.
     """
     t0 = time.monotonic()
+    events.begin_turn()
     match start_at:
         case "wav":
             set_ui(UiState.THINKING)
@@ -136,12 +153,15 @@ def bench_turn(cfg: dict, start_at: str, output_mode: str) -> None:
             set_ui(UiState.SPEAKING)
             spoken, _ = _speak([_read_text(cfg["bench"]["sample_reply"])], cfg, output_mode, t0)
             print(f"  reply: {' '.join(spoken)}")
+            events.end_turn(reason="ok", reply=" ".join(spoken))
             set_ui(UiState.IDLE)
             return
         case _:
             raise ValueError(f"unknown start_at: {start_at}")
 
+    events.emit("heard", text=question)
     if not question:
+        events.end_turn(reason="no-speech")
         set_ui(UiState.IDLE)
         return
     print(f"  heard: {question}")
@@ -150,6 +170,7 @@ def bench_turn(cfg: dict, start_at: str, output_mode: str) -> None:
     print(f"  reply: {reply}")
     if reply:
         log_interaction(question, reply, first_audio, cfg)
+    events.end_turn(reason="ok", reply=reply, latency_s=round(first_audio, 3))
     set_ui(UiState.IDLE)
 
 
@@ -189,6 +210,7 @@ def run() -> None:
                         output_mode = "file" if output_mode == "device" else "device"
             except Exception as e:  # keep the loop alive on the bench
                 print("\n")
+                events.emit("error", where="turn", error=e.__class__.__name__, message=str(e))
                 set_ui(UiState.ERROR)
                 print(f"  error: {e}\n", file=sys.stderr)
     except KeyboardInterrupt:

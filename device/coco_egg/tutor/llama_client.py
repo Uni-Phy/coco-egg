@@ -13,10 +13,12 @@ from __future__ import annotations
 
 import json
 import re
+import time
 from typing import Iterator
 
 import requests
 
+from .. import events
 from . import profile
 from .pack import Pack
 from .prompts import GROUNDING, LEARNER, SYSTEM, UNKNOWN
@@ -65,6 +67,7 @@ def _system_prompt(question: str, cfg: dict) -> tuple[str, list[dict]]:
     if pack:
         hits = pack.retrieve_semantic(question, cfg)
         if hits is None:
+            events.emit("degraded", component="embed", fallback="lexical")
             hits = pack.retrieve(question)
     if hits:
         material = "\n\n".join(f"{c['title']}: {c['text']}" for c in hits)
@@ -99,8 +102,27 @@ def split_ready_sentences(buf: str) -> tuple[list[str], str]:
 
 
 def stream_sentences(question: str, cfg: dict) -> Iterator[str]:
-    t = cfg["tutor"]
+    """Reply sentences, published to the event bus as the model produces them.
+
+    Split from _stream() only for the console: a sentence is emitted the
+    moment it is generated (not when it is spoken), and retrieval is timed
+    apart from generation so the trace shows where the ~5s actually goes.
+    Both are lazy — nothing runs until the caller pulls the first sentence.
+    """
+    t0 = time.monotonic()
     system, hits = _system_prompt(question, cfg)
+    events.emit("stage", stage="retrieval", seconds=round(time.monotonic() - t0, 3))
+    t0 = time.monotonic()
+    for i, sentence in enumerate(_stream(system, hits, question, cfg)):
+        if i == 0:
+            events.emit("stage", stage="llm_first_sentence",
+                        seconds=round(time.monotonic() - t0, 3))
+        events.emit("sentence", index=i, text=sentence)
+        yield sentence
+
+
+def _stream(system: str, hits: list[dict], question: str, cfg: dict) -> Iterator[str]:
+    t = cfg["tutor"]
     try:
         resp = requests.post(
             f"{t['llama_url']}/v1/chat/completions",
@@ -121,6 +143,8 @@ def stream_sentences(question: str, cfg: dict) -> Iterator[str]:
     except requests.RequestException as e:
         print(f"  tutor: llama-server unreachable ({e.__class__.__name__}), "
               f"using pack fallback", flush=True)
+        events.emit("degraded", component="llama", fallback="pack",
+                    error=e.__class__.__name__)
         yield from _fallback_sentences(hits)
         return
     raw, yielded = "", 0

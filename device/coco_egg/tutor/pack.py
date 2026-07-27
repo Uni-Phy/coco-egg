@@ -15,6 +15,7 @@ import math
 import pathlib
 import re
 
+from .. import events
 from . import embed as embedding
 
 _WORD = re.compile(r"\w+", re.UNICODE)
@@ -61,6 +62,36 @@ def _is_topic_match(shared: list[str], chunk: dict) -> bool:
     if not shared:
         return False
     return len(shared) > 1 or any(t in chunk["_title_tokens"] for t in shared)
+
+
+def _emit_retrieved(question: str, path: str, scale: str, floor: float,
+                    relative_floor: float, ranked: list[tuple], hits: list[dict]) -> None:
+    """Publish what retrieval saw — every candidate, kept or cut, with its score.
+
+    Retrieval is the one stage whose output is invisible in the spoken answer,
+    and both failures we are still chasing are near-misses: "why is the sky
+    blue" grounds on the water cycle, "can the government stop me praying"
+    lands on local government instead of the constitution. Neither is
+    diagnosable from the hits alone — you have to see what nearly won and by
+    how much (docs/console-design.md).
+
+    Guarded by events.active() because formatting candidates costs something
+    and nobody is watching most of the time. Retrieval itself is unchanged:
+    `ranked` is scored on the way past, and `hits` is whatever the caller
+    already decided to return.
+    """
+    if not events.active():
+        return
+    kept = {id(c) for c in hits}
+    top = sorted(ranked, key=lambda r: -r[0])[:5]
+    events.emit(
+        "retrieved", question=question, path=path, scale=scale, floor=round(floor, 4),
+        relative_floor=round(relative_floor, 4),
+        chunks=[{"id": c.get("id", ""), "title": c.get("title", ""),
+                 "subject": c.get("subject", ""), "score": round(score, 4),
+                 "lexical_bonus": bonus, "kept": id(c) in kept}
+                for score, bonus, c in top],
+    )
 
 
 class Pack:
@@ -188,21 +219,27 @@ class Pack:
         qv = embedding.normalise(qvec[0])
         q_terms = _content_tokens(question)
 
-        scored = []
+        scored, ranked = [], []
         for vec, c in zip(self._vectors, self.chunks):
             sim = embedding.similarity(qv, vec)
             shared = [t for t in q_terms if t in c["_tokens"]]
-            if _is_topic_match(shared, c):
+            bonus = _is_topic_match(shared, c)
+            if bonus:
                 sim += self.LEXICAL_BONUS
+            ranked.append((sim, bonus, c))
             if sim >= self.MIN_SIMILARITY:
                 scored.append((sim, c))
-        if not scored:
-            return []
-        scored.sort(key=lambda pair: -pair[0])
-        best = scored[0][0]
-        # Relative cut as well as absolute: a clear winner should not drag in
-        # near-misses, which is what bloats the prompt and blurs the answer.
-        return [c for sim, c in scored[:k] if sim >= 0.92 * best]
+        hits: list[dict] = []
+        relative = 0.0
+        if scored:
+            scored.sort(key=lambda pair: -pair[0])
+            # Relative cut as well as absolute: a clear winner should not drag
+            # in near-misses, which bloats the prompt and blurs the answer.
+            relative = 0.92 * scored[0][0]
+            hits = [c for sim, c in scored[:k] if sim >= relative]
+        _emit_retrieved(question, "semantic", "cosine", self.MIN_SIMILARITY, relative,
+                        ranked, hits)
+        return hits
 
     def retrieve(self, question: str, k: int = 3) -> list[dict]:
         """Top-k chunks by summed idf of question terms present in the chunk.
@@ -231,8 +268,14 @@ class Pack:
                         for t in shared)
             if score > 0:
                 scored.append((score, c))
-        if not scored:
-            return []
-        scored.sort(key=lambda pair: -pair[0])
-        best = scored[0][0]
-        return [c for score, c in scored[:k] if score >= self.MIN_RATIO * best]
+        hits: list[dict] = []
+        floor = 0.0
+        if scored:
+            scored.sort(key=lambda pair: -pair[0])
+            # Relative, so the floor the console draws is per-question. Note it
+            # is summed idf, not a cosine — the two paths are not comparable.
+            floor = self.MIN_RATIO * scored[0][0]
+            hits = [c for score, c in scored[:k] if score >= floor]
+        _emit_retrieved(question, "lexical", "idf", floor, floor,
+                        [(score, False, c) for score, c in scored], hits)
+        return hits
