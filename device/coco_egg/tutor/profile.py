@@ -21,12 +21,32 @@ import pathlib
 import yaml
 
 
-def load(cfg: dict) -> dict:
-    """Profile dict from `tutor.profile` (a YAML file) or inline `learner:`."""
-    path = cfg.get("tutor", {}).get("profile")
-    if path and pathlib.Path(path).is_file():
+def _read(path) -> dict:
+    try:
         return yaml.safe_load(pathlib.Path(path).read_text()) or {}
-    return cfg.get("learner") or {}
+    except (OSError, yaml.YAMLError):
+        return {}
+
+
+def load(cfg: dict) -> dict:
+    """The learner, from what a person wrote plus what we observed.
+
+    Two sources, merged: `tutor.profile` (hand-written, or the inline
+    `learner:` block) and `tutor.profile_derived`, which the profile builder
+    recomputes from transcripts. **The hand-written side wins on conflict.**
+
+    That direction is deliberate. This is a children's device: a teacher must
+    be able to state a fact about a learner and have it hold, rather than be
+    overruled by a background job counting questions. The derived side fills
+    gaps, it does not correct people.
+    """
+    tutor = cfg.get("tutor", {})
+    path = tutor.get("profile")
+    written = _read(path) if path and pathlib.Path(path).is_file() else (cfg.get("learner") or {})
+
+    derived_path = tutor.get("profile_derived")
+    derived = _read(derived_path) if derived_path and pathlib.Path(derived_path).is_file() else {}
+    return {**derived, **written}
 
 
 def _humanise(key: str) -> str:
@@ -50,6 +70,11 @@ def describe(profile: dict) -> str:
     we have never heard of still reaches the model. Empty values are dropped —
     a half-filled profile should read as a short profile, not a list of blanks.
     """
+    # A leading underscore marks an operational fact — written for a person or
+    # the CoCo node, not for the model. `_turns_seen` would spend prompt tokens
+    # on something it cannot use, and `_asked_but_not_covered` would tell it
+    # about questions it failed, which it can act on even less.
     lines = [f"- {_humanise(k)}: {_render(v)}"
-             for k, v in profile.items() if v not in (None, "", [], {})]
+             for k, v in profile.items()
+             if not str(k).startswith("_") and v not in (None, "", [], {})]
     return "\n".join(lines)

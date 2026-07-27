@@ -21,7 +21,8 @@ from . import config, events
 from .asr import StreamingTranscriber, transcribe
 from .audio import play_wav, record_utterance
 from .states import UiState
-from .sync import log_interaction
+from .sync import transcript
+from .tutor import profile_builder
 from .tts import preload, synthesize
 from .tutor import remember, stream_sentences
 
@@ -90,7 +91,6 @@ def one_turn(cfg: dict) -> None:
     print(f"  reply: {reply}")
     if reply:
         remember(question, reply, cfg)   # so the next turn can refer back
-        log_interaction(question, reply, first_audio, cfg)
     events.end_turn(reason="ok", reply=reply, latency_s=round(first_audio, 3))
     set_ui(UiState.IDLE)
 
@@ -172,8 +172,6 @@ def bench_turn(cfg: dict, start_at: str, output_mode: str) -> None:
     spoken, first_audio = _speak(stream_sentences(question, cfg), cfg, output_mode, t0)
     reply = " ".join(spoken)
     print(f"  reply: {reply}")
-    if reply:
-        log_interaction(question, reply, first_audio, cfg)
     events.end_turn(reason="ok", reply=reply, latency_s=round(first_audio, 3))
     set_ui(UiState.IDLE)
 
@@ -187,6 +185,9 @@ def run() -> None:
         raise SystemExit("coco-egg: stdin is not a TTY. Run docker with -it (or compose tty:true).")
 
     preload(cfg)   # pay the ~2.1s voice load now, not on the first learner
+    # Complete turn records come off the event bus, and each write nudges the
+    # profile builder — event-based, so an idle device does no work at all.
+    transcript.start(cfg, on_complete=profile_builder.on_turn)
 
     output_mode = "device"
 
