@@ -50,6 +50,12 @@ DEFAULTS = {
         # `learner:` block in egg.yaml. Schema-free on purpose — see
         # tutor/profile.py.
         "profile": "learner.yaml",
+        # Sentence-embedding server for retrieval (`make serve-embed`). Unset
+        # or unreachable => lexical retrieval, which still works but only when
+        # the learner uses the pack's own vocabulary. See tutor/embed.py.
+        "embed_url": "http://127.0.0.1:8082",
+        "embed_timeout_s": 20,
+        "embed_cache": ".embed-cache",
     },
     "tts": {
         "voice": "models/en_US-lessac-medium.onnx",

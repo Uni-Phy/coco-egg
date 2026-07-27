@@ -16,3 +16,4 @@ models/
 transcripts/
 egg.yaml
 learner.yaml
+.embed-cache/

@@ -98,10 +98,22 @@ So there are two paths, chosen per question by retrieval:
   so curated subjects get taught our way, with our examples.
   *"What are fractions?" → answers with the roti example from the pack.*
 
-Retrieval therefore has to be *quiet*: a weak match is no longer harmless
-padding, it drags the answer off the question. It ignores stopwords and drops
-chunks scoring under `Pack.MIN_RATIO` of the best, so returning nothing is a
-normal, frequent outcome.
+Retrieval therefore has to be both *quiet* and *reachable* — a weak match drags
+the answer off the question, but a missed match means the learner gets the
+small model's unaided knowledge instead of our curated material.
+
+**Retrieval is semantic** (v0.4), via a 64MB `bge-small` on a second
+llama-server (`make serve-embed`). Token matching alone only fired when the
+learner already used the pack's vocabulary — "how does rain happen" never
+reached the water cycle. Measured on `tools/eval_retrieval.py`:
+
+| path | recall | false positives |
+|---|---|---|
+| lexical only | 33% | 0% |
+| semantic + lexical tie-break | **87%** | 29% |
+
+If the embedding server is unreachable it falls back to lexical — degraded, not
+broken. Returning nothing stays a normal, frequent outcome.
 
 Still hardcoded, and worth revisiting: one pack file at a time
 (`tutor.pack`), an English-only stopword list, and a `max_reply_chars` cut.

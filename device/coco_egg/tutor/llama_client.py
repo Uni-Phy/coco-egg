@@ -58,7 +58,14 @@ def _system_prompt(question: str, cfg: dict) -> tuple[str, list[dict]]:
     if learner:
         system += LEARNER.format(learner=learner)
     pack = _get_pack(cfg)
-    hits = pack.retrieve(question) if pack else []
+    # Semantic first — lexical only fires when a learner uses the pack's own
+    # words, which measured 0/7 on natural phrasing. Lexical stays as the
+    # fallback for when the embedding server is not running.
+    hits = []
+    if pack:
+        hits = pack.retrieve_semantic(question, cfg)
+        if hits is None:
+            hits = pack.retrieve(question)
     if hits:
         material = "\n\n".join(f"{c['title']}: {c['text']}" for c in hits)
         system += GROUNDING.format(material=material)

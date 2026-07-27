@@ -128,3 +128,22 @@ def test_emoji_are_stripped_before_speaking():
     """
     assert llama_client.visible_text("Well done! 😊👍") == "Well done! "
     assert "पानी" in llama_client.visible_text("पानी 🌧 is water")
+
+
+def test_semantic_falls_back_when_embedding_server_is_down(library):
+    """No embedding server must degrade to lexical, never break the loop.
+
+    The egg is offline-first; a retrieval backend being unreachable is a normal
+    state, not an error. retrieve_semantic() returns None so the caller can
+    fall back rather than losing retrieval entirely.
+    """
+    cfg = config.load(path=None)
+    cfg["tutor"]["embed_url"] = "http://127.0.0.1:9"   # closed port
+    assert library.retrieve_semantic("how does rain happen", cfg) is None
+    assert library.retrieve("why does the plant not just eat the soil")
+
+
+def test_no_embed_url_configured_is_not_an_error(library):
+    cfg = config.load(path=None)
+    cfg["tutor"]["embed_url"] = None
+    assert library.retrieve_semantic("anything", cfg) is None

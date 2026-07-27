@@ -9,10 +9,13 @@ hardcoded starting point.
 """
 from __future__ import annotations
 
+import hashlib
 import json
 import math
 import pathlib
 import re
+
+from . import embed as embedding
 
 _WORD = re.compile(r"\w+", re.UNICODE)
 
@@ -67,6 +70,25 @@ class Pack:
     # (photosynthesis + respiration) and drops the stragglers.
     MIN_RATIO = 0.4
 
+    # Cosine floor for an embedding hit. Picked off the measured curve
+    # (`tools/eval_retrieval.py --sweep`), not by eye — the bands overlap, so
+    # no floor is clean and the knee is what matters:
+    #
+    #   floor  0.55 -> recall 93%, false positives 71%
+    #   floor  0.58 -> recall 87%, false positives 29%   <- here
+    #   floor  0.65 -> recall 60%, false positives  0%
+    #
+    # Biased slightly toward recall: a miss means the learner gets the small
+    # model's unaided knowledge instead of our curated material, while a loose
+    # hit still carries the "answer from your own knowledge where this falls
+    # short" instruction (prompts.GROUNDING). Re-sweep when packs are added.
+    MIN_SIMILARITY = 0.58
+
+    # Added to a chunk's similarity when the question also shares a title term
+    # or several content words. Lexical evidence is precise where embeddings
+    # are fuzzy, so it breaks ties rather than gating.
+    LEXICAL_BONUS = 0.05
+
     def __init__(self, *data: dict):
         # Several packs merge into ONE corpus rather than being searched
         # separately. That is deliberate: idf is a corpus statistic, and it was
@@ -87,6 +109,7 @@ class Pack:
             for t in c["_tokens"]:
                 df[t] = df.get(t, 0) + 1
         self._idf = {t: math.log(1 + n_docs / n) for t, n in df.items()}
+        self._vectors: list[list[float]] | None = None
 
     @classmethod
     def load(cls, *paths: str | pathlib.Path) -> "Pack":
@@ -115,6 +138,71 @@ class Pack:
             else:
                 print(f"  pack: {entry} not found, skipping", flush=True)
         return cls.load(*paths) if paths else None
+
+    def _passage(self, chunk: dict) -> str:
+        return f"{chunk.get('title', '')}. {chunk['text']}"
+
+    def index(self, cfg: dict) -> bool:
+        """Embed every chunk once, cached on disk. True if vectors are ready.
+
+        Embedding costs ~53ms a chunk, which is nothing once but real on every
+        boot of a device that should be answering within seconds of power-on.
+        The cache key is a hash of the passages themselves, so editing or
+        adding a pack invalidates it and nothing else does.
+        """
+        if self._vectors is not None:
+            return True
+        passages = [self._passage(c) for c in self.chunks]
+        digest = hashlib.sha256(chr(10).join(passages).encode()).hexdigest()[:16]
+        cache = pathlib.Path(cfg["tutor"].get("embed_cache", ".embed-cache"))
+        cached = cache / f"{digest}.json"
+        if cached.is_file():
+            try:
+                self._vectors = json.loads(cached.read_text())
+                return True
+            except ValueError:
+                pass   # corrupt cache is not worth failing over; re-embed
+        vecs = embedding.embed(passages, cfg)
+        if vecs is None:
+            return False
+        self._vectors = [embedding.normalise(v) for v in vecs]
+        try:
+            cache.mkdir(parents=True, exist_ok=True)
+            cached.write_text(json.dumps(self._vectors))
+        except OSError as e:
+            print(f"  pack: could not cache embeddings ({e}); continuing", flush=True)
+        print(f"  pack: embedded {len(passages)} chunks", flush=True)
+        return True
+
+    def retrieve_semantic(self, question: str, cfg: dict, k: int = 3) -> list[dict] | None:
+        """Hybrid: embeddings for recall, lexical evidence to break ties.
+
+        Returns None when embeddings are unavailable, so callers fall back to
+        the lexical path rather than losing retrieval entirely.
+        """
+        if not self.index(cfg):
+            return None
+        qvec = embedding.embed([question], cfg)
+        if not qvec:
+            return None
+        qv = embedding.normalise(qvec[0])
+        q_terms = _content_tokens(question)
+
+        scored = []
+        for vec, c in zip(self._vectors, self.chunks):
+            sim = embedding.similarity(qv, vec)
+            shared = [t for t in q_terms if t in c["_tokens"]]
+            if _is_topic_match(shared, c):
+                sim += self.LEXICAL_BONUS
+            if sim >= self.MIN_SIMILARITY:
+                scored.append((sim, c))
+        if not scored:
+            return []
+        scored.sort(key=lambda pair: -pair[0])
+        best = scored[0][0]
+        # Relative cut as well as absolute: a clear winner should not drag in
+        # near-misses, which is what bloats the prompt and blurs the answer.
+        return [c for sim, c in scored[:k] if sim >= 0.92 * best]
 
     def retrieve(self, question: str, k: int = 3) -> list[dict]:
         """Top-k chunks by summed idf of question terms present in the chunk.
