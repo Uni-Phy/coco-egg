@@ -70,7 +70,56 @@ parameter counts.
 0.6B would be a straight win. v0.2 made the model's own knowledge load-bearing,
 which is the one thing 0.6B is bad at. Pick two of: small, open, trustworthy.
 
-## 4. Options, not yet decided
+## 4. Decided: keep the cascade, text stays the interface
+
+**[FIXED 2026-07-27]** The device keeps `whisper → small LLM → Piper`. A single
+end-to-end voice-to-voice model was considered for the device and rejected.
+
+The measurement that decides it: decode speed here tracks memory bandwidth
+almost exactly — 0.6B/378MB gives 23.8 t/s and 1.7B/1056MB gives 9.8 t/s, both
+implying **~9–10 GB/s effective**. So decode ≈ bandwidth ÷ model size, and a 3B
+Q4 lands ~5 t/s, a 7B ~2 t/s.
+
+A speech-to-speech model emits audio codec tokens at roughly 100–200 per second
+of speech and must sustain that continuously or the voice stutters. The
+credible open S2S models are 3B–9B. That is **~100+ tokens/sec needed against
+~2–5 available** — an order-of-magnitude gap, not a tuning gap.
+
+Meanwhile Piper synthesises at RTF 0.09, ~11x realtime. A purpose-built vocoder
+makes audio far more cheaply than an LLM generating audio tokens, and that
+asymmetry is structural, not an artifact of current models.
+
+It would also not save what it appears to. Deleting ASR and TTS removes 2.4s of
+our 7.31s; the LLM's 3.80s stays and gets *worse*, because the model is bigger
+and audio tokens in are far more numerous than text tokens.
+
+And it breaks RAG. Retrieval needs a text key — `Pack.retrieve()` matches
+question tokens against chunks. A true end-to-end model exposes no transcript,
+so we would need an ASR anyway. Text is also what makes transcripts (the CoCo
+node's fine-tuning input, spec §3), the eval set, safety review and debugging
+possible — the VAD bug found during M0 bring-up was only visible because the
+mis-heard question could be read as text.
+
+Where voice-to-voice *does* fit: the **M2 cloud route** (spec §3 — cloud is a
+quality upgrade when online, never a dependency). Natural prosody and
+interruption when connected, local cascade as the offline floor. Worth watching
+speech-in/text-out models (Ultravox, Qwen2-Audio) for M1+, though today they
+are larger than what we run and mostly wrap a Whisper encoder anyway.
+
+Per-stage efficiency, which is what makes the split worth keeping:
+
+| stage | measured | verdict |
+|---|---|---|
+| whisper (audio→text) | 1.79s | structurally wasteful — fixed 30s window whatever the utterance length |
+| small LLM (reason+generate) | 3.80s | the bottleneck, and the only stage worth optimising |
+| Piper (text→audio) | 0.60s, RTF 0.09 | ~11x realtime, effectively free |
+
+Corollary worth holding onto: **the thinner the model, the more the pack has to
+carry.** Model size and retrieval quality trade off directly (see §3). Note the
+weak stage is *reasoning*, not generation — retrieval-grounded generation was
+indistinguishable between 0.6B and 1.7B.
+
+## 5. Options, not yet decided
 
 - **Stay 1.7B, buy back time elsewhere** — acknowledgement audio, `tiny.en`
   ASR (1.44s → ~0.5s), trim the 1.2s VAD hangover. No quality risk.
