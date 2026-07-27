@@ -1,1 +1,1 @@
-from .llama_client import stream_sentences  # noqa: F401
+from .llama_client import forget, remember, stream_sentences  # noqa: F401

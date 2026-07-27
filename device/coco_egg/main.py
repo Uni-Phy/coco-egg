@@ -23,7 +23,7 @@ from .audio import play_wav, record_utterance
 from .states import UiState
 from .sync import log_interaction
 from .tts import preload, synthesize
-from .tutor import stream_sentences
+from .tutor import remember, stream_sentences
 
 
 MENU = (
@@ -89,6 +89,7 @@ def one_turn(cfg: dict) -> None:
     reply = " ".join(spoken)
     print(f"  reply: {reply}")
     if reply:
+        remember(question, reply, cfg)   # so the next turn can refer back
         log_interaction(question, reply, first_audio, cfg)
     events.end_turn(reason="ok", reply=reply, latency_s=round(first_audio, 3))
     set_ui(UiState.IDLE)

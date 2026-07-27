@@ -20,6 +20,7 @@ import requests
 
 from .. import events
 from . import profile
+from .history import DEFAULT_TURNS, History
 from .pack import Pack
 from .prompts import GROUNDING, LEARNER, SYSTEM, UNKNOWN
 
@@ -36,6 +37,7 @@ _EMOJI = re.compile(
 )
 
 _pack: Pack | None = None
+_history = History(DEFAULT_TURNS)
 
 
 def _get_pack(cfg: dict) -> Pack | None:
@@ -100,8 +102,26 @@ def build_messages(question: str, cfg: dict) -> tuple[list[dict], list[dict]]:
     if hits:
         material = "\n\n".join(f"{c['title']}: {c['text']}" for c in hits)
         turn = GROUNDING.format(material=material).strip() + "\n\n" + question
-    return [{"role": "system", "content": _static_system(cfg)},
-            {"role": "user", "content": turn}], hits
+    prior = _history.messages() if cfg["tutor"].get("history_turns", 0) else []
+    return ([{"role": "system", "content": _static_system(cfg)}]
+            + prior
+            + [{"role": "user", "content": turn}]), hits
+
+
+def remember(question: str, reply: str, cfg: dict) -> None:
+    """Record a finished turn so the next one can refer back to it.
+
+    Called after the reply is complete rather than as it streams: a turn that
+    was interrupted is not something the learner heard, and should not be
+    something the tutor thinks it said.
+    """
+    if cfg["tutor"].get("history_turns", 0):
+        _history.add(question, reply)
+
+
+def forget() -> None:
+    """Drop the conversation — a new learner must not inherit the last one."""
+    _history.clear()
 
 
 def _fallback_sentences(hits: list[dict]) -> Iterator[str]:

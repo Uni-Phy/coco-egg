@@ -58,6 +58,12 @@ DEFAULTS = {
         # Sentence-embedding server for retrieval. llama-embed docker service
         # by default; override to 127.0.0.1:8082 for `make serve-embed`.
         # Unreachable => lexical fallback (see tutor/embed.py).
+        # Prior turns kept so a follow-up has something to follow ("why?",
+        # "tell me more"). They sit ABOVE the retrieved material in the prompt,
+        # which is what makes them nearly free: history is append-only, so it
+        # lands in llama-server's cached prefix instead of being re-prefilled.
+        # 0 disables it. See tutor/history.py.
+        "history_turns": 3,
         "embed_url": "http://llama-embed:8082",
         "embed_timeout_s": 20,
         "embed_cache": ".embed-cache",
