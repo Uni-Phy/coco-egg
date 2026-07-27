@@ -195,3 +195,37 @@ Neither setting ships: 0/7 recall makes the library decorative, 2/3 false
 positives makes a 0.6B hallucinate from the wrong lesson. Token matching
 cannot deliver both, which makes semantic retrieval a prerequisite for the
 course library rather than an improvement to it. See docs/roadmap.md.
+
+## 8. llama-server RSS grows ~11MB per request and never returns it
+
+Measured on the bench Pi, 2026-07-28, tutor server (Qwen3-0.6B, `-c 1024`):
+
+| | RSS |
+|---|---|
+| freshly started | 984 MB |
+| after 20 varied requests | 1213 MB (+229 MB) |
+| after ~11 hours of use | **5801 MB** |
+
+About 11 MB per request with a *varied* prompt, not reclaimed. The box has
+8 GB and **no swap**, so extrapolating from a fresh start this reaches the
+ceiling in roughly 500-600 questions — inside a single classroom day.
+
+It is not a config problem: `-c 1024` caps the KV cache, and a fresh process
+with the same flags sits at 984 MB. The growth tracks distinct prompts, which
+points at llama-server's prompt-cache/slot state accumulating per unique
+prefix — every question retrieves different pack material, so every prompt is
+a new prefix, and a tutor is close to the worst case for that.
+
+Consequences we already saw: a `bench_loop` run against the bloated server
+produced a 12.6s LLM first-sentence outlier against a 2.6s median, and the
+perceived e2e max was 16.8s. A demo that has been running for hours will not
+behave like one just started.
+
+**This raises the priority of systemd units (parallel-tasks D1) from hygiene
+to containment.** A unit with `MemoryMax=` plus `Restart=always` bounds the
+blast radius without solving the leak. Worth testing next: llama-server's slot
+and cache-reuse flags, whether the `/slots` endpoint can release state, and
+whether a newer llama.cpp build fixes it.
+
+Practical bench note: restart the tutor server before any timing measurement
+or demo, or the numbers are measuring the leak rather than the model.
