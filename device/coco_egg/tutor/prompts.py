@@ -36,6 +36,17 @@ your own memory — it is the authority here. Where it falls short, answer from
 your own knowledge as usual. Do not mention the material itself.
 """
 
+# Appended when a learner profile exists. Preferences shape HOW the answer is
+# said, never WHETHER it is true — a thin model will happily bend facts to
+# please, and "teach it their way" must not become "tell them what they like".
+LEARNER = """
+About this learner:
+{learner}
+
+Adapt how you explain — the words, the examples, the pace — to suit them.
+Never change the facts to fit their preferences.
+"""
+
 # Spoken when the LLM is unreachable AND no chunk matches — the offline floor,
 # where the pack is the only knowledge on the device. Short and warm; with no
 # model and no matching lesson there is genuinely nothing to teach from.

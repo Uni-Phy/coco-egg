@@ -1,0 +1,26 @@
+# Example learner profile. Copy to ./learner.yaml (gitignored, like egg.yaml)
+# or paste under a `learner:` key in egg.yaml.
+#
+# There is no schema and no field list in the code. Every key below is passed
+# through to the tutor as-is, so add whatever turns out to matter — delete
+# whatever does not. Keys are humanised (`reads_at` -> "reads at"), lists and
+# nesting render fine. See device/coco_egg/tutor/profile.py.
+#
+# Preferences shape HOW something is explained, never WHETHER it is true.
+
+name: Asha
+grade: 6
+reads_at: about grade 5, so keep sentences short
+
+interests:
+  - farming
+  - cricket
+
+prefers:
+  examples: everyday things from a village — rotis, fields, cattle
+  explanation_style: one idea at a time, then check she followed
+  new_topics: go slowly and repeat the key word
+
+# Anything else you learn about them can just be added:
+# struggles_with: word problems with more than one step
+# confident_with: multiplication tables

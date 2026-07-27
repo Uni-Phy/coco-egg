@@ -39,10 +39,17 @@ DEFAULTS = {
         "temperature": 0.7,           # Qwen3 recommended non-thinking sampling
         "timeout_s": 30,
         "max_reply_chars": 600,       # keep spoken answers short
-        # Curriculum content pack (spec §7 RAG). Retrieval grounds the LLM;
-        # with no LLM reachable the pack's canned explanations are spoken
-        # directly. Real packs come from the CoCo node; this is the fixture.
-        "pack": "fixtures/content-pack.json",
+        # Curriculum content pack(s) (spec §7 RAG). A file, a DIRECTORY of
+        # packs, or a list of either — a directory is the shape to use once
+        # subjects are a library: drop a pack in, it gets taught, and the set
+        # of loaded packs *is* the list of supported subjects. Merging also
+        # sharpens retrieval, since idf is a whole-corpus statistic.
+        # Real packs come from the CoCo node; this is the fixture.
+        "pack": "fixtures/packs",
+        # Optional YAML file describing the learner. Falls back to an inline
+        # `learner:` block in egg.yaml. Schema-free on purpose — see
+        # tutor/profile.py.
+        "profile": "learner.yaml",
     },
     "tts": {
         "voice": "models/en_US-lessac-medium.onnx",

@@ -17,19 +17,33 @@ from typing import Iterator
 
 import requests
 
+from . import profile
 from .pack import Pack
-from .prompts import GROUNDING, SYSTEM, UNKNOWN
+from .prompts import GROUNDING, LEARNER, SYSTEM, UNKNOWN
 
 _SENTENCE_END = re.compile(r"(?<=[.!?])\s+")
 _THINK_PAIR = re.compile(r"<think>.*?</think>", re.DOTALL)
+
+# Emoji and pictographs. The reply is SPOKEN, and a smiley either gets read out
+# as a word salad or lands in the WAV as mojibake — the 0.6B ends cheerful
+# answers with one far more often than the 1.7B did. Deliberately targets the
+# pictograph blocks only, not all non-ASCII: Hindi/Marathi packs must survive.
+_EMOJI = re.compile(
+    "[\U0001F000-\U0001FAFF\U00002190-\U000021FF\U00002300-\U000027BF"
+    "\U00002B00-\U00002BFF\U0000FE00-\U0000FE0F\U0001F1E6-\U0001F1FF]+"
+)
 
 _pack: Pack | None = None
 
 
 def _get_pack(cfg: dict) -> Pack | None:
     global _pack
-    if _pack is None and cfg["tutor"].get("pack"):
-        _pack = Pack.load(cfg["tutor"]["pack"])
+    if _pack is None:
+        _pack = Pack.load_config(cfg["tutor"].get("pack"))
+        if _pack:
+            print(f"  pack: {len(_pack.chunks)} chunks across "
+                  f"{len(_pack.subjects) or 1} subject(s): "
+                  f"{', '.join(_pack.subjects) or _pack.topic}", flush=True)
     return _pack
 
 
@@ -40,6 +54,9 @@ def _system_prompt(question: str, cfg: dict) -> tuple[str, list[dict]]:
     the question on its own. Grounding only fires on curated subjects.
     """
     system = SYSTEM
+    learner = profile.describe(profile.load(cfg))
+    if learner:
+        system += LEARNER.format(learner=learner)
     pack = _get_pack(cfg)
     hits = pack.retrieve(question) if pack else []
     if hits:
@@ -62,8 +79,8 @@ def _fallback_sentences(hits: list[dict]) -> Iterator[str]:
 
 
 def visible_text(raw: str) -> str:
-    """Drop completed <think>...</think> blocks and hold back an unclosed one."""
-    raw = _THINK_PAIR.sub("", raw)
+    """Speakable text: no <think> blocks, no emoji, no unclosed tag leaking."""
+    raw = _EMOJI.sub("", _THINK_PAIR.sub("", raw))
     open_tag = raw.find("<think>")
     return raw if open_tag == -1 else raw[:open_tag]
 

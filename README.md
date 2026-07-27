@@ -44,15 +44,15 @@ measure it honestly and set the bar (spec §16).
 ## Measured on real hardware (M0 bench)
 
 Pi 5 8GB / Cortex-A76 / DietPi (Debian 13), eMeet M0 Plus USB speakerphone.
-whisper.cpp `ggml-base.en` + Qwen3-1.7B Q4_K_M via llama-server + Piper
-`en_US-lessac-medium`. Median of 5 turns, voice preloaded, WiFi down:
+whisper.cpp `ggml-base.en` + **Qwen3-0.6B Q4_K_M** via llama-server (`-c 1024`)
++ Piper `en_US-lessac-medium`. Median of 6 rotating questions, voice preloaded:
 
 | stage | median | note |
 |---|---|---|
 | ASR (whisper-cli) | 1.79s | 1.44s of it is the encoder — a **fixed 30s-window cost**, independent of how short the utterance is. Model load is only 85ms. |
-| LLM → first sentence | 3.80s (1.34–4.09) | dominated by prefill of the grounded prompt at ~56 tok/s; decode runs ~9.8 tok/s |
-| TTS (Piper) | 0.60s (0.42–1.62) | scales with sentence length, RTF ≈ 0.09. First call costs ~2.1s of voice load — `preload()` moves that off the learner's turn |
-| **end-of-speech → first audio** | **7.31s (4.96–8.63)** | includes the `silence_stop_s` = 1.2s hangover the learner waits through |
+| LLM → first sentence | 1.60s (0.70–3.53) | prefill ~149 tok/s, decode ~23.8 tok/s on the 0.6B |
+| TTS (Piper) | 0.58s (0.30–1.76) | scales with sentence length, RTF ≈ 0.09. First call costs ~2.1s of voice load — `preload()` moves that off the learner's turn |
+| **end-of-speech → first audio** | **5.01s (4.01–7.67)** | includes the `silence_stop_s` = 1.2s hangover the learner waits through |
 
 > An earlier revision of this table said ~6.4s. That was wrong, and the bug is
 > worth naming: the bench asked the *same* question every turn, so
@@ -60,18 +60,22 @@ whisper.cpp `ggml-base.en` + Qwen3-1.7B Q4_K_M via llama-server + Piper
 > ~0.10s from turn 2 on. `bench_loop.py` now rotates questions so every turn
 > pays what a new question really costs.
 
-**The bar is not met yet.** Spec §16 floated ~2–3s; the honest measured number
-is ~7.3s. Where the time actually goes, in priority order:
+Whole-process RSS is **945 MB**, down from 2641 MB on the 1.7B at `-c 4096`.
 
-1. **LLM prefill** — the biggest and most variable slice. The 124-token SYSTEM
-   preamble is a shared prefix that llama-server caches, but the retrieved pack
-   material after it differs per question and is re-prefilled every time.
-   Retrieving `k=1` instead of `k=3` cuts ~110 tokens (~2s).
-2. **ASR encoder** — whisper's fixed 30s window means a 1.6s question costs the
-   same 1.44s as a 25s one. `ggml-tiny.en` or a persistent whisper-server are
-   the levers; caching the model is not (load is already only 85ms).
-3. **Silence hangover** — 1.2s of dead air before work even starts. Lowering
-   `silence_stop_s` trades latency against clipping the learner.
+**The bar is still not met.** Spec §16 floated ~2–3s; measured is ~5.0s. The
+v0.3 model switch took ~2.3s out, and **the bottleneck has moved off the LLM**:
+
+1. **ASR is now the largest single stage** at 1.78s, and 1.44s of that is
+   whisper's fixed 30s-window encoder — a 1.6s question costs the same as a 25s
+   one. `ggml-tiny.en`, a persistent whisper-server, or streaming decode are the
+   levers; caching the model is not (load is already only 85ms).
+2. **Silence hangover** — 1.2s of dead air before work even starts. A
+   push-to-talk button (spec decision #5) removes it outright.
+3. **LLM prefill** — still the most *variable* slice, and it is what the
+   retrieval work keeps short.
+
+Nothing here overlaps: the pipeline is fully serial. Streaming ASR plus
+speculative retrieval on a partial transcript is the next structural win.
 
 Note the mic is an eMeet M0 Plus with **hardware AEC**: it cancels its own
 speaker output almost completely (a full-volume tone played into it records at

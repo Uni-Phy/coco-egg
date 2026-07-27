@@ -119,7 +119,48 @@ carry.** Model size and retrieval quality trade off directly (see §3). Note the
 weak stage is *reasoning*, not generation — retrieval-grounded generation was
 indistinguishable between 0.6B and 1.7B.
 
-## 5. Options, not yet decided
+## 5. Taken (v0.3): 0.6B + a subject library
+
+**[DECIDED 2026-07-27]** Move to Qwen3-0.6B at `-c 1024`, and put the
+intelligence the model gives up into curated subject packs plus a per-learner
+layer. Measured after the switch:
+
+| | 1.7B `-c 4096` | 0.6B `-c 1024` |
+|---|---|---|
+| RSS | 2641 MB | **945 MB** |
+| perceived end-to-end | 7.31s median | **5.01s median** |
+
+The bottleneck moved: **ASR (1.78s) is now the largest single stage**, not the
+LLM. The next structural win is streaming ASR + speculative retrieval, not more
+model work.
+
+What the packs actually fixed — the 0.6B's measured failures from §3, re-run
+with two subjects loaded (science/maths + civics/history):
+
+- "Who was Ashoka?" — was "ruler of the Gupta Empire"; now correct and
+  detailed, grounded on the civics pack. **This is the bet working.**
+- New subjects answer correctly on first contact (Gram Panchayat, fundamental
+  rights) purely from adding a pack — no code, no model change.
+- "Why is the sky blue?" and "what did I have for breakfast?" — the wrong
+  answers turned out **not** to be model ignorance. Both were *false-positive
+  retrieval*: "breakfast" matched the fractions lesson on the single word
+  "have" (that lesson mentions a roti, so the tutor claimed it ate one), and
+  "sky" matched the water cycle on one word. Fixed by requiring a topic match
+  (a title hit, or more than one shared content word) rather than any overlap.
+
+That is the §3 corollary paying out concretely: at 0.6B, retrieval precision
+*is* answer correctness. The same two bad chunks were harmless to the 1.7B.
+
+Accepted risk, chosen deliberately: out-of-pack questions are still answered
+from model knowledge rather than refused, so the 0.6B can still be confidently
+wrong outside curated subjects ("I had a sandwich for breakfast!"). The eval
+set should measure this so it can be revisited with data.
+
+Also fixed in passing: the 0.6B ends cheerful answers with emoji far more often
+than the 1.7B, and the reply is *spoken* — emoji are now stripped before TTS,
+targeting pictograph blocks only so Devanagari survives.
+
+## 6. Options, not yet decided
 
 - **Stay 1.7B, buy back time elsewhere** — acknowledgement audio, `tiny.en`
   ASR (1.44s → ~0.5s), trim the 1.2s VAD hangover. No quality risk.

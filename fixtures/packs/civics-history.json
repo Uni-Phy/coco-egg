@@ -1,0 +1,37 @@
+{
+  "topic": "Civics and Indian history",
+  "lesson": [
+    {
+      "id": "constitution",
+      "goal": "Students should understand that the Constitution protects people's rights and limits government power."
+    },
+    {
+      "id": "ashoka-and-buddhism",
+      "goal": "Students should understand that Ashoka was a king who changed his ways after a war and spread Buddhism."
+    },
+    {
+      "id": "parliament-and-local-government",
+      "goal": "Students should understand how India's government works and how local communities make decisions."
+    }
+  ],
+  "chunks": [
+    {
+      "id": "constitution",
+      "title": "Constitution",
+      "text": "The Indian Constitution came into effect on 26 January 1950. It is the longest written constitution of any country. Dr B R Ambedkar chaired the drafting committee, and he is often called the chief architect of the Constitution. The Constitution sets out how the country is governed and what rights every citizen has. Fundamental Rights are the basic freedoms guaranteed to every citizen of India. They include the right to equality, the right to freedom of speech and expression, the right against exploitation, the right to freedom of religion, cultural and educational rights, and the right to constitutional remedies. These rights can be defended in court. No government can take them away.",
+      "explain": "The Constitution is the rules that govern India. It tells how the country is run and what rights people have. Fundamental Rights are the basic freedoms like speaking freely, believing your religion, and getting a fair trial. These rights can't be taken away by the government."
+    },
+    {
+      "id": "ashoka-and-buddhism",
+      "title": "Ashoka and Buddhism",
+      "text": "Ashoka was an emperor of the Maurya Empire who ruled most of the Indian subcontinent from about 268 to 232 BCE. After the bloody war of Kalinga he was filled with remorse and turned to Buddhism, spreading its teachings of non violence across Asia. He had his edicts carved on pillars and rocks. The Lion Capital of Ashoka is the national emblem of India, and the wheel from it appears on the national flag.",
+      "explain": "Ashoka was a king who ruled a big country in India. After a tough war, he became sad and started believing in Buddhism. He spread its message of peace and kindness. He also made big stones with messages about his beliefs."
+    },
+    {
+      "id": "parliament-and-local-government",
+      "title": "Parliament and Local Government",
+      "text": "India has a parliamentary system of government. Parliament has two houses, the Lok Sabha and the Rajya Sabha. Members of the Lok Sabha are elected directly by the people. The President is the head of state, while the Prime Minister is the head of government and leads the council of ministers. Laws are debated and passed in Parliament. Local government in villages works through the Panchayati Raj system. A Gram Panchayat is the elected council of a village, headed by a Sarpanch. It looks after water supply, roads, sanitation and schools in the village. This system gives people a direct say in decisions that affect their daily life.",
+      "explain": "India has a parliamentary system where the government is led by the Prime Minister and a council of ministers. Parliament has two houses, and the Lok Sabha is directly elected. Local government in villages is run by a Gram Panchayat, led by a Sarpanch, who makes decisions about village life."
+    }
+  ]
+}

@@ -4,14 +4,20 @@ import pytest
 
 from coco_egg import config
 from coco_egg.tutor import llama_client, prompts
-from coco_egg.tutor.pack import Pack
+from coco_egg.tutor.pack import Pack, _content_tokens
 
-PACK_PATH = pathlib.Path(__file__).parents[2] / "fixtures" / "content-pack.json"
+PACKS_DIR = pathlib.Path(__file__).parents[2] / "fixtures" / "packs"
+PACK_PATH = PACKS_DIR / "science-maths.json"
 
 
 @pytest.fixture
 def pack():
     return Pack.load(PACK_PATH)
+
+
+@pytest.fixture
+def library():
+    return Pack.load_config(str(PACKS_DIR))
 
 
 def test_retrieve_ranks_relevant_chunk_first(pack):
@@ -43,6 +49,52 @@ def test_retrieve_handles_soil_misconception(pack):
     assert hits[0]["id"] == "plants-soil"
 
 
+def test_library_merges_subjects_into_one_corpus(library):
+    assert len(library.subjects) >= 2
+    assert len(library.chunks) > len(Pack.load(PACK_PATH).chunks)
+    assert all(c.get("subject") for c in library.chunks)
+
+
+@pytest.mark.parametrize("question, subject_word", [
+    ("Who was Ashoka?", "Civics"),
+    ("What is a Gram Panchayat?", "Civics"),
+    ("What is photosynthesis?", "Science"),
+    ("What are fractions?", "Science"),
+])
+def test_retrieval_routes_across_subjects(library, question, subject_word):
+    """A question lands in the right subject once several packs are loaded.
+
+    Ashoka is the case that matters: ungrounded, the small model placed him in
+    the Gupta Empire (docs/model-notes.md §3). Adding the subject is what
+    fixes that, which is the whole thin-model-plus-packs bet.
+    """
+    hits = library.retrieve(question)
+    assert hits, f"{question!r} retrieved nothing"
+    assert subject_word in hits[0]["subject"]
+
+
+@pytest.mark.parametrize("question, incidental_word", [
+    ("What did I have for breakfast?", "have"),   # fractions lesson says "you have"
+    ("Why is the sky blue?", "sky"),              # water cycle says "earth and the sky"
+])
+def test_one_incidental_word_is_not_a_topic_match(library, question, incidental_word):
+    """Sharing a single body word is not evidence a lesson is relevant.
+
+    Both of these grounded wrongly before the topic-match rule, and the 0.6B
+    then built its whole answer from the bad chunk — claiming it ate a roti,
+    and explaining a blue sky with evaporation. Regression-guarding the exact
+    failures, since they get worse the thinner the model gets.
+    """
+    assert incidental_word in _content_tokens(question)   # the trap still exists
+    assert library.retrieve(question) == []
+
+
+def test_missing_pack_path_is_skipped_not_fatal(tmp_path):
+    """One un-synced pack must not stop the egg teaching the others."""
+    lib = Pack.load_config([str(PACK_PATH), str(tmp_path / "not-there.json")])
+    assert lib and lib.chunks
+
+
 def test_fallback_speaks_canned_explanation(pack, monkeypatch):
     """LLM unreachable -> the pack's pre-written explanation, sentence-split."""
     cfg = config.load(path=None)
@@ -66,3 +118,13 @@ def test_fallback_unknown_when_no_match(pack, monkeypatch):
     monkeypatch.setattr(llama_client, "_pack", None)
     sentences = list(llama_client.stream_sentences("qqq zzz xyzzy", cfg))
     assert " ".join(sentences) == prompts.UNKNOWN
+
+
+def test_emoji_are_stripped_before_speaking():
+    """The reply is spoken, so a smiley is either read aloud or lands as noise.
+
+    Devanagari must survive — stripping all non-ASCII would break the
+    Hindi/Marathi packs the retrieval layer was built unicode-aware for.
+    """
+    assert llama_client.visible_text("Well done! 😊👍") == "Well done! "
+    assert "पानी" in llama_client.visible_text("पानी 🌧 is water")
