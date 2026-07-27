@@ -1,21 +1,22 @@
-"""Local ASR via whisper.cpp CLI (spec §7). Swappable behind transcribe()."""
+"""Local ASR via whisper.cpp whisper-server (spec §7). Swappable behind transcribe()."""
 from __future__ import annotations
 
-import subprocess
+import requests
 
 
 def transcribe(wav_path: str, cfg: dict) -> str:
     a = cfg["asr"]
-    cmd = [a["whisper_bin"], "-m", a["model"], "-l", a["language"],
-           "-f", wav_path, "--no-timestamps", "--no-prints"]
-    print(f"  whisper: {' '.join(cmd)}", flush=True)
-    out = subprocess.run(cmd, capture_output=True, text=True, timeout=120)
-    if out.returncode != 0:
-        raise RuntimeError(
-            f"whisper-cli exited {out.returncode}:\n"
-            f"{out.stderr.strip() or out.stdout.strip() or '(no output)'}"
+    url = f"{a['whisper_url']}/inference"
+    print(f"  whisper: POST {url}", flush=True)
+    with open(wav_path, "rb") as f:
+        resp = requests.post(
+            url,
+            files={"file": (wav_path, f, "audio/wav")},
+            data={"language": a["language"], "response_format": "json"},
+            timeout=a["timeout_s"],
         )
-    text = out.stdout.strip()
+    resp.raise_for_status()
+    text = (resp.json().get("text") or "").strip()
     if not text:
-        print(f"  whisper: no speech detected (stderr: {out.stderr.strip() or 'empty'})", flush=True)
+        print("  whisper: no speech detected", flush=True)
     return text

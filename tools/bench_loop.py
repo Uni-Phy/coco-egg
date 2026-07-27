@@ -61,7 +61,7 @@ def main() -> None:
     hangover = cfg["audio"]["silence_stop_s"]
 
     # *.wav is gitignored, so this is not in a fresh clone — say so usefully
-    # rather than letting whisper-cli fail on a missing file. It has to be a
+    # rather than letting the ASR stage fail on a missing file. It has to be a
     # real recording anyway: the numbers are only meaningful against real
     # speech, so shipping a synthetic stand-in would flatter the ASR stage.
     if not pathlib.Path(wav).exists():

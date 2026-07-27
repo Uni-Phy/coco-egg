@@ -25,11 +25,11 @@ DEFAULTS = {
         "silence_rms": 0.005,
     },
     "asr": {
-        # Path to whisper.cpp CLI binary and model. Bench: build whisper.cpp
-        # and download ggml-base.en (or small) into models/.
-        "whisper_bin": "whisper-cli",
-        "model": "models/ggml-base.en.bin",
+        # whisper.cpp whisper-server. whisper docker service by default;
+        # override to 127.0.0.1:8081 for a locally-run whisper-server.
+        "whisper_url": "http://whisper:8081",
         "language": "en",
+        "timeout_s": 30,
     },
     "tutor": {
         # Qwen3-0.6B via llama-server (llama.cpp).
