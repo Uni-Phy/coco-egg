@@ -67,12 +67,24 @@ def heuristic_chunk(text: str, index: int) -> dict:
 
 
 def llm_polish(chunk: dict, url: str) -> dict:
-    """Ask the LLM for a concise title + spoken explanation + lesson goal."""
+    """Ask the LLM for a concise title + lesson goal. Deliberately NOT explain.
+
+    `explain` stays the heuristic, source-derived text. It is the no-LLM floor
+    — spoken verbatim to a learner with no model in the loop to catch a
+    mistake — and a small model rewriting vetted curriculum inverted the facts
+    often enough to matter. Measured on the first polish of these six courses:
+    "a muscle can only pull, never push" came back as "they only push when
+    they are used"; the scattering that makes the sky look blue came back as
+    "making it appear white"; and the lesson that a magnet ignores most metals
+    came back as "if the object is made of metal, it will be attracted by a
+    magnet" — the exact misconception that chunk exists to correct.
+
+    Titles are worth generating (they carry 3x weight in retrieval) and safe
+    to generate: a bad title is ugly, a bad explain is taught.
+    """
     prompt = (
         "Material:\n" + chunk["text"] + "\n\n"
         'Reply with JSON only, no other text: {"title": "<concept name, 2-4 words>", '
-        '"explain": "<explain the material for a middle-school student in at most '
-        '3 short simple sentences, as if speaking aloud>", '
         '"goal": "<one sentence: what the student should understand>"}'
     )
     body = json.dumps({
@@ -99,11 +111,18 @@ def llm_polish(chunk: dict, url: str) -> dict:
         print(f"  warn: bad JSON from LLM for {chunk['id']}, keeping heuristic")
         return chunk
     out = dict(chunk)
-    out["title"] = polished.get("title") or chunk["title"]
-    out["explain"] = polished.get("explain") or chunk["explain"]
+    title = polished.get("title") or ""
+    # A small model sometimes echoes the instruction instead of following it —
+    # one chunk came back titled literally "<concept name, 2-4 words>", which
+    # then became its id and its retrieval key. Anything that looks like the
+    # template falls back to the heuristic title.
+    if not title or "<" in title or "concept name" in title.lower():
+        print(f"  warn: LLM echoed the template for {chunk['id']}, keeping heuristic title")
+        title = chunk["title"]
+    out["title"] = title
     if polished.get("goal"):
         out["goal"] = polished["goal"]
-    out["id"] = slugify(out["title"])
+    out["id"] = slugify(title)
     return out
 
 

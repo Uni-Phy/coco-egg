@@ -2,244 +2,244 @@
   "topic": "Maths you can see",
   "lesson": [
     {
-      "id": "00-place-value-is-the-idea",
-      "goal": "Understand Place value is the idea."
+      "id": "place-value",
+      "goal": "Understand that place value determines the value of each digit in a number."
     },
     {
-      "id": "01-zero-is-not-nothing-and",
-      "goal": "Understand Zero is not nothing, and."
+      "id": "zero",
+      "goal": "Understand that zero has a place and can be used to represent absence in numbers."
     },
     {
-      "id": "02-lakh-and-crore-are-the",
-      "goal": "Understand Lakh and crore are the."
+      "id": "lakh-and-crore",
+      "goal": "Understand how Indian numbers are grouped and compared."
     },
     {
-      "id": "03-carrying-in-addition-is-really",
-      "goal": "Understand Carrying in addition is really."
+      "id": "carrying-in-addition",
+      "goal": "Understand how adding numbers works by carrying over when the sum exceeds 10."
     },
     {
-      "id": "04-subtraction-undoes-addition-and-you",
-      "goal": "Understand Subtraction undoes addition, and you."
+      "id": "subtraction-and-addition",
+      "goal": "Understand that subtraction is the inverse of addition and can be checked quickly."
     },
     {
-      "id": "05-multiplication-is-a-short-way",
-      "goal": "Understand Multiplication is a short way."
+      "id": "multiplication",
+      "goal": "Understand how multiplication works by visualizing groups of objects."
     },
     {
-      "id": "06-times-tables-get-much-easier",
-      "goal": "Understand Times tables get much easier."
+      "id": "times-tables-patterns",
+      "goal": "Understand how multiplication patterns simplify math."
     },
     {
-      "id": "07-division-is-sharing-out-into",
-      "goal": "Understand Division is sharing out into."
+      "id": "division-and-sharing",
+      "goal": "Understand how division helps in sharing items evenly."
     },
     {
-      "id": "08-a-fraction-is-a-way",
-      "goal": "Understand A fraction is a way."
+      "id": "equal-parts",
+      "goal": "Understanding how to divide a whole into equal parts and identify fractions of that."
     },
     {
-      "id": "09-the-bigger-the-bottom-number",
-      "goal": "Understand The bigger the bottom number,."
+      "id": "comparing-fractions",
+      "goal": "Understand how to compare fractions by looking at the bottom numbers."
     },
     {
-      "id": "10-different-fractions-can-name-exactly",
-      "goal": "Understand Different fractions can name exactly."
+      "id": "equivalent-fractions",
+      "goal": "Understand that different fractions can represent the same amount of food."
     },
     {
-      "id": "11-adding-fractions-is-easy-when",
-      "goal": "Understand Adding fractions is easy when."
+      "id": "adding-fractions",
+      "goal": "Understand how to add fractions by keeping the same denominator."
     },
     {
-      "id": "12-indian-everyday-speech-has-its",
-      "goal": "Understand Indian everyday speech has its."
+      "id": "fractions-in-indian-language",
+      "goal": "Students should understand how to identify and use mixed numbers in everyday life."
     },
     {
-      "id": "13-length-is-measured-in-centimetres",
-      "goal": "Understand Length is measured in centimetres,."
+      "id": "units-of-measurement",
+      "goal": "Understand that measurements can vary but are still accurate and consistent."
     },
     {
-      "id": "14-weight-is-measured-in-grams",
-      "goal": "Understand Weight is measured in grams,."
+      "id": "weight-units",
+      "goal": "Students should understand how to measure weight using different units like grams, kilograms, and quintals."
     },
     {
-      "id": "15-capacity-is-how-much-a",
-      "goal": "Understand Capacity is how much a."
+      "id": "capacity-and-volume",
+      "goal": "Understand that capacity is measured in volume and that oil floats on top because they have the same space but different densities."
     },
     {
-      "id": "16-money-in-india-is-counted",
-      "goal": "Understand Money in India is counted."
+      "id": "money-counting",
+      "goal": "Understand how to calculate change by subtracting the price of an item from the amount you give."
     },
     {
-      "id": "17-shopkeeping-is-arithmetic-you-can",
-      "goal": "Understand Shopkeeping is arithmetic you can."
+      "id": "profit-and-loss",
+      "goal": "Understand how profit and loss are calculated by adding and subtracting."
     },
     {
-      "id": "18-time-is-counted-in-units",
-      "goal": "Understand Time is counted in units."
+      "id": "time-measurement",
+      "goal": "Understand how to calculate the duration of a journey by subtracting the start and end times."
     },
     {
-      "id": "19-perimeter-and-area-answer-two",
-      "goal": "Understand Perimeter and area answer two."
+      "id": "perimeter-and-area",
+      "goal": "Students should understand how to calculate both the perimeter and area of a rectangle and apply this knowledge to real-world scenarios like farming."
     },
     {
-      "id": "20-flat-shapes-are-named-by",
-      "goal": "Understand Flat shapes are named by."
+      "id": "shape-and-circles",
+      "goal": "Students should understand how shapes are named and how a circle is defined."
     },
     {
-      "id": "21-even-numbers-are-the-ones",
-      "goal": "Understand Even numbers are the ones."
+      "id": "even-and-odd-numbers",
+      "goal": "Understand how even and odd numbers work, and how factors and multiples relate to dividing a number."
     },
     {
-      "id": "22-estimating-is-guessing-on-purpose",
-      "goal": "Understand Estimating is guessing on purpose,."
+      "id": "estimation-and-reasoning",
+      "goal": "Students should understand that estimating first helps them check their answers more easily."
     },
     {
-      "id": "23-a-shape-is-symmetrical-when",
-      "goal": "Understand A shape is symmetrical when."
+      "id": "symmetry",
+      "goal": "Understand that symmetry involves folding a shape to reveal two identical halves."
     }
   ],
   "chunks": [
     {
-      "id": "00-place-value-is-the-idea",
-      "title": "Place value is the idea",
+      "id": "place-value",
+      "title": "Place Value",
       "text": "Place value is the idea that a digit is worth different amounts depending on where it sits. In the number two hundred and forty five, the two is not worth two. It is worth two hundreds. The four stands for four tens, and the five for five ones. Shuffle the same three digits around and you get an entirely different number, because every place to the left is worth ten times the place on its right. This is how we can write any number at all, however enormous, using only the ten digits from zero up to nine.",
       "explain": "Place value is the idea that a digit is worth different amounts depending on where it sits. In the number two hundred and forty five, the two is not worth two. It is worth two hundreds."
     },
     {
-      "id": "01-zero-is-not-nothing-and",
-      "title": "Zero is not nothing, and",
+      "id": "zero",
+      "title": "Zero",
       "text": "Zero is not nothing, and that is the surprising part of it. As a count, zero does mean none. But as a digit inside a number it does a real job. It holds a place open. In three hundred and five, the zero tells you there are no tens, and it keeps the three sitting in the hundreds place. Take that zero away and you are left with thirty five, a completely different number. The idea of using a symbol for zero in this way grew up in ancient India, and it is one of the reasons written arithmetic became easy enough for everyone.",
       "explain": "Zero is not nothing, and that is the surprising part of it. As a count, zero does mean none. But as a digit inside a number it does a real job."
     },
     {
-      "id": "02-lakh-and-crore-are-the",
-      "title": "Lakh and crore are the",
+      "id": "lakh-and-crore",
+      "title": "Lakh and Crore",
       "text": "Lakh and crore are the Indian names for large numbers, and they are grouped in their own way. Ten hundreds make one thousand. One hundred thousands make one lakh, which is a one followed by five zeros. One hundred lakhs make one crore, which is a one followed by seven zeros. The commas are placed to match those groups. In the Indian style the first comma goes after three digits counting from the right, and then after every two digits. So one crore is ten times ten lakh, and ten lakh is ten times one lakh.",
       "explain": "Lakh and crore are the Indian names for large numbers, and they are grouped in their own way. Ten hundreds make one thousand. One hundred thousands make one lakh, which is a one followed by five zeros."
     },
     {
-      "id": "03-carrying-in-addition-is-really",
-      "title": "Carrying in addition is really",
+      "id": "carrying-in-addition",
+      "title": "Carrying in addition",
       "text": "Carrying in addition is really just trading ten of something for one of the next bigger thing. When you add up the ones column and the total goes past nine, you cannot squeeze two digits into one place, so you swap ten ones for a single ten and carry that ten across. Take twenty seven plus fifteen. Seven and five make twelve, which is one ten and two ones. You write down the two and carry the one into the tens column. Two tens, plus one ten, plus the carried ten make four tens. The answer is forty two.",
       "explain": "Carrying in addition is really just trading ten of something for one of the next bigger thing. When you add up the ones column and the total goes past nine, you cannot squeeze two digits into one place, so you swap ten ones for a single ten and carry that ten across. Take twenty seven plus fifteen."
     },
     {
-      "id": "04-subtraction-undoes-addition-and-you",
-      "title": "Subtraction undoes addition, and you",
+      "id": "subtraction-and-addition",
+      "title": "Subtraction and Addition",
       "text": "Subtraction undoes addition, and you can always use that fact to check yourself. If you work out that fifty two take away nineteen leaves thirty three, then adding nineteen back onto thirty three must bring you to fifty two, and it does. Borrowing works like carrying, only in reverse. When the top digit is too small to take from, you fetch one ten from the next column along and turn it into ten ones. Checking an answer by reversing it takes only a few seconds, it catches most mistakes, and it costs you nothing at all.",
       "explain": "Subtraction undoes addition, and you can always use that fact to check yourself. If you work out that fifty two take away nineteen leaves thirty three, then adding nineteen back onto thirty three must bring you to fifty two, and it does. Borrowing works like carrying, only in reverse."
     },
     {
-      "id": "05-multiplication-is-a-short-way",
-      "title": "Multiplication is a short way",
+      "id": "multiplication",
+      "title": "Multiplication",
       "text": "Multiplication is a short way of adding the same number over and over. Six plus six plus six plus six is four sixes, which we write as four times six, and it comes to twenty four. It also helps to picture rows. A vegetable patch with four rows of six plants in each row holds twenty four plants, and you can count them along the rows or down the columns and reach the same total either way. That picture also explains why four times six and six times four are equal. Turn the patch sideways and it is still the same patch.",
       "explain": "Multiplication is a short way of adding the same number over and over. Six plus six plus six plus six is four sixes, which we write as four times six, and it comes to twenty four. It also helps to picture rows."
     },
     {
-      "id": "06-times-tables-get-much-easier",
-      "title": "Times tables get much easier",
+      "id": "times-tables-patterns",
+      "title": "Times Tables Patterns",
       "text": "Times tables get much easier once you notice the patterns hiding in them. Anything multiplied by one stays exactly the same, and anything multiplied by zero is zero. The ten times table simply puts a zero on the end. Every answer in the five times table ends in a five or a zero. In the nine times table the two digits of each answer add up to nine, so nine sevens is sixty three, and six and three make nine. And because the order does not matter, learning three sevens gives you seven threes for free, which halves the work.",
       "explain": "Times tables get much easier once you notice the patterns hiding in them. Anything multiplied by one stays exactly the same, and anything multiplied by zero is zero. The ten times table simply puts a zero on the end."
     },
     {
-      "id": "07-division-is-sharing-out-into",
-      "title": "Division is sharing out into",
+      "id": "division-and-sharing",
+      "title": "Division and Sharing",
       "text": "Division is sharing out into equal groups, or asking how many groups you can make. If twelve laddus are shared fairly among four children, each child gets three, so twelve divided by four is three. You can ask it the other way round too. How many groups of four can you make out of twelve? Again, three. When the sharing does not come out evenly, whatever is left over is called the remainder. Thirteen laddus shared among four children gives three each, with one laddu still sitting in the box.",
       "explain": "Division is sharing out into equal groups, or asking how many groups you can make. If twelve laddus are shared fairly among four children, each child gets three, so twelve divided by four is three. You can ask it the other way round too."
     },
     {
-      "id": "08-a-fraction-is-a-way",
-      "title": "A fraction is a way",
+      "id": "equal-parts",
+      "title": "Equal Parts",
       "text": "A fraction is a way of naming equal parts of one whole thing. Cut a chapati into eight equal pieces, take three of them, and you have three eighths of that chapati. The number underneath tells you how many equal pieces the whole was divided into, and the number on top tells you how many of those pieces you are holding. The word equal is the important one here. Four uneven bits torn off a chapati are not quarters. Every piece has to be the same size before you can call them by a fraction's name.",
       "explain": "A fraction is a way of naming equal parts of one whole thing. Cut a chapati into eight equal pieces, take three of them, and you have three eighths of that chapati. The number underneath tells you how many equal pieces the whole was divided into, and the number on top tells you how many of those pieces you are holding."
     },
     {
-      "id": "09-the-bigger-the-bottom-number",
-      "title": "The bigger the bottom number,",
+      "id": "comparing-fractions",
+      "title": "Comparing Fractions",
       "text": "The bigger the bottom number, the smaller each piece, and this catches nearly everybody out. Eight is a bigger number than four, so it feels as though one eighth ought to be bigger than one fourth. But cut the same chapati into eight pieces instead of four and each piece must come out smaller, because the same food is being shared between more pieces. So one eighth is less than one fourth. When the bottom numbers match, comparing is easy. Three fifths beats two fifths, because the pieces are the same size and you simply have more of them.",
       "explain": "The bigger the bottom number, the smaller each piece, and this catches nearly everybody out. Eight is a bigger number than four, so it feels as though one eighth ought to be bigger than one fourth. But cut the same chapati into eight pieces instead of four and each piece must come out smaller, because the same food is being shared between more pieces."
     },
     {
-      "id": "10-different-fractions-can-name-exactly",
-      "title": "Different fractions can name exactly",
+      "id": "equivalent-fractions",
+      "title": "Equivalent Fractions",
       "text": "Different fractions can name exactly the same amount, and those are called equivalent fractions. Cut a chapati in half and you have one half. Cut both halves again and now you have four quarters, and two of those quarters are still the same amount of chapati as the original half. So one half, two quarters and four eighths are all the same quantity. You make an equivalent fraction by multiplying the top and the bottom by the same number, or by dividing both by the same number. Nothing has really changed. The food has just been cut differently.",
       "explain": "Different fractions can name exactly the same amount, and those are called equivalent fractions. Cut a chapati in half and you have one half. Cut both halves again and now you have four quarters, and two of those quarters are still the same amount of chapati as the original half."
     },
     {
-      "id": "11-adding-fractions-is-easy-when",
-      "title": "Adding fractions is easy when",
+      "id": "adding-fractions",
+      "title": "Adding Fractions",
       "text": "Adding fractions is easy when all the pieces are the same size. Suppose a chapati is cut into six equal pieces, you eat two of them and your brother eats three. Together you have eaten five of the six pieces, which is five sixths. You add the top numbers together and you leave the bottom number alone, because the size of each piece has not changed. What you must never do is add the bottom numbers too. Two sixths plus three sixths is five sixths, not five twelfths, and you can see that plainly on the plate.",
       "explain": "Adding fractions is easy when all the pieces are the same size. Suppose a chapati is cut into six equal pieces, you eat two of them and your brother eats three. Together you have eaten five of the six pieces, which is five sixths."
     },
     {
-      "id": "12-indian-everyday-speech-has-its",
-      "title": "Indian everyday speech has its",
+      "id": "fractions-in-indian-language",
+      "title": "Fractions in Indian Language",
       "text": "Indian everyday speech has its own short words for fractions, and they are used constantly at the shop. Adha means one half. Pav means one quarter, which is why a quarter of a kilo is called pav kilo. Sawa means one and a quarter, dedh means one and a half, and dhai means two and a half. Paune means a quarter less than the next whole number, so paune do is one and three quarters. If you can ask for sawa kilo of tomatoes and check the change, you already understand mixed numbers, whatever your textbook decides to call them.",
       "explain": "Indian everyday speech has its own short words for fractions, and they are used constantly at the shop. Adha means one half. Pav means one quarter, which is why a quarter of a kilo is called pav kilo."
     },
     {
-      "id": "13-length-is-measured-in-centimetres",
-      "title": "Length is measured in centimetres,",
+      "id": "units-of-measurement",
+      "title": "Units of Measurement",
       "text": "Length is measured in centimetres, metres and kilometres. One hundred centimetres make one metre, and one thousand metres make one kilometre. We use these agreed units because our own bodies do not agree with one another. If you measure the classroom in your footsteps and your friend measures it in hers, you will get two different answers for the very same room, and neither of you has made a mistake. A metre is the same metre for everybody, and that is what makes it possible to buy cloth, build a wall, or send a measurement to somebody far away.",
       "explain": "Length is measured in centimetres, metres and kilometres. One hundred centimetres make one metre, and one thousand metres make one kilometre. We use these agreed units because our own bodies do not agree with one another."
     },
     {
-      "id": "14-weight-is-measured-in-grams",
-      "title": "Weight is measured in grams,",
+      "id": "weight-units",
+      "title": "Weight Units",
       "text": "Weight is measured in grams, kilograms and quintals. One thousand grams make one kilogram. In villages and grain markets the quintal, which is one hundred kilograms, is a common unit, and one thousand kilograms make one tonne. A balance works by comparing two things. You put the goods on one pan and known weights on the other, and when the two pans hang level the weights are equal. A packet of biscuits is sold in grams, a bag of rice in kilograms, and a season's harvest of wheat is counted in quintals.",
       "explain": "Weight is measured in grams, kilograms and quintals. One thousand grams make one kilogram. In villages and grain markets the quintal, which is one hundred kilograms, is a common unit, and one thousand kilograms make one tonne."
     },
     {
-      "id": "15-capacity-is-how-much-a",
-      "title": "Capacity is how much a",
+      "id": "capacity-and-volume",
+      "title": "Capacity and Volume",
       "text": "Capacity is how much a container can hold, and it is measured in millilitres and litres. One thousand millilitres make one litre. A medicine spoon is marked in millilitres, milk and oil are sold by the litre, and a bucket at the well might hold ten or fifteen litres. Capacity is not the same thing as weight. A litre of oil and a litre of water take up exactly the same space, but the water is heavier than the oil. That is why oil floats on top when the two of them are poured into one glass.",
       "explain": "Capacity is how much a container can hold, and it is measured in millilitres and litres. One thousand millilitres make one litre. A medicine spoon is marked in millilitres, milk and oil are sold by the litre, and a bucket at the well might hold ten or fifteen litres."
     },
     {
-      "id": "16-money-in-india-is-counted",
-      "title": "Money in India is counted",
+      "id": "money-counting",
+      "title": "Money Counting",
       "text": "Money in India is counted in rupees and paise, and one hundred paise make one rupee. When you buy something, the change you should get back is the money you handed over minus the price of the thing. If you give a fifty rupee note for something that costs thirty two rupees, you should get eighteen rupees back, and you can work that out by counting up from thirty two to fifty. Amounts are written with the paise after a dot, so twelve rupees and fifty paise is written as twelve point five zero.",
       "explain": "Money in India is counted in rupees and paise, and one hundred paise make one rupee. When you buy something, the change you should get back is the money you handed over minus the price of the thing. If you give a fifty rupee note for something that costs thirty two rupees, you should get eighteen rupees back, and you can work that out by counting up from thirty two to fifty."
     },
     {
-      "id": "17-shopkeeping-is-arithmetic-you-can",
-      "title": "Shopkeeping is arithmetic you can",
+      "id": "profit-and-loss",
+      "title": "Profit and Loss",
       "text": "Shopkeeping is arithmetic you can hold in your hand. If tomatoes cost forty rupees a kilo and you buy two and a half kilos, the cost is forty plus forty plus twenty, which comes to one hundred rupees. If a shopkeeper pays eight hundred rupees for a crate and sells everything in it for nine hundred and fifty, then one hundred and fifty rupees is his profit, before he counts what he spent bringing it to the shop. Selling for less than it cost is a loss. Profit and loss are only addition and subtraction in formal clothes.",
       "explain": "Shopkeeping is arithmetic you can hold in your hand. If tomatoes cost forty rupees a kilo and you buy two and a half kilos, the cost is forty plus forty plus twenty, which comes to one hundred rupees. If a shopkeeper pays eight hundred rupees for a crate and sells everything in it for nine hundred and fifty, then one hundred and fifty rupees is his profit, before he counts what he spent bringing it to the shop."
     },
     {
-      "id": "18-time-is-counted-in-units",
-      "title": "Time is counted in units",
+      "id": "time-measurement",
+      "title": "Time Measurement",
       "text": "Time is counted in units that climb in sixties, which is unusual. Sixty seconds make one minute, sixty minutes make one hour, and twenty four hours make one day. On a round clock the short hand shows the hour and the long hand shows the minutes, and the long hand travels all the way round once every hour. Half past four means half an hour after four o'clock. Working out how long a journey took is subtraction. A bus that leaves at ten past two and arrives at quarter to four has taken one hour and thirty five minutes.",
       "explain": "Time is counted in units that climb in sixties, which is unusual. Sixty seconds make one minute, sixty minutes make one hour, and twenty four hours make one day. On a round clock the short hand shows the hour and the long hand shows the minutes, and the long hand travels all the way round once every hour."
     },
     {
-      "id": "19-perimeter-and-area-answer-two",
-      "title": "Perimeter and area answer two",
+      "id": "perimeter-and-area",
+      "title": "Perimeter and Area",
       "text": "Perimeter and area answer two different questions about the very same field. The perimeter is the distance all the way round the outside edge, which is what a farmer needs when he is buying wire for a fence. The area is the amount of ground inside, which is what decides how much seed to sow. For a rectangle you find the perimeter by adding all four sides, and the area by multiplying the length by the breadth. A field twenty metres long and ten metres wide has a perimeter of sixty metres and an area of two hundred square metres.",
       "explain": "Perimeter and area answer two different questions about the very same field. The perimeter is the distance all the way round the outside edge, which is what a farmer needs when he is buying wire for a fence. The area is the amount of ground inside, which is what decides how much seed to sow."
     },
     {
-      "id": "20-flat-shapes-are-named-by",
-      "title": "Flat shapes are named by",
+      "id": "shape-and-circles",
+      "title": "Shape and Circles",
       "text": "Flat shapes are named by their sides and their corners. A triangle has three straight sides. A square has four equal sides meeting at square corners, and a rectangle has four sides with each opposite pair equal. A circle has no sides at all. Every point on a circle lies exactly the same distance from its centre, and that distance is called the radius. A straight line drawn from one edge, through the centre, to the far edge is the diameter, and it is always twice the radius. That is exactly why a wheel rolls so smoothly.",
       "explain": "Flat shapes are named by their sides and their corners. A triangle has three straight sides. A square has four equal sides meeting at square corners, and a rectangle has four sides with each opposite pair equal."
     },
     {
-      "id": "21-even-numbers-are-the-ones",
-      "title": "Even numbers are the ones",
+      "id": "even-and-odd-numbers",
+      "title": "Even and Odd Numbers",
       "text": "Even numbers are the ones that can be split into two equal whole groups, and odd numbers are the ones with one left over. Any number ending in zero, two, four, six or eight is even. Factors are the numbers that divide into a number exactly, so the factors of twelve are one, two, three, four, six and twelve, because twelve laddus can be arranged in exactly those group sizes with none left over. Multiples run the other way. The multiples of three are three, six, nine and onwards, which is simply the three times table.",
       "explain": "Even numbers are the ones that can be split into two equal whole groups, and odd numbers are the ones with one left over. Any number ending in zero, two, four, six or eight is even. Factors are the numbers that divide into a number exactly, so the factors of twelve are one, two, three, four, six and twelve, because twelve laddus can be arranged in exactly those group sizes with none left over."
     },
     {
-      "id": "22-estimating-is-guessing-on-purpose",
-      "title": "Estimating is guessing on purpose,",
+      "id": "estimation-and-reasoning",
+      "title": "Estimation and Reasoning",
       "text": "Estimating is guessing on purpose, and it saves you from silly answers. Before working out thirty nine times twenty one exactly, notice that it is close to forty times twenty, which is eight hundred. So if your careful working gives you eighty two, something has gone wrong somewhere. Rounding to the nearest ten or hundred makes numbers easy to juggle in your head, and it is what people really do at a shop when they check whether a bill sounds about right. Estimate first, work it out properly second, then see whether the two agree.",
       "explain": "Estimating is guessing on purpose, and it saves you from silly answers. Before working out thirty nine times twenty one exactly, notice that it is close to forty times twenty, which is eight hundred. So if your careful working gives you eighty two, something has gone wrong somewhere."
     },
     {
-      "id": "23-a-shape-is-symmetrical-when",
-      "title": "A shape is symmetrical when",
+      "id": "symmetry",
+      "title": "Symmetry",
       "text": "A shape is symmetrical when you can fold it so that the two halves lie exactly on top of each other, and the line of the fold is called the line of symmetry. A butterfly's wings, a rangoli pattern at the doorstep, many leaves and most temple doorways are built this way. Some shapes have more than one such line. A square has four, because you can fold it down the middle in two directions and across both of its diagonals. A circle has more lines of symmetry than anyone could count, since any fold through the centre works.",
       "explain": "A shape is symmetrical when you can fold it so that the two halves lie exactly on top of each other, and the line of the fold is called the line of symmetry. A butterfly's wings, a rangoli pattern at the doorstep, many leaves and most temple doorways are built this way. Some shapes have more than one such line."
     }

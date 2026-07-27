@@ -123,15 +123,24 @@ class Pack:
     # (`tools/eval_retrieval.py --sweep`), not by eye — the bands overlap, so
     # no floor is clean and the knee is what matters:
     #
-    #   floor  0.55 -> recall 93%, false positives 71%
-    #   floor  0.58 -> recall 87%, false positives 29%   <- here
-    #   floor  0.65 -> recall 60%, false positives  0%
+    # Re-swept at 143 chunks / 8 subjects (it was tuned at 8 chunks, and the
+    # knee moved — which is why the sweep exists):
     #
-    # Biased slightly toward recall: a miss means the learner gets the small
-    # model's unaided knowledge instead of our curated material, while a loose
-    # hit still carries the "answer from your own knowledge where this falls
-    # short" instruction (prompts.GROUNDING). Re-sweep when packs are added.
-    MIN_SIMILARITY = 0.58
+    #   floor  0.55 -> recall 76%, false positives 57%
+    #   floor  0.58 -> recall 75%, false positives 32%
+    #   floor  0.62 -> recall 74%, false positives 11%   <- here
+    #   floor  0.65 -> recall 70%, false positives  5%
+    #
+    # 0.62 buys a 3x cut in false positives for one point of recall. Note
+    # recall now plateaus around 76% however loose the floor gets, so the
+    # remaining misses are a RANKING problem, not a threshold one — the right
+    # chunk is not winning, and no floor fixes that.
+    #
+    # Still biased toward recall over precision: a miss hands the question to
+    # the 0.6B's unaided knowledge, while a loose hit still carries the
+    # "answer from your own knowledge where this falls short" instruction
+    # (prompts.GROUNDING). Re-sweep whenever the library grows.
+    MIN_SIMILARITY = 0.62
 
     # Added to a chunk's similarity when the question also shares a title term
     # or several content words. Lexical evidence is precise where embeddings
