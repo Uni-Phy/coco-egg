@@ -65,6 +65,10 @@ DEFAULTS = {
         # lands in llama-server's cached prefix instead of being re-prefilled.
         # 0 disables it. See tutor/history.py.
         "history_turns": 3,
+        # How many retrieved chunks are quoted in full. The rest are named
+        # only. Three full chunks cost ~422 prompt tokens (~2.8s of a ~3.5s
+        # answer) and were mostly near-ties of the same topic. See _material().
+        "grounding_full_chunks": 1,
         # Sentence-embedding server for retrieval. llama-embed docker service
         # by default; override to 127.0.0.1:8082 for `make serve-embed`.
         # Unreachable => lexical fallback (see tutor/embed.py).

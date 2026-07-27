@@ -55,6 +55,10 @@ class History:
             out.append({"role": "assistant", "content": reply})
         return out
 
+    def last_question(self) -> str:
+        """The most recent question, for resolving what a follow-up refers to."""
+        return self._turns[-1][0] if self._turns else ""
+
     def clear(self) -> None:
         """Forget the conversation. A new learner must not inherit the last one."""
         self._turns.clear()

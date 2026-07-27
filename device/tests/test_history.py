@@ -91,3 +91,44 @@ def test_forget_clears_between_learners(cfg):
     llama_client.forget()
     messages, _ = llama_client.build_messages("fresh", cfg)
     assert [m["role"] for m in messages] == ["system", "user"]
+
+
+def test_followup_borrows_the_previous_subject(cfg):
+    """"why do we need it" has no topic; on the device it retrieved ENERGY
+    after a friction question, because the words carry nothing."""
+    llama_client.remember("what is friction", "It resists sliding.", cfg)
+    assert llama_client.retrieval_query("why do we need it").startswith("what is friction")
+
+
+def test_a_real_topic_change_is_not_dragged_back(cfg):
+    """A standalone question must not be blended with the previous subject."""
+    llama_client.remember("what is friction", "It resists sliding.", cfg)
+    assert llama_client.retrieval_query("what is a fraction") == "what is a fraction"
+
+
+def test_no_history_means_no_rewrite():
+    assert llama_client.retrieval_query("why do we need it") == "why do we need it"
+
+
+def test_only_the_top_chunk_is_quoted_in_full(cfg):
+    """Runners-up are named, not quoted — that is the latency lever."""
+    hits = [{"title": "Friction", "text": "A" * 400},
+            {"title": "Gravity", "text": "B" * 400},
+            {"title": "Levers", "text": "C" * 400}]
+    material = llama_client._material(hits, cfg)
+    assert "A" * 400 in material
+    assert "B" * 400 not in material
+    assert "Gravity" in material and "Levers" in material   # still named
+
+
+@pytest.mark.parametrize("question, rewritten", [
+    ("why do we need it", True),        # bare pronoun
+    ("tell me more", True),             # nothing to search on at all
+    ("what is a fraction", False),      # one content word, but standalone
+    ("what is gravity", False),         # the commonest tutor question shape
+    ("how does a lever work", False),
+])
+def test_only_context_dependent_questions_are_rewritten(cfg, question, rewritten):
+    llama_client.remember("what is friction", "It resists sliding.", cfg)
+    q = llama_client.retrieval_query(question)
+    assert (q != question) is rewritten

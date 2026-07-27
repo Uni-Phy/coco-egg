@@ -21,7 +21,7 @@ import requests
 from .. import events
 from . import profile
 from .history import DEFAULT_TURNS, History
-from .pack import Pack
+from .pack import Pack, _content_tokens
 from .prompts import GROUNDING, LEARNER, SYSTEM, UNKNOWN
 
 _SENTENCE_END = re.compile(r"(?<=[.!?])\s+")
@@ -35,6 +35,10 @@ _EMOJI = re.compile(
     "[\U0001F000-\U0001FAFF\U00002190-\U000021FF\U00002300-\U000027BF"
     "\U00002B00-\U00002BFF\U0000FE00-\U0000FE0F\U0001F1E6-\U0001F1FF]+"
 )
+
+# Bare referring words. A question built on one of these is pointing at the
+# previous turn rather than naming its own subject.
+_PRONOUN = re.compile(r"\b(it|its|that|this|they|them|their|those|these|one)\b", re.I)
 
 _pack: Pack | None = None
 _history = History(DEFAULT_TURNS)
@@ -65,6 +69,35 @@ def _static_system(cfg: dict) -> str:
     return system
 
 
+def retrieval_query(question: str) -> str:
+    """What to search on — a follow-up has no topic of its own.
+
+    Adding conversation memory created this gap: the tutor remembered the
+    exchange but retrieval did not. Measured on the device, after "what is
+    friction" the follow-up "why do we need it" retrieved the ENERGY lesson,
+    because the words "why do we need it" carry no topic at all. The answer
+    only came out right because history supplied the referent.
+
+    So a question that cannot stand alone borrows the last one's subject.
+    Deliberately narrow: only when the question leans on a bare pronoun or has
+    almost no content words of its own. A real topic change ("what is a
+    fraction") must not be dragged back to the previous subject, which is what
+    blending every question with its predecessor would do.
+    """
+    if not len(_history):
+        return question
+    # A bare pronoun ("why do we need IT"), or nothing to search on at all
+    # ("tell me more"). NOT "few content words": "what is a fraction" has
+    # exactly one after stopwords, and "what is X" is the commonest shape a
+    # tutor question takes — treating those as follow-ups would drag every
+    # new topic back to the previous one.
+    leans_on_context = bool(_PRONOUN.search(question)) or not _content_tokens(question)
+    if not leans_on_context:
+        return question
+    previous = _history.last_question()
+    return f"{previous} {question}" if previous else question
+
+
 def _retrieve(question: str, cfg: dict) -> list[dict]:
     """Pack chunks for this question — semantic, falling back to lexical.
 
@@ -75,11 +108,33 @@ def _retrieve(question: str, cfg: dict) -> list[dict]:
     pack = _get_pack(cfg)
     if not pack:
         return []
-    hits = pack.retrieve_semantic(question, cfg)
+    query = retrieval_query(question) if cfg["tutor"].get("history_turns", 0) else question
+    hits = pack.retrieve_semantic(query, cfg)
     if hits is None:
         events.emit("degraded", component="embed", fallback="lexical")
-        hits = pack.retrieve(question)
+        hits = pack.retrieve(query)
     return hits
+
+
+def _material(hits: list[dict], cfg: dict) -> str:
+    """Retrieved lessons as prompt text — the top one in full, the rest named.
+
+    This is the whole latency budget. Injecting three chunks verbatim came to
+    ~422 tokens, about 2.8s of a ~3.5s answer at 149 tok/s, and it is the
+    single largest cost left in the loop. The extra chunks were rarely doing
+    the work either: the relative cut in retrieve_semantic() only keeps
+    near-ties, so runners-up are usually the same topic said again.
+
+    Naming them instead of quoting them keeps the option open — the tutor can
+    still say "we also have a lesson on X" — at a few tokens rather than a few
+    hundred. Raise `grounding_full_chunks` if a subject genuinely needs two.
+    """
+    full = max(1, cfg["tutor"].get("grounding_full_chunks", 1))
+    parts = [f"{c['title']}: {c['text']}" for c in hits[:full]]
+    also = [c["title"] for c in hits[full:]]
+    if also:
+        parts.append("Related lessons available: " + ", ".join(also) + ".")
+    return "\n\n".join(parts)
 
 
 def build_messages(question: str, cfg: dict) -> tuple[list[dict], list[dict]]:
@@ -100,8 +155,7 @@ def build_messages(question: str, cfg: dict) -> tuple[list[dict], list[dict]]:
     hits = _retrieve(question, cfg)
     turn = question
     if hits:
-        material = "\n\n".join(f"{c['title']}: {c['text']}" for c in hits)
-        turn = GROUNDING.format(material=material).strip() + "\n\n" + question
+        turn = GROUNDING.format(material=_material(hits, cfg)).strip() + "\n\n" + question
     prior = _history.messages() if cfg["tutor"].get("history_turns", 0) else []
     return ([{"role": "system", "content": _static_system(cfg)}]
             + prior
