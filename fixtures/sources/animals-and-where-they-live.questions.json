@@ -1,0 +1,24 @@
+{
+  "subject": "Animals and where they live",
+  "should_retrieve": [
+    { "q": "why do different animals live in different places", "topic": "habitat" },
+    { "q": "what is inside a camel's hump", "topic": "camel-in-the-desert" },
+    { "q": "how do fish get air under the water", "topic": "fish-and-gills" },
+    { "q": "why do some birds have a long pointy mouth and some a short fat one", "topic": "birds-beaks" },
+    { "q": "how come birds can fly and I cannot", "topic": "birds-built-for-flight" },
+    { "q": "does a baby frog look like a frog", "topic": "frogs-and-tadpoles" },
+    { "q": "are snakes wet and slimy when you touch them", "topic": "reptiles-dry-scaly-skin" },
+    { "q": "who eats who in the jungle", "topic": "food-chain" },
+    { "q": "what happens to the leaves that fall on the ground", "topic": "decomposers" },
+    { "q": "is a whale a very big fish", "topic": "mammals" },
+    { "q": "how do animals hide so nobody eats them", "topic": "camouflage" },
+    { "q": "where do the birds go when it gets cold", "topic": "migration" }
+  ],
+  "should_not_retrieve": [
+    "what did I do yesterday",
+    "is my uncle coming home tomorrow",
+    "who took my notebook",
+    "sing me a film song",
+    "are you a robot"
+  ]
+}

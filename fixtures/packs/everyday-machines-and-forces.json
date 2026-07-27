@@ -1,0 +1,227 @@
+{
+  "topic": "Everyday machines and forces",
+  "lesson": [
+    {
+      "id": "00-a-force-is-simply-a",
+      "goal": "Understand A force is simply a."
+    },
+    {
+      "id": "01-friction-is-the-force-that",
+      "goal": "Understand Friction is the force that."
+    },
+    {
+      "id": "02-friction-can-be-increased-or",
+      "goal": "Understand Friction can be increased or."
+    },
+    {
+      "id": "03-gravity-is-the-pull-of",
+      "goal": "Understand Gravity is the pull of."
+    },
+    {
+      "id": "04-simple-machines-are-tools-that",
+      "goal": "Understand Simple machines are tools that."
+    },
+    {
+      "id": "05-a-lever-is-a-stiff",
+      "goal": "Understand A lever is a stiff."
+    },
+    {
+      "id": "06-levers-are-everywhere-once-you",
+      "goal": "Understand Levers are everywhere once you."
+    },
+    {
+      "id": "07-a-pulley-is-a-wheel",
+      "goal": "Understand A pulley is a wheel."
+    },
+    {
+      "id": "08-the-wheel-and-axle-turned",
+      "goal": "Understand The wheel and axle turned."
+    },
+    {
+      "id": "09-a-ramp-is-a-simple",
+      "goal": "Understand A ramp is a simple."
+    },
+    {
+      "id": "10-a-wedge-is-really-a",
+      "goal": "Understand A wedge is really a."
+    },
+    {
+      "id": "11-machines-never-create-energy-out",
+      "goal": "Understand Machines never create energy out."
+    },
+    {
+      "id": "12-magnets-attract-iron-and-they",
+      "goal": "Understand Magnets attract iron, and they."
+    },
+    {
+      "id": "13-every-magnet-has-two-poles",
+      "goal": "Understand Every magnet has two poles,."
+    },
+    {
+      "id": "14-a-compass-is-a-small",
+      "goal": "Understand A compass is a small."
+    },
+    {
+      "id": "15-magnets-can-be-made-and",
+      "goal": "Understand Magnets can be made and."
+    },
+    {
+      "id": "16-an-electric-circuit-is-a",
+      "goal": "Understand An electric circuit is a."
+    },
+    {
+      "id": "17-conductors-let-electricity-pass-through",
+      "goal": "Understand Conductors let electricity pass through."
+    },
+    {
+      "id": "18-electricity-from-the-wall-is",
+      "goal": "Understand Electricity from the wall is."
+    },
+    {
+      "id": "19-an-electromagnet-is-a-magnet",
+      "goal": "Understand An electromagnet is a magnet."
+    },
+    {
+      "id": "20-balance-depends-on-where-the",
+      "goal": "Understand Balance depends on where the."
+    },
+    {
+      "id": "21-the-sun-is-the-original",
+      "goal": "Understand The sun is the original."
+    }
+  ],
+  "chunks": [
+    {
+      "id": "00-a-force-is-simply-a",
+      "title": "A force is simply a",
+      "text": "A force is simply a push or a pull. You cannot see a force, only what it does. A force can start something moving, stop it, make it go faster or slower, or change the direction it is going in. A force can also change the shape of a thing, which is what happens when you squeeze dough or bend a wire. When you kick a ball you push it, when you draw water from a well you pull the rope, and when you sit on a chair you push down on it while it pushes right back up on you.",
+      "explain": "A force is simply a push or a pull. You cannot see a force, only what it does. A force can start something moving, stop it, make it go faster or slower, or change the direction it is going in."
+    },
+    {
+      "id": "01-friction-is-the-force-that",
+      "title": "Friction is the force that",
+      "text": "Friction is the force that resists sliding whenever two surfaces rub together. It comes from the roughness of the surfaces, so a stone floor grips more than a polished one, and a wet floor grips very little, which is exactly why people slip on it. Friction is often useful. It is what lets you walk without your feet skidding, what lets brakes stop a cycle, and what lets your fingers hold a pencil. It is also a nuisance, because it slows machines down and wears them out, and it turns useful energy into wasted heat.",
+      "explain": "Friction is the force that resists sliding whenever two surfaces rub together. It comes from the roughness of the surfaces, so a stone floor grips more than a polished one, and a wet floor grips very little, which is exactly why people slip on it. Friction is often useful."
+    },
+    {
+      "id": "02-friction-can-be-increased-or",
+      "title": "Friction can be increased or",
+      "text": "Friction can be increased or reduced depending on what you want. To increase it, surfaces are made rougher. Tyres and the soles of shoes have grooves cut into them for grip, and the handle of a tool is roughened so it does not slip out of a wet hand. To reduce it, surfaces are made smoother, or oil or grease is put between them, which is why a squeaking hinge or a cycle chain is oiled. The neatest trick of all is to stop sliding altogether and roll instead, because rolling friction is far smaller.",
+      "explain": "Friction can be increased or reduced depending on what you want. To increase it, surfaces are made rougher. Tyres and the soles of shoes have grooves cut into them for grip, and the handle of a tool is roughened so it does not slip out of a wet hand."
+    },
+    {
+      "id": "03-gravity-is-the-pull-of",
+      "title": "Gravity is the pull of",
+      "text": "Gravity is the pull of the earth on everything near it, and it is why things fall down instead of drifting away. What we call the weight of an object is really the strength of that pull on it. Gravity acts on everything, all the time, whether the object is moving or resting on a table. Many people think a heavy stone must fall faster than a light one. Drop a big stone and a small stone together and they land at practically the same moment. A sheet of paper falls slowly only because the air pushes against its wide surface.",
+      "explain": "Gravity is the pull of the earth on everything near it, and it is why things fall down instead of drifting away. What we call the weight of an object is really the strength of that pull on it. Gravity acts on everything, all the time, whether the object is moving or resting on a table."
+    },
+    {
+      "id": "04-simple-machines-are-tools-that",
+      "title": "Simple machines are tools that",
+      "text": "Simple machines are tools that make a job easier, and there are only a handful of basic kinds. A lever, a pulley, a wheel with its axle, a ramp, a wedge and a screw are the whole family, and every complicated machine is made out of some combination of them. What a simple machine does is let you use a smaller force, or use your force in a more convenient direction. What it can never do is create energy from nothing. If you use less force, you must move it through a longer distance to make up for it.",
+      "explain": "Simple machines are tools that make a job easier, and there are only a handful of basic kinds. A lever, a pulley, a wheel with its axle, a ramp, a wedge and a screw are the whole family, and every complicated machine is made out of some combination of them. What a simple machine does is let you use a smaller force, or use your force in a more convenient direction."
+    },
+    {
+      "id": "05-a-lever-is-a-stiff",
+      "title": "A lever is a stiff",
+      "text": "A lever is a stiff bar that turns about a fixed point, and that point is called the fulcrum. Push down on one end and the other end lifts. To shift a heavy stone out of a field, a farmer slides a strong pole under it, rests the pole on a smaller stone near the load, and pushes down on the far end. The nearer the fulcrum sits to the load, the less force is needed, though the far end then has to travel further. This is the oldest way people have had of lifting things far heavier than themselves.",
+      "explain": "A lever is a stiff bar that turns about a fixed point, and that point is called the fulcrum. Push down on one end and the other end lifts. To shift a heavy stone out of a field, a farmer slides a strong pole under it, rests the pole on a smaller stone near the load, and pushes down on the far end."
+    },
+    {
+      "id": "06-levers-are-everywhere-once-you",
+      "title": "Levers are everywhere once you",
+      "text": "Levers are everywhere once you start looking for them. A see saw has its fulcrum in the middle. A pair of scissors is two levers joined at a pin, and so are pliers and a nutcracker. A wheelbarrow has its fulcrum at the wheel, with the load in the middle and your hands lifting at the far end, which is why a barrow feels lighter than carrying the same load. The handle of a village hand pump is a lever. So is your own forearm, with the elbow acting as the fulcrum and the muscle providing the effort.",
+      "explain": "Levers are everywhere once you start looking for them. A see saw has its fulcrum in the middle. A pair of scissors is two levers joined at a pin, and so are pliers and a nutcracker."
+    },
+    {
+      "id": "07-a-pulley-is-a-wheel",
+      "title": "A pulley is a wheel",
+      "text": "A pulley is a wheel with a groove in its rim, with a rope running over it. The pulley over a village well is fixed in place, and what it changes is the direction of your effort. Instead of leaning into the well and hauling the bucket straight up, you stand safely on the ground and pull downwards, using your own weight to help. A single fixed pulley does not reduce the force needed, only makes it easier to apply. Using several pulleys together, with the rope threaded between them, does share the load and reduce the force.",
+      "explain": "A pulley is a wheel with a groove in its rim, with a rope running over it. The pulley over a village well is fixed in place, and what it changes is the direction of your effort. Instead of leaning into the well and hauling the bucket straight up, you stand safely on the ground and pull downwards, using your own weight to help."
+    },
+    {
+      "id": "08-the-wheel-and-axle-turned",
+      "title": "The wheel and axle turned",
+      "text": "The wheel and axle turned out to be one of the most useful inventions ever made, because rolling is so much easier than dragging. A heavy sack dragged along the ground fights friction the whole way, while the same sack on a cart rolls with far less resistance. The wheel turns on an axle through its centre, and greasing that axle cuts the friction further still. A bullock cart, a bicycle, a potter's wheel and a water wheel all use the same idea. Wheels work best on a hard smooth surface, which is why roads matter as much as wheels do.",
+      "explain": "The wheel and axle turned out to be one of the most useful inventions ever made, because rolling is so much easier than dragging. A heavy sack dragged along the ground fights friction the whole way, while the same sack on a cart rolls with far less resistance. The wheel turns on an axle through its centre, and greasing that axle cuts the friction further still."
+    },
+    {
+      "id": "09-a-ramp-is-a-simple",
+      "title": "A ramp is a simple",
+      "text": "A ramp is a simple machine, even though it has no moving parts at all. Rolling a heavy drum up a plank onto a cart is far easier than lifting it straight up, because the force is spread over a longer distance. The gentler the slope, the less force is needed and the further you must travel. Mountain roads zigzag back and forth for exactly this reason, since a vehicle cannot climb straight up a steep hillside but can manage a long gentle slope. A staircase is a ramp cut into steps.",
+      "explain": "A ramp is a simple machine, even though it has no moving parts at all. Rolling a heavy drum up a plank onto a cart is far easier than lifting it straight up, because the force is spread over a longer distance. The gentler the slope, the less force is needed and the further you must travel."
+    },
+    {
+      "id": "10-a-wedge-is-really-a",
+      "title": "A wedge is really a",
+      "text": "A wedge is really a moving ramp, and it splits or cuts things apart. The blade of a knife, the head of an axe, a chisel, a nail and even your front teeth are wedges. You push the wedge in one direction, and its sloping sides push outwards very hard on either side, which is what forces a log apart. A screw is another cousin of the ramp. It is a ramp wrapped around a rod, and turning it many times round drives it a short way in, trading many easy turns for a powerful grip.",
+      "explain": "A wedge is really a moving ramp, and it splits or cuts things apart. The blade of a knife, the head of an axe, a chisel, a nail and even your front teeth are wedges. You push the wedge in one direction, and its sloping sides push outwards very hard on either side, which is what forces a log apart."
+    },
+    {
+      "id": "11-machines-never-create-energy-out",
+      "title": "Machines never create energy out",
+      "text": "Machines never create energy out of nothing, and that is worth understanding properly. Whatever force you save, you pay back in distance. Lifting a load a metre straight up with a rope needs a large force over a short distance. Pushing the same load up a long gentle ramp needs a much smaller force, but you push it much further to get to the same height. The total work is about the same, and a little more in practice because friction always takes its share. Machines rearrange effort. They do not manufacture it.",
+      "explain": "Machines never create energy out of nothing, and that is worth understanding properly. Whatever force you save, you pay back in distance. Lifting a load a metre straight up with a rope needs a large force over a short distance."
+    },
+    {
+      "id": "12-magnets-attract-iron-and-they",
+      "title": "Magnets attract iron, and they",
+      "text": "Magnets attract iron, and they do not attract every metal, which trips up nearly everyone. A magnet will pick up an iron nail, and it works on steel because steel is mostly iron. It also works on nickel and cobalt. But an aluminium spoon, a copper wire, a silver coin and a brass lock are all metal and a magnet ignores every one of them. Wood, plastic, paper, cloth and glass are not attracted either. The quickest way to test what a thing is made of is often just to hold a magnet against it.",
+      "explain": "Magnets attract iron, and they do not attract every metal, which trips up nearly everyone. A magnet will pick up an iron nail, and it works on steel because steel is mostly iron. It also works on nickel and cobalt."
+    },
+    {
+      "id": "13-every-magnet-has-two-poles",
+      "title": "Every magnet has two poles,",
+      "text": "Every magnet has two poles, and they behave in opposite ways. Hang a bar magnet so it can swing freely and one end will settle pointing roughly north. That end is the north pole and the other is the south pole. Bring two magnets together and unlike poles pull towards each other while like poles push apart, so north pushes north away. The pull is strongest at the poles and weakest in the middle. And if you cut a magnet in half you do not get one north piece and one south piece. You get two complete smaller magnets.",
+      "explain": "Every magnet has two poles, and they behave in opposite ways. Hang a bar magnet so it can swing freely and one end will settle pointing roughly north. That end is the north pole and the other is the south pole."
+    },
+    {
+      "id": "14-a-compass-is-a-small",
+      "title": "A compass is a small",
+      "text": "A compass is a small magnet balanced so that it can turn freely, and it works because the earth itself behaves like a giant magnet. Wherever you take it, the needle swings round until it lines up roughly north and south. Sailors, travellers and surveyors relied on this for centuries, and it works equally well at night, in fog, and under cloud, when no star is visible. Keep a compass away from iron objects and away from other magnets, because anything magnetic nearby will pull the needle off the earth's much weaker influence.",
+      "explain": "A compass is a small magnet balanced so that it can turn freely, and it works because the earth itself behaves like a giant magnet. Wherever you take it, the needle swings round until it lines up roughly north and south. Sailors, travellers and surveyors relied on this for centuries, and it works equally well at night, in fog, and under cloud, when no star is visible."
+    },
+    {
+      "id": "15-magnets-can-be-made-and",
+      "title": "Magnets can be made and",
+      "text": "Magnets can be made and they can be spoilt. Stroke a steel needle many times in the same direction with one pole of a magnet and the needle becomes a weak magnet itself, which floated on a leaf in a bowl of water makes a working compass. Magnets lose their strength if they are hammered, dropped repeatedly or heated strongly. They are best stored in pairs with opposite poles facing, and with a small piece of iron laid across the ends, so that the magnetism has a path to run round instead of leaking away.",
+      "explain": "Magnets can be made and they can be spoilt. Stroke a steel needle many times in the same direction with one pole of a magnet and the needle becomes a weak magnet itself, which floated on a leaf in a bowl of water makes a working compass. Magnets lose their strength if they are hammered, dropped repeatedly or heated strongly."
+    },
+    {
+      "id": "16-an-electric-circuit-is-a",
+      "title": "An electric circuit is a",
+      "text": "An electric circuit is a complete loop for electricity to travel round. A torch has a cell, some metal contacts and a bulb, and current flows out of one end of the cell, through the bulb and back into the other end. The word circuit means a circle, and the loop has to be unbroken. If a wire comes loose, or the bulb is not screwed in properly, or the cell is put in the wrong way round, the loop is broken and nothing lights up at all. A switch is just a deliberate gap that you can close and open.",
+      "explain": "An electric circuit is a complete loop for electricity to travel round. A torch has a cell, some metal contacts and a bulb, and current flows out of one end of the cell, through the bulb and back into the other end. The word circuit means a circle, and the loop has to be unbroken."
+    },
+    {
+      "id": "17-conductors-let-electricity-pass-through",
+      "title": "Conductors let electricity pass through",
+      "text": "Conductors let electricity pass through them, and insulators do not. Metals such as copper and aluminium are good conductors, and copper is what most wires are made of. Rubber, plastic, dry wood, glass and dry cloth are insulators, and they block the flow. That is why a wire is a metal thread wrapped in a plastic coat. The metal carries the current and the plastic keeps it from reaching your hand. Water with salts dissolved in it also conducts, and your skin conducts much better when it is wet, which is why wet hands and electricity are so dangerous.",
+      "explain": "Conductors let electricity pass through them, and insulators do not. Metals such as copper and aluminium are good conductors, and copper is what most wires are made of. Rubber, plastic, dry wood, glass and dry cloth are insulators, and they block the flow."
+    },
+    {
+      "id": "18-electricity-from-the-wall-is",
+      "title": "Electricity from the wall is",
+      "text": "Electricity from the wall is dangerous and needs real respect. The cells in a torch are weak enough to be safe to handle, but the supply in the sockets of a house is many times stronger and can injure or kill. Never poke anything into a socket. Never touch a switch or a plug with wet hands or while standing in water. Never touch a wire whose covering is torn, and never go near a wire that has fallen from a pole, even if it looks dead. Tell an adult instead. There is no safe way to check by touching.",
+      "explain": "Electricity from the wall is dangerous and needs real respect. The cells in a torch are weak enough to be safe to handle, but the supply in the sockets of a house is many times stronger and can injure or kill. Never poke anything into a socket."
+    },
+    {
+      "id": "19-an-electromagnet-is-a-magnet",
+      "title": "An electromagnet is a magnet",
+      "text": "An electromagnet is a magnet you can switch on and off. Wind a length of insulated wire many times around an iron nail and connect the ends to a cell, and the nail becomes a magnet that will pick up pins. Disconnect the cell and it drops them, because the magnetism stops the moment the current does. More turns of wire and a stronger current make it stronger. Huge electromagnets on cranes lift scrap iron and then release it, and small ones make electric bells ring and make the motors in fans and pumps turn.",
+      "explain": "An electromagnet is a magnet you can switch on and off. Wind a length of insulated wire many times around an iron nail and connect the ends to a cell, and the nail becomes a magnet that will pick up pins. Disconnect the cell and it drops them, because the magnetism stops the moment the current does."
+    },
+    {
+      "id": "20-balance-depends-on-where-the",
+      "title": "Balance depends on where the",
+      "text": "Balance depends on where the weight of a thing sits. An object stays upright as long as its weight is supported over its base, and it topples when the weight moves out past the edge. That is why a wide base is steadier than a narrow one, and why a low load is safer than a tall one. A bullock cart piled high with straw tips easily on a slope, while the same cart loaded low does not. A woman carrying a pot on her head keeps her body straight underneath it for the same reason.",
+      "explain": "Balance depends on where the weight of a thing sits. An object stays upright as long as its weight is supported over its base, and it topples when the weight moves out past the edge. That is why a wide base is steadier than a narrow one, and why a low load is safer than a tall one."
+    },
+    {
+      "id": "21-the-sun-is-the-original",
+      "title": "The sun is the original",
+      "text": "The sun is the original source of nearly all the energy we use. Solar panels turn sunlight straight into electricity, and they now run pumps, street lights and homes in villages far from any electric line. Wind turbines are pushed round by moving air, and that air is moving because the sun heats the ground unevenly. Water in a river was lifted into the clouds by the sun's heat before it ever ran downhill through a turbine. Even coal and firewood are stored sunlight, caught by plants and held for a very long time.",
+      "explain": "The sun is the original source of nearly all the energy we use. Solar panels turn sunlight straight into electricity, and they now run pumps, street lights and homes in villages far from any electric line. Wind turbines are pushed round by moving air, and that air is moving because the sun heats the ground unevenly."
+    }
+  ]
+}

@@ -26,6 +26,18 @@ _WORD = re.compile(r"\w+", re.UNICODE)
 # chunk titles ("The water cycle", "Why plants do not eat soil"), where the
 # title boost in retrieve() lets them carry a match on their own — that is how
 # "why is the sky blue" used to retrieve the soil lesson.
+#
+# The bare letters are contraction and possessive debris: `\w+` splits
+# "bird's" into "bird" + "s", and an "s" landing in a 3x-weighted title made
+# ANY question containing a possessive match ANY chunk whose title had one
+# ("what is my father's job" topic-matched "A bird's nest"). Filtering the
+# question side is enough — an unshared token cannot score.
+#
+# The verbs are the other half of the same trap: `_is_topic_match` accepts a
+# single shared token when it hits the title, so a workaday word like "have"
+# was enough to pull in a whole lesson. Deliberately NOT here: number, time,
+# name, class — those are genuine topics in a maths or civics pack.
+#
 # Launch language is English (spec §1); a second language needs its own set.
 _STOPWORDS = frozenset("""
 a an the of to in on at by for and or but if then than as is are was were be
@@ -33,6 +45,12 @@ been being do does did can could will would should i you he she it they we me
 my your our their them us this that these those what why how when where who
 whom whose not no yes with from about into over under more most some any each
 both few other such own so very just
+
+s t d m ll re ve
+
+have has had get got come comes go goes make makes made put puts want wants
+need needs use uses used give gives take takes tell tells know knows say says
+said think thinks called call calls something anything nothing
 """.split())
 
 

@@ -4,7 +4,7 @@ import pytest
 
 from coco_egg import config
 from coco_egg.tutor import llama_client, prompts
-from coco_egg.tutor.pack import Pack, _content_tokens
+from coco_egg.tutor.pack import Pack, _content_tokens, _is_topic_match, _tokens
 
 PACKS_DIR = pathlib.Path(__file__).parents[2] / "fixtures" / "packs"
 PACK_PATH = PACKS_DIR / "science-maths.json"
@@ -59,7 +59,7 @@ def test_library_merges_subjects_into_one_corpus(library):
     ("Who was Ashoka?", "Civics"),
     ("What is a Gram Panchayat?", "Civics"),
     ("What is photosynthesis?", "Science"),
-    ("What are fractions?", "Science"),
+    ("What are fractions?", "Maths"),   # dedicated course beats the old sampler
 ])
 def test_retrieval_routes_across_subjects(library, question, subject_word):
     """A question lands in the right subject once several packs are loaded.
@@ -73,20 +73,39 @@ def test_retrieval_routes_across_subjects(library, question, subject_word):
     assert subject_word in hits[0]["subject"]
 
 
-@pytest.mark.parametrize("question, incidental_word", [
-    ("What did I have for breakfast?", "have"),   # fractions lesson says "you have"
-    ("Why is the sky blue?", "sky"),              # water cycle says "earth and the sky"
+@pytest.mark.parametrize("question", [
+    "What did I have for breakfast?",   # fractions lesson says "you have"
+    "where did I leave my slippers",    # nothing in the library answers this
 ])
-def test_one_incidental_word_is_not_a_topic_match(library, question, incidental_word):
+def test_one_incidental_word_is_not_a_topic_match(library, question):
     """Sharing a single body word is not evidence a lesson is relevant.
 
-    Both of these grounded wrongly before the topic-match rule, and the 0.6B
-    then built its whole answer from the bad chunk — claiming it ate a roti,
-    and explaining a blue sky with evaporation. Regression-guarding the exact
-    failures, since they get worse the thinner the model gets.
+    Both of these grounded wrongly once, and the 0.6B then built its whole
+    answer from the bad chunk — claiming it ate a roti, and explaining a blue
+    sky with evaporation. Asserts the outcome rather than the mechanism: two
+    layers now stop them: "have" is a stopword, and neither question shares a
+    topic term with any lesson. ("Why is the sky blue" used to live here; the
+    sky course now teaches it, so it is a hit rather than a false positive.)
     """
-    assert incidental_word in _content_tokens(question)   # the trap still exists
     assert library.retrieve(question) == []
+
+
+@pytest.mark.parametrize("question, chunk_title", [
+    ("what is my father's job", "A bird's nest"),      # both split to a bare "s"
+    ("where do we keep the goat's feed", "A bird's nest"),
+])
+def test_possessive_debris_is_not_a_match(question, chunk_title):
+    """`\\w+` splits "bird's" into "bird" + "s", and "s" in a title scored 3x.
+
+    That made ANY question with a possessive topic-match ANY chunk whose title
+    had one. Found while drafting course material, where titles like "A bird's
+    nest" are natural to write.
+    """
+    chunk = {"_title_tokens": set(_tokens(chunk_title)),
+             "_tokens": set(_tokens(chunk_title + " is built high in a tree"))}
+    shared = [t for t in _content_tokens(question) if t in chunk["_tokens"]]
+    assert "s" not in shared
+    assert not _is_topic_match(shared, chunk)
 
 
 def test_missing_pack_path_is_skipped_not_fatal(tmp_path):

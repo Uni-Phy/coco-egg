@@ -1,0 +1,24 @@
+{
+  "subject": "Everyday machines and forces",
+  "should_retrieve": [
+    { "q": "why do I slip on a wet floor", "topic": "friction" },
+    { "q": "why do people put grease on a squeaky wheel", "topic": "increasing-and-reducing-friction" },
+    { "q": "why do things always come down when I throw them up", "topic": "gravity" },
+    { "q": "does a big stone come down faster than a small one", "topic": "gravity" },
+    { "q": "how do people move a really heavy stone with a stick", "topic": "lever" },
+    { "q": "what is that wheel on top of the well for", "topic": "pulley" },
+    { "q": "why is it easier to pull a cart than to drag a heavy sack", "topic": "wheel-and-axle" },
+    { "q": "why do roads on a hill go this way and that instead of straight up", "topic": "ramp-or-inclined-plane" },
+    { "q": "will a magnet stick to anything made of metal", "topic": "what-magnets-attract" },
+    { "q": "why do two magnets push each other away sometimes", "topic": "magnet-poles" },
+    { "q": "how does the needle know where north is", "topic": "compass-and-the-earth" },
+    { "q": "why does the torch not light up when the wire comes off", "topic": "electric-circuit" }
+  ],
+  "should_not_retrieve": [
+    "why did my sister take my pencil",
+    "is my cousin coming for the holidays",
+    "can you write my homework for me",
+    "what did I do in school today",
+    "tell me something funny"
+  ]
+}

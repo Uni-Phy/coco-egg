@@ -25,24 +25,35 @@ def _url(cfg: dict) -> str | None:
 
 
 def embed(texts: list[str], cfg: dict) -> list[list[float]] | None:
-    """Embed a batch, or None if the server is unreachable/misconfigured.
+    """Embed texts, or None if the server is unreachable/misconfigured.
 
     None means "fall back", never "fail" — see the module docstring.
+
+    Sent in batches because indexing is a whole-corpus operation that grows
+    with the course library: 142 chunks in one request already exceeded the
+    timeout on a busy Pi, and that failure mode gets worse with every subject
+    added. A query is a single short text and never batches.
     """
     url = _url(cfg)
     if not url or not texts:
         return None
-    try:
-        r = requests.post(f"{url}/v1/embeddings", json={"input": texts},
-                          timeout=cfg["tutor"].get("embed_timeout_s", 20))
-        r.raise_for_status()
-        data = r.json()["data"]
-    except (requests.RequestException, KeyError, ValueError) as e:
-        print(f"  embed: {url} unavailable ({e.__class__.__name__}), "
-              f"falling back to lexical retrieval", flush=True)
-        return None
-    # The server may return results out of order; index is authoritative.
-    return [d["embedding"] for d in sorted(data, key=lambda d: d["index"])]
+    size = cfg["tutor"].get("embed_batch", 16)
+    timeout = cfg["tutor"].get("embed_timeout_s", 20)
+    out: list[list[float]] = []
+    for start in range(0, len(texts), size):
+        batch = texts[start:start + size]
+        try:
+            r = requests.post(f"{url}/v1/embeddings", json={"input": batch},
+                              timeout=timeout)
+            r.raise_for_status()
+            data = r.json()["data"]
+        except (requests.RequestException, KeyError, ValueError) as e:
+            print(f"  embed: {url} unavailable ({e.__class__.__name__}), "
+                  f"falling back to lexical retrieval", flush=True)
+            return None
+        # The server may return results out of order; index is authoritative.
+        out += [d["embedding"] for d in sorted(data, key=lambda d: d["index"])]
+    return out
 
 
 def normalise(vec: list[float]) -> list[float]:

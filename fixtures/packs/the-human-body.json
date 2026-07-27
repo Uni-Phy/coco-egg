@@ -1,0 +1,237 @@
+{
+  "topic": "The human body and staying healthy",
+  "lesson": [
+    {
+      "id": "00-bones-are-the-hard-frame",
+      "goal": "Understand Bones are the hard frame."
+    },
+    {
+      "id": "01-joints-are-the-places-where",
+      "goal": "Understand Joints are the places where."
+    },
+    {
+      "id": "02-muscles-move-your-bones-and",
+      "goal": "Understand Muscles move your bones, and."
+    },
+    {
+      "id": "03-the-heart-is-a-pump",
+      "goal": "Understand The heart is a pump."
+    },
+    {
+      "id": "04-breathing-brings-air-into-your",
+      "goal": "Understand Breathing brings air into your."
+    },
+    {
+      "id": "05-breathing-through-your-nose-is",
+      "goal": "Understand Breathing through your nose is."
+    },
+    {
+      "id": "06-digestion-is-how-food-is",
+      "goal": "Understand Digestion is how food is."
+    },
+    {
+      "id": "07-chewing-properly-makes-digestion-easier",
+      "goal": "Understand Chewing properly makes digestion easier,."
+    },
+    {
+      "id": "08-teeth-come-in-two-sets",
+      "goal": "Understand Teeth come in two sets."
+    },
+    {
+      "id": "09-the-brain-is-the-control",
+      "goal": "Understand The brain is the control."
+    },
+    {
+      "id": "10-the-five-senses-are-how",
+      "goal": "Understand The five senses are how."
+    },
+    {
+      "id": "11-skin-is-the-largest-organ",
+      "goal": "Understand Skin is the largest organ."
+    },
+    {
+      "id": "12-sweating-is-how-the-body",
+      "goal": "Understand Sweating is how the body."
+    },
+    {
+      "id": "13-water-makes-up-about-two",
+      "goal": "Understand Water makes up about two."
+    },
+    {
+      "id": "14-a-balanced-diet-means-eating",
+      "goal": "Understand A balanced diet means eating."
+    },
+    {
+      "id": "15-roughage-is-the-part-of",
+      "goal": "Understand Roughage is the part of."
+    },
+    {
+      "id": "16-vitamins-and-minerals-are-needed",
+      "goal": "Understand Vitamins and minerals are needed."
+    },
+    {
+      "id": "17-germs-are-living-things-far",
+      "goal": "Understand Germs are living things far."
+    },
+    {
+      "id": "18-washing-your-hands-with-soap",
+      "goal": "Understand Washing your hands with soap."
+    },
+    {
+      "id": "19-sleep-is-when-the-body",
+      "goal": "Understand Sleep is when the body."
+    },
+    {
+      "id": "20-exercise-makes-the-heart-the",
+      "goal": "Understand Exercise makes the heart, the."
+    },
+    {
+      "id": "21-keeping-clean-protects-you-and",
+      "goal": "Understand Keeping clean protects you and."
+    },
+    {
+      "id": "22-every-child-grows-at-their",
+      "goal": "Understand Every child grows at their."
+    }
+  ],
+  "chunks": [
+    {
+      "id": "00-bones-are-the-hard-frame",
+      "title": "Bones are the hard frame",
+      "text": "Bones are the hard frame that holds your body up. A grown person has about two hundred and six of them, and babies start out with even more, because some of the small ones join together as a child grows. Bones give the body its shape and something for the muscles to pull against. They also act as armour for the softest parts. The skull is a hard box around the brain, the ribs make a cage around the heart and the lungs, and the backbone is a chain of small bones protecting the nerve cord that runs down it.",
+      "explain": "Bones are the hard frame that holds your body up. A grown person has about two hundred and six of them, and babies start out with even more, because some of the small ones join together as a child grows. Bones give the body its shape and something for the muscles to pull against."
+    },
+    {
+      "id": "01-joints-are-the-places-where",
+      "title": "Joints are the places where",
+      "text": "Joints are the places where two bones meet, and different joints allow different movements. Your elbow and your knee are hinge joints, so they swing back and forth in one direction only, like a door on its hinges. Your shoulder and your hip are ball and socket joints, where a rounded end sits in a cup, so your arm can swing round in a full circle. Your neck can turn side to side on a pivot joint. The bones of the skull have joints that do not move at all, and that is exactly what you want around a brain.",
+      "explain": "Joints are the places where two bones meet, and different joints allow different movements. Your elbow and your knee are hinge joints, so they swing back and forth in one direction only, like a door on its hinges. Your shoulder and your hip are ball and socket joints, where a rounded end sits in a cup, so your arm can swing round in a full circle."
+    },
+    {
+      "id": "02-muscles-move-your-bones-and",
+      "title": "Muscles move your bones, and",
+      "text": "Muscles move your bones, and the surprising thing is that a muscle can only pull, never push. That is why muscles work in pairs. Bend your arm and the muscle on the front, the biceps, shortens and pulls the forearm up while the one at the back relaxes. Straighten it again and the muscle at the back does the pulling instead. Muscles are joined to bones by tough cords, and the more you use them the stronger they get. Some muscles you control, and some, like the heart, work all day without you thinking about them.",
+      "explain": "Muscles move your bones, and the surprising thing is that a muscle can only pull, never push. That is why muscles work in pairs. Bend your arm and the muscle on the front, the biceps, shortens and pulls the forearm up while the one at the back relaxes."
+    },
+    {
+      "id": "03-the-heart-is-a-pump",
+      "title": "The heart is a pump",
+      "text": "The heart is a pump about the size of your own fist, and it never takes a rest. It squeezes and relaxes roughly seventy to ninety times a minute while you are sitting quietly, and much faster when you run, and each squeeze pushes blood out into tubes that reach every part of you. Blood carries oxygen from the lungs and digested food from the gut to wherever they are needed, and carries waste away. Press two fingers gently on your wrist and you can feel the beat arriving. That tapping is your pulse.",
+      "explain": "The heart is a pump about the size of your own fist, and it never takes a rest. It squeezes and relaxes roughly seventy to ninety times a minute while you are sitting quietly, and much faster when you run, and each squeeze pushes blood out into tubes that reach every part of you. Blood carries oxygen from the lungs and digested food from the gut to wherever they are needed, and carries waste away."
+    },
+    {
+      "id": "04-breathing-brings-air-into-your",
+      "title": "Breathing brings air into your",
+      "text": "Breathing brings air into your lungs so that your blood can collect oxygen. Air goes in through the nose, down the windpipe, and into two spongy lungs inside the chest. There the oxygen passes into the blood, and carbon dioxide passes out of the blood and is breathed away. That is why the air you breathe out is different from the air you breathed in, and why a mirror held in front of your mouth mists up. The chest rises and falls because a sheet of muscle under the lungs pulls down to let air in and relaxes to push it out.",
+      "explain": "Breathing brings air into your lungs so that your blood can collect oxygen. Air goes in through the nose, down the windpipe, and into two spongy lungs inside the chest. There the oxygen passes into the blood, and carbon dioxide passes out of the blood and is breathed away."
+    },
+    {
+      "id": "05-breathing-through-your-nose-is",
+      "title": "Breathing through your nose is",
+      "text": "Breathing through your nose is better than breathing through your mouth, and the nose is built for the job. Small hairs just inside catch dust and insects. A sticky layer traps still smaller specks, so that a lot of dirt never reaches the lungs at all. The passages warm the air and add moisture to it, which suits the lungs far better than cold dry air straight off the street. The mouth does none of this. It is a useful spare route when you are running hard and need air quickly, but the nose is the proper doorway.",
+      "explain": "Breathing through your nose is better than breathing through your mouth, and the nose is built for the job. Small hairs just inside catch dust and insects. A sticky layer traps still smaller specks, so that a lot of dirt never reaches the lungs at all."
+    },
+    {
+      "id": "06-digestion-is-how-food-is",
+      "title": "Digestion is how food is",
+      "text": "Digestion is how food is broken down small enough to enter your blood. It starts in the mouth, where teeth grind the food and saliva begins working on it. The swallowed food travels down the food pipe to the stomach, which churns it with digestive juices into a soft paste. Most of the real work then happens in the small intestine, a long coiled tube where the useful parts of the food pass through the wall into the blood. The large intestine takes back water from what is left, and the rest leaves the body as waste.",
+      "explain": "Digestion is how food is broken down small enough to enter your blood. It starts in the mouth, where teeth grind the food and saliva begins working on it. The swallowed food travels down the food pipe to the stomach, which churns it with digestive juices into a soft paste."
+    },
+    {
+      "id": "07-chewing-properly-makes-digestion-easier",
+      "title": "Chewing properly makes digestion easier,",
+      "text": "Chewing properly makes digestion easier, which is why people say not to gulp your food. Teeth break a mouthful into many small pieces, and small pieces have far more surface for the digestive juices to work on than one large lump does. Chewing also mixes food with saliva, which starts breaking down the starch in rice and roti even before you swallow. Food gulped down in big pieces gives the stomach more work to do and can sit heavily. Eating slowly costs a few extra minutes and saves your body a great deal of effort.",
+      "explain": "Chewing properly makes digestion easier, which is why people say not to gulp your food. Teeth break a mouthful into many small pieces, and small pieces have far more surface for the digestive juices to work on than one large lump does. Chewing also mixes food with saliva, which starts breaking down the starch in rice and roti even before you swallow."
+    },
+    {
+      "id": "08-teeth-come-in-two-sets",
+      "title": "Teeth come in two sets",
+      "text": "Teeth come in two sets and in several shapes. A child grows about twenty milk teeth, and these fall out one by one and are replaced by thirty two permanent teeth that have to last a lifetime. The flat sharp ones in front are incisors for cutting, the pointed ones beside them are canines for tearing, and the broad ones at the back are molars for grinding. Bacteria living in the mouth feed on sugar left on the teeth and make an acid that eats into them, which is why brushing twice a day matters so much.",
+      "explain": "Teeth come in two sets and in several shapes. A child grows about twenty milk teeth, and these fall out one by one and are replaced by thirty two permanent teeth that have to last a lifetime. The flat sharp ones in front are incisors for cutting, the pointed ones beside them are canines for tearing, and the broad ones at the back are molars for grinding."
+    },
+    {
+      "id": "09-the-brain-is-the-control",
+      "title": "The brain is the control",
+      "text": "The brain is the control room of the body, and nerves are the wires. The brain sits protected inside the skull, and it handles thinking, remembering, feeling and every deliberate movement you make. Nerves run from it down the spinal cord and out to every part of the body, carrying messages in both directions at astonishing speed. When you touch something hot, your hand pulls back before you have even decided to move. That shortcut is called a reflex, and it goes through the spinal cord rather than waiting for the brain to think it over.",
+      "explain": "The brain is the control room of the body, and nerves are the wires. The brain sits protected inside the skull, and it handles thinking, remembering, feeling and every deliberate movement you make. Nerves run from it down the spinal cord and out to every part of the body, carrying messages in both directions at astonishing speed."
+    },
+    {
+      "id": "10-the-five-senses-are-how",
+      "title": "The five senses are how",
+      "text": "The five senses are how the body gathers news about the world. Eyes gather light, ears gather sound, the nose picks up smells, the tongue tastes, and the skin feels touch, pressure, heat and cold. None of these organs understands anything on its own. Each one turns what it catches into nerve signals and sends them to the brain, and the brain is where seeing and hearing actually happen. Smell and taste work closely together, which is why food seems to lose its flavour when your nose is blocked with a cold.",
+      "explain": "The five senses are how the body gathers news about the world. Eyes gather light, ears gather sound, the nose picks up smells, the tongue tastes, and the skin feels touch, pressure, heat and cold. None of these organs understands anything on its own."
+    },
+    {
+      "id": "11-skin-is-the-largest-organ",
+      "title": "Skin is the largest organ",
+      "text": "Skin is the largest organ of the body, and it does much more than cover you. It keeps water in and keeps dirt and germs out. It is packed with nerve endings, so it tells you when something is rough, hot, cold or sharp. It repairs itself when it is cut. It also helps control your temperature by letting more blood flow near the surface when you are hot, and by making sweat. Skin darkens in strong sunshine because it makes more of the pigment that shields the living cells underneath.",
+      "explain": "Skin is the largest organ of the body, and it does much more than cover you. It keeps water in and keeps dirt and germs out. It is packed with nerve endings, so it tells you when something is rough, hot, cold or sharp."
+    },
+    {
+      "id": "12-sweating-is-how-the-body",
+      "title": "Sweating is how the body",
+      "text": "Sweating is how the body cools itself down. When you run about or when the day is hot, tiny glands in the skin push out a watery liquid. As that liquid dries off your skin it carries heat away with it, and you cool down. This is the same reason water kept in an earthen matka stays cool, because water seeps through the clay and dries from the outside. Sweating uses up the body's water, so on a hot day or after playing hard you need to drink more than usual to replace what you have lost.",
+      "explain": "Sweating is how the body cools itself down. When you run about or when the day is hot, tiny glands in the skin push out a watery liquid. As that liquid dries off your skin it carries heat away with it, and you cool down."
+    },
+    {
+      "id": "13-water-makes-up-about-two",
+      "title": "Water makes up about two",
+      "text": "Water makes up about two thirds of your body, and you lose some of it every single day. It goes out in sweat, in urine and even in the air you breathe out, so it has to be replaced by drinking and by the food you eat. Water carries nutrients around, helps get rid of waste and keeps you cool. It matters that the water is clean, because dirty water carries germs. Water that has been properly boiled and cooled, or passed through a good filter, is much safer than water straight from an open source.",
+      "explain": "Water makes up about two thirds of your body, and you lose some of it every single day. It goes out in sweat, in urine and even in the air you breathe out, so it has to be replaced by drinking and by the food you eat. Water carries nutrients around, helps get rid of waste and keeps you cool."
+    },
+    {
+      "id": "14-a-balanced-diet-means-eating",
+      "title": "A balanced diet means eating",
+      "text": "A balanced diet means eating from every group of foods rather than a lot of one thing. Rice, roti, potato and sugar are mainly energy foods, and oils and ghee give energy too. Dal, milk, curd, eggs, fish, meat and peanuts are the body building foods, used for growing and for repair. Fruits and vegetables are the protective foods, full of the vitamins and minerals that keep everything working properly. No single food has everything in it, which is why a plate with dal, rice, a vegetable and some curd works so well.",
+      "explain": "A balanced diet means eating from every group of foods rather than a lot of one thing. Rice, roti, potato and sugar are mainly energy foods, and oils and ghee give energy too. Dal, milk, curd, eggs, fish, meat and peanuts are the body building foods, used for growing and for repair."
+    },
+    {
+      "id": "15-roughage-is-the-part-of",
+      "title": "Roughage is the part of",
+      "text": "Roughage is the part of plant food that your body cannot digest, and it is useful precisely because of that. It comes from vegetables, fruit with the skin on, whole grains and pulses. Roughage adds bulk and holds water, and that helps food move steadily along the gut instead of getting stuck. A diet made only of soft refined foods leaves people uncomfortable. Roughage carries no energy and no nutrients of its own, which is a good reminder that a food can matter for what it does rather than for what it contains.",
+      "explain": "Roughage is the part of plant food that your body cannot digest, and it is useful precisely because of that. It comes from vegetables, fruit with the skin on, whole grains and pulses. Roughage adds bulk and holds water, and that helps food move steadily along the gut instead of getting stuck."
+    },
+    {
+      "id": "16-vitamins-and-minerals-are-needed",
+      "title": "Vitamins and minerals are needed",
+      "text": "Vitamins and minerals are needed only in small amounts, but the body cannot do without them. Vitamin C is found in amla, guava, lemon and orange. Vitamin A, which the eyes need, comes from carrots, papaya, green leafy vegetables and milk. Sunlight on the skin helps the body make vitamin D, which works with the calcium in milk, curd, ragi and sesame to build strong bones. Iron, which blood needs, is found in green leafy vegetables, dal and jaggery. Iodised salt supplies iodine. This is why eating the same one dish every day is a poor idea.",
+      "explain": "Vitamins and minerals are needed only in small amounts, but the body cannot do without them. Vitamin C is found in amla, guava, lemon and orange. Vitamin A, which the eyes need, comes from carrots, papaya, green leafy vegetables and milk."
+    },
+    {
+      "id": "17-germs-are-living-things-far",
+      "title": "Germs are living things far",
+      "text": "Germs are living things far too small to see, and they are all around us. Some kinds cause illness when they get inside the body, but most are harmless and many are genuinely useful. Bacteria are what turn milk into curd, and other bacteria live in your gut and help you. The harmful ones spread through unwashed hands, through droplets from a cough or a sneeze, through dirty water and food, and on the feet of flies. Keeping germs out of your mouth is therefore mostly about hands, water and covering food.",
+      "explain": "Germs are living things far too small to see, and they are all around us. Some kinds cause illness when they get inside the body, but most are harmless and many are genuinely useful. Bacteria are what turn milk into curd, and other bacteria live in your gut and help you."
+    },
+    {
+      "id": "18-washing-your-hands-with-soap",
+      "title": "Washing your hands with soap",
+      "text": "Washing your hands with soap is the simplest way to stop germs travelling. Water alone slides off greasy skin and leaves a lot behind, while soap loosens grease and dirt so that the germs are lifted away and rinsed off. Rub the palms, the backs, between the fingers, under the nails and around the thumbs for about twenty seconds, then rinse well. The times that matter most are before eating or handling food and after using the toilet. Covering a cough or a sneeze with the inside of your elbow rather than your hand works the same way.",
+      "explain": "Washing your hands with soap is the simplest way to stop germs travelling. Water alone slides off greasy skin and leaves a lot behind, while soap loosens grease and dirt so that the germs are lifted away and rinsed off. Rub the palms, the backs, between the fingers, under the nails and around the thumbs for about twenty seconds, then rinse well."
+    },
+    {
+      "id": "19-sleep-is-when-the-body",
+      "title": "Sleep is when the body",
+      "text": "Sleep is when the body does its repairs, and it is not wasted time. Children of school age usually need about nine to eleven hours a night. During sleep the body grows and mends itself, and the brain sorts through what happened during the day, which is a large part of how the things you learned actually stick. Too little sleep shows up as trouble concentrating in class, irritability, and clumsiness. Going to bed and waking at roughly the same time each day makes falling asleep easier than any trick.",
+      "explain": "Sleep is when the body does its repairs, and it is not wasted time. Children of school age usually need about nine to eleven hours a night. During sleep the body grows and mends itself, and the brain sorts through what happened during the day, which is a large part of how the things you learned actually stick."
+    },
+    {
+      "id": "20-exercise-makes-the-heart-the",
+      "title": "Exercise makes the heart, the",
+      "text": "Exercise makes the heart, the lungs, the muscles and the bones stronger. When you run, jump, cycle or play kabaddi or kho kho, the heart pumps harder and the muscles pull against your bones, and all of them respond by becoming stronger over time. Play also improves balance and control, and most children find it lifts their mood. About an hour of active play a day is a good aim, and it does not have to happen all at once. Walking to school and helping with work around the house both count.",
+      "explain": "Exercise makes the heart, the lungs, the muscles and the bones stronger. When you run, jump, cycle or play kabaddi or kho kho, the heart pumps harder and the muscles pull against your bones, and all of them respond by becoming stronger over time. Play also improves balance and control, and most children find it lifts their mood."
+    },
+    {
+      "id": "21-keeping-clean-protects-you-and",
+      "title": "Keeping clean protects you and",
+      "text": "Keeping clean protects you and the people around you. A daily bath washes off sweat and dirt that would otherwise feed the bacteria that cause smells and skin trouble. Nails cut short are much easier to keep clean, since dirt and germs gather underneath long ones. Clean clothes, a clean handkerchief, washed fruit and vegetables, and food kept covered away from flies all reduce the chance of germs getting in. These are small daily habits and none of them is difficult, which is what makes them worth turning into habits at all.",
+      "explain": "Keeping clean protects you and the people around you. A daily bath washes off sweat and dirt that would otherwise feed the bacteria that cause smells and skin trouble. Nails cut short are much easier to keep clean, since dirt and germs gather underneath long ones."
+    },
+    {
+      "id": "22-every-child-grows-at-their",
+      "title": "Every child grows at their",
+      "text": "Every child grows at their own pace, and that is completely normal. Children in one class can differ a great deal in height and build, and some grow early and some grow late, and both catch up in the end. Good food, enough sleep, plenty of play and clean surroundings are what help a body grow well. If somebody is unwell, or hurt, or worried about their health, the right step is always to tell a grown up and see a doctor or the health centre. Deciding about illness and medicine is a doctor's work, never a guess.",
+      "explain": "Every child grows at their own pace, and that is completely normal. Children in one class can differ a great deal in height and build, and some grow early and some grow late, and both catch up in the end. Good food, enough sleep, plenty of play and clean surroundings are what help a body grow well."
+    }
+  ]
+}

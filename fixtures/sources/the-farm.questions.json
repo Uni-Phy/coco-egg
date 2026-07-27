@@ -1,0 +1,24 @@
+{
+  "subject": "The farm",
+  "should_retrieve": [
+    { "q": "what is mud made of", "topic": "soil" },
+    { "q": "how does a little plant come out of a seed", "topic": "seeds-and-germination" },
+    { "q": "does a seed need light to start growing", "topic": "seeds-need-water-air-warmth" },
+    { "q": "why do farmers dig up the ground before planting", "topic": "ploughing" },
+    { "q": "which months do farmers wait for the rain", "topic": "monsoon-and-kharif-crops" },
+    { "q": "what do farmers grow in the cold months", "topic": "rabi-crops" },
+    { "q": "how do fields get water when it does not rain", "topic": "irrigation" },
+    { "q": "is there a way to use less water in the fields", "topic": "drip-irrigation" },
+    { "q": "why do they put cow dung in the field", "topic": "manure-and-compost" },
+    { "q": "are all the insects in a field bad", "topic": "helpful-insects-and-pollinators" },
+    { "q": "how do they get the rice out of the plant after cutting", "topic": "harvesting-threshing-winnowing" },
+    { "q": "what is the difference between how it is today and how it usually is", "topic": "weather-and-climate" }
+  ],
+  "should_not_retrieve": [
+    "where did I leave my slippers",
+    "is my friend angry with me",
+    "sing me a song",
+    "what is the capital of France",
+    "who is knocking at the door"
+  ]
+}

@@ -1,0 +1,227 @@
+{
+  "topic": "The sky and the seasons",
+  "lesson": [
+    {
+      "id": "00-the-sun-is-a-star",
+      "goal": "Understand The sun is a star,."
+    },
+    {
+      "id": "01-day-and-night-happen-because",
+      "goal": "Understand Day and night happen because."
+    },
+    {
+      "id": "02-the-sun-appears-in-the",
+      "goal": "Understand The sun appears in the."
+    },
+    {
+      "id": "03-shadows-change-through-the-day",
+      "goal": "Understand Shadows change through the day."
+    },
+    {
+      "id": "04-nobody-can-feel-the-earth",
+      "goal": "Understand Nobody can feel the earth."
+    },
+    {
+      "id": "05-the-earth-also-travels-round",
+      "goal": "Understand The earth also travels round."
+    },
+    {
+      "id": "06-seasons-happen-because-the-earth",
+      "goal": "Understand Seasons happen because the earth."
+    },
+    {
+      "id": "07-the-monsoon-is-a-wind",
+      "goal": "Understand The monsoon is a wind."
+    },
+    {
+      "id": "08-the-moon-makes-no-light",
+      "goal": "Understand The moon makes no light."
+    },
+    {
+      "id": "09-the-moon-changes-shape-through",
+      "goal": "Understand The moon changes shape through."
+    },
+    {
+      "id": "10-the-moon-always-shows-us",
+      "goal": "Understand The moon always shows us."
+    },
+    {
+      "id": "11-an-eclipse-is-a-shadow",
+      "goal": "Understand An eclipse is a shadow,."
+    },
+    {
+      "id": "12-stars-twinkle-because-of-the",
+      "goal": "Understand Stars twinkle because of the."
+    },
+    {
+      "id": "13-star-patterns-help-you-find",
+      "goal": "Understand Star patterns help you find."
+    },
+    {
+      "id": "14-planets-are-worlds-that-circle",
+      "goal": "Understand Planets are worlds that circle."
+    },
+    {
+      "id": "15-clouds-are-made-of-countless",
+      "goal": "Understand Clouds are made of countless."
+    },
+    {
+      "id": "16-rain-falls-when-the-tiny",
+      "goal": "Understand Rain falls when the tiny."
+    },
+    {
+      "id": "17-lightning-and-thunder-happen-at",
+      "goal": "Understand Lightning and thunder happen at."
+    },
+    {
+      "id": "18-a-rainbow-appears-when-sunshine",
+      "goal": "Understand A rainbow appears when sunshine."
+    },
+    {
+      "id": "19-the-moon-is-often-up",
+      "goal": "Understand The moon is often up."
+    },
+    {
+      "id": "20-the-indian-year-is-usually",
+      "goal": "Understand The Indian year is usually."
+    },
+    {
+      "id": "21-the-night-sky-slowly-changes",
+      "goal": "Understand The night sky slowly changes."
+    }
+  ],
+  "chunks": [
+    {
+      "id": "00-the-sun-is-a-star",
+      "title": "The sun is a star,",
+      "text": "The sun is a star, and it is the nearest one to us. It is an enormous ball of glowing gas, so hot that light and heat pour out of it in every direction, and that light takes about eight minutes to cross space and reach us. Every other star you see at night is a sun as well. They look like tiny points only because they are unimaginably far away. The next nearest star after our own sun is so distant that its light takes more than four years to get here, and even then it arrives as a faint speck.",
+      "explain": "The sun is a star, and it is the nearest one to us. It is an enormous ball of glowing gas, so hot that light and heat pour out of it in every direction, and that light takes about eight minutes to cross space and reach us. Every other star you see at night is a sun as well."
+    },
+    {
+      "id": "01-day-and-night-happen-because",
+      "title": "Day and night happen because",
+      "text": "Day and night happen because the earth spins. The earth turns round once about every twenty four hours, like a very slow spinning top. The half of the earth facing the sun has daylight, while the other half lies in its own shadow and has night. As your village turns towards the sunlight you get morning, and as it turns away you get evening. The sun does not travel round the earth, and it does not sink into the ground. It stays where it is, and it is the ground under your feet that is moving.",
+      "explain": "Day and night happen because the earth spins. The earth turns round once about every twenty four hours, like a very slow spinning top. The half of the earth facing the sun has daylight, while the other half lies in its own shadow and has night."
+    },
+    {
+      "id": "02-the-sun-appears-in-the",
+      "title": "The sun appears in the",
+      "text": "The sun appears in the east each morning and goes down in the west each evening, and the reason is the direction the earth spins. The earth turns from west to east, so everything in the sky seems to drift the other way, from east to west. The moon and the stars do exactly the same. This is why you can find your directions with no instrument at all. Stand in the early morning with your right arm pointing at the rising sun, and you are facing north, with south behind you and west on your left.",
+      "explain": "The sun appears in the east each morning and goes down in the west each evening, and the reason is the direction the earth spins. The earth turns from west to east, so everything in the sky seems to drift the other way, from east to west. The moon and the stars do exactly the same."
+    },
+    {
+      "id": "03-shadows-change-through-the-day",
+      "title": "Shadows change through the day",
+      "text": "Shadows change through the day because the sun changes its height in the sky. A shadow forms wherever something blocks the light, so its shape follows the object and its length depends on how high the light is. Early in the morning the sun is low and shadows are long. Around the middle of the day the sun is at its highest and shadows are at their shortest. Then they stretch out again towards evening. Push a stick upright into the ground and mark the tip of its shadow every hour, and you have built a clock that runs on sunlight.",
+      "explain": "Shadows change through the day because the sun changes its height in the sky. A shadow forms wherever something blocks the light, so its shape follows the object and its length depends on how high the light is. Early in the morning the sun is low and shadows are long."
+    },
+    {
+      "id": "04-nobody-can-feel-the-earth",
+      "title": "Nobody can feel the earth",
+      "text": "Nobody can feel the earth spinning, even though it is moving very fast, and that puzzles almost everybody the first time they hear it. The reason is that everything is moving along with it. The ground, the trees, the buildings, the water in the well and all the air around you travel together at the same steady speed. You only notice movement when your speed changes. That is why you feel a bus start, brake or swing round a corner, but feel nothing at all during the smooth stretch in between.",
+      "explain": "Nobody can feel the earth spinning, even though it is moving very fast, and that puzzles almost everybody the first time they hear it. The reason is that everything is moving along with it. The ground, the trees, the buildings, the water in the well and all the air around you travel together at the same steady speed."
+    },
+    {
+      "id": "05-the-earth-also-travels-round",
+      "title": "The earth also travels round",
+      "text": "The earth also travels round the sun, and one full journey takes about three hundred and sixty five and a quarter days. That journey is what we call a year. Because of the extra quarter day, our calendar would slowly slip out of step with the seasons, so every fourth year we add one extra day to February, and we call that a leap year. The earth is doing two things at once, all the time. It spins, which gives us day and night, and it circles the sun, which gives us the year.",
+      "explain": "The earth also travels round the sun, and one full journey takes about three hundred and sixty five and a quarter days. That journey is what we call a year. Because of the extra quarter day, our calendar would slowly slip out of step with the seasons, so every fourth year we add one extra day to February, and we call that a leap year."
+    },
+    {
+      "id": "06-seasons-happen-because-the-earth",
+      "title": "Seasons happen because the earth",
+      "text": "Seasons happen because the earth is tilted, and not because of any change in distance from the sun. The earth leans to one side as it travels, always leaning the same way, so for part of the year the northern half tips towards the sun. It then gets more direct light and longer days, and that is our summer. Six months later the same half leans away, the sunlight arrives slanted, and the days are shorter and cooler. Many people believe summer comes when the earth is nearest the sun. It cannot be, because the earth is actually slightly closer to the sun in January.",
+      "explain": "Seasons happen because the earth is tilted, and not because of any change in distance from the sun. The earth leans to one side as it travels, always leaning the same way, so for part of the year the northern half tips towards the sun. It then gets more direct light and longer days, and that is our summer."
+    },
+    {
+      "id": "07-the-monsoon-is-a-wind",
+      "title": "The monsoon is a wind",
+      "text": "The monsoon is a wind that changes direction with the seasons, and it is why India gets most of its rain in just a few months. In summer the land heats up far faster than the sea. Hot air over the land rises, and cooler air from the ocean flows in to take its place. That sea air is loaded with water vapour, and as it rises over the land and climbs the hills it cools, and the water falls out as rain. This is the southwest monsoon, from about June to September. Later in the year the winds turn around and bring rain to the southeastern coast.",
+      "explain": "The monsoon is a wind that changes direction with the seasons, and it is why India gets most of its rain in just a few months. In summer the land heats up far faster than the sea. Hot air over the land rises, and cooler air from the ocean flows in to take its place."
+    },
+    {
+      "id": "08-the-moon-makes-no-light",
+      "title": "The moon makes no light",
+      "text": "The moon makes no light of its own. It is a great ball of rock circling the earth, and it shines only because sunlight falls on it and bounces off towards us. That is why the bright part of the moon always faces the direction of the sun, even in the daytime. If the sun were somehow switched off, the moon would vanish from the sky. The moon is also our nearest neighbour in space. Its light takes only a little over a second to reach us, while sunlight takes about eight minutes.",
+      "explain": "The moon makes no light of its own. It is a great ball of rock circling the earth, and it shines only because sunlight falls on it and bounces off towards us. That is why the bright part of the moon always faces the direction of the sun, even in the daytime."
+    },
+    {
+      "id": "09-the-moon-changes-shape-through",
+      "title": "The moon changes shape through",
+      "text": "The moon changes shape through the month because we see different amounts of its sunlit half. One half of the moon is always lit, but as the moon travels round the earth we view that lit half from changing angles. When the moon is between us and the sun we see almost none of it, and that is the new moon, amavasya. About a fortnight later the earth lies between the sun and the moon, the whole lit face is turned our way, and that is the full moon, purnima. One complete round of shapes takes about twenty nine and a half days.",
+      "explain": "The moon changes shape through the month because we see different amounts of its sunlit half. One half of the moon is always lit, but as the moon travels round the earth we view that lit half from changing angles. When the moon is between us and the sun we see almost none of it, and that is the new moon, amavasya."
+    },
+    {
+      "id": "10-the-moon-always-shows-us",
+      "title": "The moon always shows us",
+      "text": "The moon always shows us the same face, and there is a neat reason for it. The moon turns on its own axis exactly once in the time it takes to travel once round the earth. So as it moves along its path it rotates by just the right amount to keep the same side pointing at us. The far side is not a dark side. It gets sunlight like everywhere else. It is simply never turned in our direction, which is why nobody on earth saw it until spacecraft flew round and photographed it.",
+      "explain": "The moon always shows us the same face, and there is a neat reason for it. The moon turns on its own axis exactly once in the time it takes to travel once round the earth. So as it moves along its path it rotates by just the right amount to keep the same side pointing at us."
+    },
+    {
+      "id": "11-an-eclipse-is-a-shadow",
+      "title": "An eclipse is a shadow,",
+      "text": "An eclipse is a shadow, and nothing more than that. When the moon passes exactly between the sun and the earth, its shadow falls on a small patch of the earth, and people standing there see the sun blocked out for a few minutes. That is a solar eclipse. When the earth passes exactly between the sun and the moon, the earth's shadow falls across the moon and it turns dim and coppery. That is a lunar eclipse. Eclipses are ordinary and can be predicted years ahead. One rule always holds, though. Never look straight at the sun, eclipse or no eclipse.",
+      "explain": "An eclipse is a shadow, and nothing more than that. When the moon passes exactly between the sun and the earth, its shadow falls on a small patch of the earth, and people standing there see the sun blocked out for a few minutes. That is a solar eclipse."
+    },
+    {
+      "id": "12-stars-twinkle-because-of-the",
+      "title": "Stars twinkle because of the",
+      "text": "Stars twinkle because of the air, not because of anything the stars themselves are doing. Starlight arrives as an extremely fine point of light, and it must pass down through many kilometres of air that is warm in some places, cool in others, and always moving. Those shifting layers bend the light this way and that, so the point seems to shiver and change its brightness. Planets usually shine with a steadier light. They are much nearer and appear as tiny discs rather than points, so a wobble in one part is cancelled out by another.",
+      "explain": "Stars twinkle because of the air, not because of anything the stars themselves are doing. Starlight arrives as an extremely fine point of light, and it must pass down through many kilometres of air that is warm in some places, cool in others, and always moving. Those shifting layers bend the light this way and that, so the point seems to shiver and change its brightness."
+    },
+    {
+      "id": "13-star-patterns-help-you-find",
+      "title": "Star patterns help you find",
+      "text": "Star patterns help you find your way at night. Seven bright stars in the northern sky make the shape we call Saptarishi, the seven sages. The two stars at the end of its bowl point almost exactly at the Pole Star, Dhruv Tara, which sits nearly above the earth's axis in the north. All the other stars appear to wheel slowly round it through the night, while the Pole Star itself hardly moves. Find that star and you have found north, which is how travellers and sailors kept their direction for thousands of years.",
+      "explain": "Star patterns help you find your way at night. Seven bright stars in the northern sky make the shape we call Saptarishi, the seven sages. The two stars at the end of its bowl point almost exactly at the Pole Star, Dhruv Tara, which sits nearly above the earth's axis in the north."
+    },
+    {
+      "id": "14-planets-are-worlds-that-circle",
+      "title": "Planets are worlds that circle",
+      "text": "Planets are worlds that circle the sun, and there are eight of them, the earth being one. Like the moon, they make no light of their own and shine only by reflecting sunlight. Several are easy to see with nothing but your eyes. Venus is the brilliant one low in the sky soon after sunset or shortly before sunrise. Jupiter, Mars and Saturn are visible too on clear nights. If a bright object shines with a steady light while everything around it twinkles, there is a good chance you are looking at a planet.",
+      "explain": "Planets are worlds that circle the sun, and there are eight of them, the earth being one. Like the moon, they make no light of their own and shine only by reflecting sunlight. Several are easy to see with nothing but your eyes."
+    },
+    {
+      "id": "15-clouds-are-made-of-countless",
+      "title": "Clouds are made of countless",
+      "text": "Clouds are made of countless tiny drops of water, far too small and light to fall. Warm air rising from the ground carries invisible water vapour upwards with it. High above, the air is much colder, and cold air cannot hold as much vapour, so the vapour turns back into liquid on specks of dust floating there. Millions of those droplets together are what you see as a cloud. Clouds look white because they scatter sunlight in all directions, and a rain cloud looks dark grey from below only because it is so thick that little light gets through.",
+      "explain": "Clouds are made of countless tiny drops of water, far too small and light to fall. Warm air rising from the ground carries invisible water vapour upwards with it. High above, the air is much colder, and cold air cannot hold as much vapour, so the vapour turns back into liquid on specks of dust floating there."
+    },
+    {
+      "id": "16-rain-falls-when-the-tiny",
+      "title": "Rain falls when the tiny",
+      "text": "Rain falls when the tiny droplets inside a cloud join together into drops too heavy to stay up. The droplets are blown about inside the cloud, they bump into each other and merge, and every collision makes them a little bigger. Once a drop is heavy enough it begins to fall, sweeping up more droplets on the way down. If the air high up is very cold the water may freeze first and come down as hail, which is how hard little balls of ice can fall out of the sky on a hot summer afternoon.",
+      "explain": "Rain falls when the tiny droplets inside a cloud join together into drops too heavy to stay up. The droplets are blown about inside the cloud, they bump into each other and merge, and every collision makes them a little bigger. Once a drop is heavy enough it begins to fall, sweeping up more droplets on the way down."
+    },
+    {
+      "id": "17-lightning-and-thunder-happen-at",
+      "title": "Lightning and thunder happen at",
+      "text": "Lightning and thunder happen at the same moment, but you see the flash long before you hear the bang. Light travels so fast that it reaches you almost instantly, while sound crawls along at roughly one kilometre every three seconds. So if you count three seconds between the flash and the rumble, the lightning was about a kilometre away. In a storm the safest place is inside a proper building. Never shelter under a lone tree in an open field, and keep away from water and from wide open ground.",
+      "explain": "Lightning and thunder happen at the same moment, but you see the flash long before you hear the bang. Light travels so fast that it reaches you almost instantly, while sound crawls along at roughly one kilometre every three seconds. So if you count three seconds between the flash and the rumble, the lightning was about a kilometre away."
+    },
+    {
+      "id": "18-a-rainbow-appears-when-sunshine",
+      "title": "A rainbow appears when sunshine",
+      "text": "A rainbow appears when sunshine falls on falling rain. Sunlight looks white, but it is really a mixture of all the colours together. As light enters a raindrop it bends, then bounces off the back of the drop, then bends again as it comes out, and each colour bends by a slightly different amount. That spreads the colours out into a band. You will only see a rainbow when the sun is behind you and the rain is in front of you, which is why they so often appear in the evening after a shower, with the sun low in the west.",
+      "explain": "A rainbow appears when sunshine falls on falling rain. Sunlight looks white, but it is really a mixture of all the colours together. As light enters a raindrop it bends, then bounces off the back of the drop, then bends again as it comes out, and each colour bends by a slightly different amount."
+    },
+    {
+      "id": "19-the-moon-is-often-up",
+      "title": "The moon is often up",
+      "text": "The moon is often up in the daytime, and many children are surprised to catch it there. The moon rises and sets about fifty minutes later each day, so for much of the month it is above the horizon while the sun is still up. It looks pale then, because the sky around it is so bright. There is nothing odd about this at all. The moon is not a creature of the night that comes out after dark. It is simply easiest to see when the sky behind it is black.",
+      "explain": "The moon is often up in the daytime, and many children are surprised to catch it there. The moon rises and sets about fifty minutes later each day, so for much of the month it is above the horizon while the sun is still up. It looks pale then, because the sky around it is so bright."
+    },
+    {
+      "id": "20-the-indian-year-is-usually",
+      "title": "The Indian year is usually",
+      "text": "The Indian year is usually described in three big seasons. There is the hot season, roughly March to May, when the land bakes and the days grow long. Then comes the rainy season with the monsoon, roughly June to September, when the fields turn green and the rivers run full. Then the cool season, roughly November to February, with clear skies and short days. Different parts of the country feel these very differently. The Himalayan valleys get real snow in winter, while places beside the sea in the south stay warm and damp nearly all year.",
+      "explain": "The Indian year is usually described in three big seasons. There is the hot season, roughly March to May, when the land bakes and the days grow long. Then comes the rainy season with the monsoon, roughly June to September, when the fields turn green and the rivers run full."
+    },
+    {
+      "id": "21-the-night-sky-slowly-changes",
+      "title": "The night sky slowly changes",
+      "text": "The night sky slowly changes through the year, and that is because we are moving. As the earth travels round the sun we look out into a different direction of space each month, so different star patterns come into view and others disappear. Orion, which many people know by the three stars in a neat line across its middle, rides high on Indian winter nights and is gone by summer. This is why old calendars and festival dates could be worked out from the stars. The sky is the oldest clock and calendar people ever had.",
+      "explain": "The night sky slowly changes through the year, and that is because we are moving. As the earth travels round the sun we look out into a different direction of space each month, so different star patterns come into view and others disappear. Orion, which many people know by the three stars in a neat line across its middle, rides high on Indian winter nights and is gone by summer."
+    }
+  ]
+}

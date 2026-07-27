@@ -1,0 +1,24 @@
+{
+  "subject": "Sky and seasons",
+  "should_retrieve": [
+    { "q": "why does it get dark at night", "topic": "day-and-night" },
+    { "q": "where does the sun go when it goes away in the evening", "topic": "day-and-night" },
+    { "q": "why is it hot in some months and cold in others", "topic": "seasons-and-the-tilt" },
+    { "q": "why is my shadow so long in the evening", "topic": "shadows" },
+    { "q": "why is the moon sometimes round and sometimes just a thin line", "topic": "moon-phases" },
+    { "q": "does the moon shine by itself", "topic": "moon-reflects-sunlight" },
+    { "q": "why can I see the moon in the morning when it is not night", "topic": "moon-in-the-daytime" },
+    { "q": "why do stars go blinky", "topic": "why-stars-twinkle" },
+    { "q": "which star tells you which way to go", "topic": "pole-star-and-star-patterns" },
+    { "q": "in a storm why does the noise come after the light", "topic": "lightning-and-thunder" },
+    { "q": "how do all those colours come in the sky after it rains", "topic": "rainbow" },
+    { "q": "why does all the rain come in only a few months of the year", "topic": "the-monsoon" }
+  ],
+  "should_not_retrieve": [
+    "what did I dream about",
+    "who is my class teacher",
+    "tell me a joke",
+    "who is the president of America",
+    "when is my birthday"
+  ]
+}

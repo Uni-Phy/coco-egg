@@ -19,8 +19,38 @@ import sys
 
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1] / "device"))
 
+import json                                    # noqa: E402
+
 from coco_egg import config                    # noqa: E402
 from coco_egg.tutor.pack import Pack           # noqa: E402
+
+SOURCES = pathlib.Path(__file__).resolve().parents[1] / "fixtures" / "sources"
+
+
+def load_course_questions() -> tuple[list[tuple[str, str]], list[str]]:
+    """Per-course question sets shipped beside their source document.
+
+    A course adds its own questions when it is written, so the eval grows with
+    the library instead of being back-filled from memory later. Expected topics
+    are matched loosely against the chunk id and title, because ids are derived
+    from the prose and shift when a document is re-polished — pinning exact ids
+    would make the eval fail on rewording rather than on regression.
+    """
+    positive, negative = [], []
+    for f in sorted(SOURCES.glob("*.questions.json")):
+        data = json.loads(f.read_text())
+        positive += [(r["q"], r["topic"]) for r in data.get("should_retrieve", [])]
+        negative += data.get("should_not_retrieve", [])
+    return positive, negative
+
+
+def topic_matches(chunk: dict, expected: str) -> bool:
+    """Loose match: any meaningful word of the expected topic in id or title."""
+    haystack = f"{chunk.get('id', '')} {chunk.get('title', '')}".lower()
+    words = [w for w in expected.lower().replace("-", " ").split() if len(w) > 3]
+    if not words:
+        words = expected.lower().replace("-", " ").split()
+    return any(w in haystack or w.rstrip("s") in haystack for w in words)
 
 # (question, expected chunk id). Phrased as a child would, never as the pack
 # does — that is the whole point of the file.
@@ -40,13 +70,17 @@ SHOULD_RETRIEVE = [
     ("who decides about roads in our village", "parliament-and-local-government"),
     ("which king became a buddhist after a war", "ashoka-and-buddhism"),
     ("tell me about the lion pillar", "ashoka-and-buddhism"),
+    # Was a should_not_retrieve case for as long as no course covered the sky.
+    # It is the question children ask most, and grounding it wrongly on the
+    # water cycle is what exposed the whole precision problem — so the sky
+    # course now teaches it and this is a hit, not a false positive.
+    ("why is the sky blue", "sky-blue"),
 ]
 
 # Nothing in the library answers these. Grounding one of them is how the tutor
 # ends up explaining a blue sky with evaporation, or claiming it ate a roti.
 SHOULD_NOT_RETRIEVE = [
     "what did I have for breakfast",
-    "why is the sky blue",
     "what is the range",
     "what is game theory",
     "who is my teacher",
@@ -59,24 +93,28 @@ MAX_FALSE_POSITIVE = 0.30
 
 
 def score(pack: Pack, cfg: dict, lexical: bool) -> tuple[float, float, list[str]]:
+    course_pos, course_neg = load_course_questions()
+    positives = SHOULD_RETRIEVE + course_pos
+    negatives = SHOULD_NOT_RETRIEVE + course_neg
+
     notes = []
     hits = 0
-    for q, want in SHOULD_RETRIEVE:
+    for q, want in positives:
         got = pack.retrieve(q) if lexical else pack.retrieve_semantic(q, cfg)
         if got is None:
             sys.exit("eval: embedding server unreachable — start `make serve-embed`")
-        top = got[0]["id"] if got else None
-        if top == want:
+        top = got[0] if got else None
+        if top is not None and (top["id"] == want or topic_matches(top, want)):
             hits += 1
         else:
-            notes.append(f"  MISS  {q!r} -> {top or '(nothing)'}  want {want}")
+            notes.append(f"  MISS  {q!r} -> {top['id'] if top else '(nothing)'}  want {want}")
     fps = 0
-    for q in SHOULD_NOT_RETRIEVE:
+    for q in negatives:
         got = pack.retrieve(q) if lexical else pack.retrieve_semantic(q, cfg)
         if got:
             fps += 1
             notes.append(f"  FALSE {q!r} -> {got[0]['id']}")
-    return hits / len(SHOULD_RETRIEVE), fps / len(SHOULD_NOT_RETRIEVE), notes
+    return hits / len(positives), fps / len(negatives), notes
 
 
 def main() -> None:

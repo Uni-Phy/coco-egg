@@ -1,0 +1,24 @@
+{
+  "subject": "Maths you can see",
+  "should_retrieve": [
+    { "q": "why does the same number mean something different in a big number", "topic": "place-value" },
+    { "q": "is zero just nothing", "topic": "zero-holds-a-place" },
+    { "q": "how much is one lakh", "topic": "lakh-and-crore" },
+    { "q": "when I add and it goes past ten what do I do", "topic": "carrying-in-addition" },
+    { "q": "how can I check if my taking away is right", "topic": "subtraction-and-checking" },
+    { "q": "what is the quick way to add the same number many times", "topic": "multiplication" },
+    { "q": "how do I remember my nines", "topic": "times-table-patterns" },
+    { "q": "if we share twelve sweets between four of us how many each", "topic": "division-and-remainder" },
+    { "q": "if I cut a chapati into eight and take three what do I have", "topic": "fractions" },
+    { "q": "is a piece smaller if you cut the roti into more pieces", "topic": "comparing-fractions" },
+    { "q": "what does pav kilo mean", "topic": "indian-fraction-words" },
+    { "q": "how much wire do I need to go all the way round my field", "topic": "perimeter-and-area" }
+  ],
+  "should_not_retrieve": [
+    "what did I have for breakfast",
+    "where are my chappals",
+    "can you tell me a ghost story",
+    "what is my best friend called",
+    "what is the capital of Japan"
+  ]
+}
