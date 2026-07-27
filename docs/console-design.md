@@ -464,6 +464,7 @@ envelope plus its own fields:
 | `turn.start` | — | `main.one_turn`, `main.bench_turn` |
 | `state` | `state`: one of the six `UiState` names | `main.set_ui` |
 | `heard` | `text` (may be `""`) | `main` after `transcribe` |
+| `partial_heard` | `text` | `asr.streaming` while recording (0+ per turn) |
 | `retrieved` | `question`, `path` `semantic\|lexical`, `scale` `cosine\|idf`, `floor`, `relative_floor`, `chunks[]` | `tutor.pack` |
 | `sentence` | `index`, `text` | `tutor.llama_client` as generated |
 | `spoken` | `index`, `text` | `main` after `play_wav` |
@@ -509,12 +510,12 @@ figure includes it. The split is more honest for a timeline and the sum is
 unchanged; `first_audio` remains the number the product is judged on.
 
 **Ordering guarantees the renderer may rely on:** `turn.start` first and
-`turn.end` last; `heard` before `retrieved`; `retrieved` before the `stage
-retrieval` that times it; `degraded{embed}` before a `retrieved{lexical}` that
-it caused; `stage llm_first_sentence` immediately before `sentence` 0;
-`sentence` indices ascending; `spoken[i]` after `sentence[i]`. Everything else
-is best-effort — render defensively, because a dropped event (§8) is a normal
-outcome.
+`turn.end` last; any `partial_heard` before `heard`; `heard` before
+`retrieved`; `retrieved` before the `stage retrieval` that times it;
+`degraded{embed}` before a `retrieved{lexical}` that it caused; `stage
+llm_first_sentence` immediately before `sentence` 0; `sentence` indices
+ascending; `spoken[i]` after `sentence[i]`. Everything else is best-effort —
+render defensively, because a dropped event (§8) is a normal outcome.
 
 A real trace, captured from the fully degraded device (no llama-server, no
 embedding server, and a question the lexical path is known to miss). Thirteen

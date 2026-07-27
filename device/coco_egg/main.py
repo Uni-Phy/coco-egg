@@ -18,9 +18,8 @@ import tty
 import wave
 
 from . import config, events
-from .asr import transcribe
+from .asr import StreamingTranscriber, transcribe
 from .audio import play_wav, record_utterance
-from .audio.io import write_wav
 from .states import UiState
 from .sync import log_interaction
 from .tts import preload, synthesize
@@ -46,9 +45,13 @@ def set_ui(state: UiState) -> None:
 def one_turn(cfg: dict) -> None:
     events.begin_turn()
     set_ui(UiState.LISTENING)
+    # Streaming ASR: partials POST during speech, and the final POST fires at
+    # first silence — its encoder runs in parallel with the hangover instead
+    # of chaining after it (asr/streaming.py).
+    txn = StreamingTranscriber(cfg)
     # t0 is end-of-speech, not "recorder returned": the learner sits through
     # the trailing-silence hangover too, so it counts as latency.
-    audio, t0 = record_utterance(cfg)
+    audio, t0 = record_utterance(cfg, on_block=txn.push)
     if audio.size == 0:
         events.end_turn(reason="no-audio")
         set_ui(UiState.IDLE)
@@ -57,9 +60,9 @@ def one_turn(cfg: dict) -> None:
     # The hangover is dead air the learner waits through before any work
     # starts — 1.2s of the ~5s (README). It is a stage like the others.
     events.emit("stage", stage="hangover", seconds=round(time.monotonic() - t0, 3))
-    wav = write_wav(audio, cfg["audio"]["sample_rate"])
+    txn.flush()   # no-op unless recording ended without a trailing-silence run
     t_asr = time.monotonic()
-    question = transcribe(wav, cfg)
+    question = txn.result(timeout_s=cfg["asr"]["timeout_s"])
     events.emit("stage", stage="asr", seconds=round(time.monotonic() - t_asr, 3))
     events.emit("heard", text=question)
     if not question:

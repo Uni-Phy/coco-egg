@@ -6,7 +6,7 @@ from coco_egg.tutor.llama_client import split_ready_sentences, visible_text
 def test_defaults_load():
     cfg = config.load(path=None)
     assert cfg["audio"]["sample_rate"] == 16000
-    assert cfg["tutor"]["llama_url"].startswith("http://127.0.0.1")
+    assert cfg["tutor"]["llama_url"].startswith("http://llama-tutor")
 
 
 def test_states_exist():

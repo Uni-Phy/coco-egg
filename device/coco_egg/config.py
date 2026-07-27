@@ -30,6 +30,9 @@ DEFAULTS = {
         "whisper_url": "http://whisper:8081",
         "language": "en",
         "timeout_s": 30,
+        # Streaming ASR (see asr/streaming.py).
+        "stream_min_voiced_s": 0.8,
+        "stream_speculate_after_s": 0.6,
     },
     "tutor": {
         # Qwen3-0.6B via llama-server (llama.cpp).

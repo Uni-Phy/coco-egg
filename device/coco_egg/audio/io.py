@@ -10,9 +10,12 @@ import subprocess
 import tempfile
 import time
 import wave
+from typing import Callable
 
 import numpy as np
 import sounddevice as sd
+
+BlockCallback = Callable[[np.ndarray, bool], None]
 
 
 def resolve_input(cfg: dict) -> int | None:
@@ -40,7 +43,7 @@ def resolve_input(cfg: dict) -> int | None:
     return index
 
 
-def record_utterance(cfg: dict) -> tuple[np.ndarray, float]:
+def record_utterance(cfg: dict, on_block: BlockCallback | None = None) -> tuple[np.ndarray, float]:
     """Record until trailing silence or max length.
 
     Returns (int16 mono @16k, monotonic time of end-of-speech). The second
@@ -48,6 +51,10 @@ def record_utterance(cfg: dict) -> tuple[np.ndarray, float]:
     silence_stop_s hangover sits between the two. The learner waits through
     that hangover, so latency has to be measured from end-of-speech or M0
     under-reports itself by silence_stop_s (spec §16 says measure honestly).
+
+    `on_block(chunk, is_silent)` fires inline once per 100 ms block; the
+    streaming transcriber (asr/streaming.py) uses it to overlap ASR with
+    speech. Runs on this thread — must not block.
     """
     a = cfg["audio"]
     sr = a["sample_rate"]
@@ -66,15 +73,19 @@ def record_utterance(cfg: dict) -> tuple[np.ndarray, float]:
         for _ in range(max_blocks):
             data, _ = stream.read(block)
             mono = data[:, 0]
-            chunks.append(mono.copy())
+            chunk = mono.copy()
+            chunks.append(chunk)
             rms = float(np.sqrt(np.mean((mono.astype(np.float32) / 32768.0) ** 2)))
-            if rms >= a["silence_rms"]:
+            is_silent = rms < a["silence_rms"]
+            if not is_silent:
                 voiced_yet, silent = True, 0
                 speech_end = time.monotonic()
             elif voiced_yet:
                 silent += 1
-                if silent >= silence_blocks_needed:
-                    break
+            if on_block is not None:
+                on_block(chunk, is_silent)
+            if voiced_yet and is_silent and silent >= silence_blocks_needed:
+                break
     audio = np.concatenate(chunks) if chunks else np.zeros(0, dtype=np.int16)
     return audio, speech_end
 
