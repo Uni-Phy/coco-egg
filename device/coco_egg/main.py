@@ -179,6 +179,7 @@ def bench_turn(cfg: dict, start_at: str, output_mode: str) -> None:
 def run() -> None:
     cfg = config.load()
     print("coco-egg zero — local voice loop.")
+    print(config.summary(cfg))
     if cfg["trigger"]["mode"] != "keyboard":
         raise NotImplementedError("gpio trigger arrives at M1")
     if not sys.stdin.isatty():

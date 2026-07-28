@@ -96,7 +96,6 @@ DEFAULTS = {
     },
 }
 
-
 def load(path: str | None = None) -> dict:
     cfg = {k: dict(v) for k, v in DEFAULTS.items()}
     for candidate in ([path] if path else []) + ["egg.yaml", "/etc/coco/egg.yaml"]:
@@ -111,3 +110,13 @@ def load(path: str | None = None) -> dict:
                 cfg.setdefault(section, {}).update(values or {})
             break
     return cfg
+
+def summary(cfg: dict) -> str:
+    return "\n".join([
+        f"  audio in:   {cfg['audio']['input_device']}",
+        f"  audio out:  {cfg['audio']['output_device']}",
+        f"  whisper:    {cfg['asr']['whisper_url']}",
+        f"  llama:      {cfg['tutor']['llama_url']}",
+        f"  embed:      {cfg['tutor']['embed_url']}",
+        f"  tts voice:  {cfg['tts']['voice']}\n",
+    ])
