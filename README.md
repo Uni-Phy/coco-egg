@@ -26,22 +26,69 @@ deploy/     Dockerfile + compose (app updates = image pulls)
 docs/       spec.md — the engineering scope & design doc
 ```
 
-## Bench quickstart (M0: Pi 5 + eMeet M0 Plus)
+## Getting started
 
-Inference (llama-server, whisper-server) runs as containers now — no host
-builds. The compose stack pulls the official
-[llama.cpp](https://github.com/ggml-org/llama.cpp) and
-[whisper.cpp](https://github.com/ggml-org/whisper.cpp) images.
+On a Pi 5 with the eMeet M0 Plus plugged in.
 
-1. `make models` — downloads the tutor LLM (Qwen3-0.6B Q4_K_M), the whisper
-   ASR model (`ggml-base.en.bin`), the [Piper](https://github.com/rhasspy/piper)
-   voice (`en_US-lessac-medium.onnx` + `.onnx.json`), and retrieval embeddings
-   (`bge-small-en-v1.5-f16.gguf`) into `models/`.
-2. `make up` — brings up the inference stack (llama-tutor, llama-embed,
-   whisper) and the egg app. Press Enter in the egg TTY, speak, listen.
+> **DietPi**
+>
+> Install `docker` and `docker-compose`:
+> ```shell
+> sudo dietpi-software
+> ```
+>
+> Add user to the `audio` group:
+> ```shell
+> sudo usermod -aG audio $USER
+> ```
+>
+> Then configure audio:
+> ```shell
+> sudo dietpi-config
+> ```
+>
+> Audio Options -> Sound card
+>
+> At the botton under `● Auto Detection` choose the device.
+> In case of EMEET M0 Plus it was `hw:0,0   : Plus USB Audio`.
+>
+> Then in the previous menu (Audio Options) select `Auto-conversion [On]`.
+>
+> Reboot, test with `aplay -L` and `arecord -L`.
 
-Latency (end-of-speech → first audio) prints per turn; M0's job is to
-measure it honestly and set the bar (spec §16).
+Clone the repo and create `egg.yaml` in the root directory to set up audio devices.
+
+Example `egg.yaml` for EMEET M0 Plus:
+
+```yaml
+audio:
+  input_device: EMEET
+  output_device: plughw:CARD=Plus,DEV=0
+```
+
+1. input_device: run `arecord -L`, just part of the name is enough
+2. output_device: run `aplay -L` and use the `plughw:*` line
+
+Set up and run:
+
+```shell
+make models # download models (~660 MB)
+make up     # start docker containers in the background
+make attach # jump to the egg app. Press Enter and start speaking
+```
+
+If you need to restart the app, for example after editing `egg.yaml`
+or pulling fresh code changes from the repo, do `make attach` then
+Ctrl+C - the app will get restarted immediately and the changes
+will be applied for the next `make attach`.
+
+Other commands:
+
+```shell
+make down   # stop containers
+make build  # start containers with `--build` - rebuilds egg and whisper images.
+            # Only needed after a Dockerfile edit.
+```
 
 ## Measured on real hardware (M0 bench)
 
