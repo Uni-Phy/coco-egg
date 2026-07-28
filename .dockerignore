@@ -1,0 +1,8 @@
+models/
+transcripts/
+.embed-cache/
+.venv/
+.git/
+__pycache__/
+*.pyc
+*.egg-info/

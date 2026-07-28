@@ -1,4 +1,4 @@
-.PHONY: setup models serve serve-embed run test lint docker up down
+.PHONY: setup models serve serve-embed run test lint docker build up down attach
 
 TUTOR_GGUF = models/Qwen3-0.6B-Q4_K_M.gguf
 EMBED_GGUF = models/bge-small-en-v1.5-f16.gguf
@@ -57,9 +57,12 @@ lint:
 docker:
 	docker build -t coco-egg:dev -f deploy/Dockerfile .
 
+build:            ## rebuild egg + whisper images (only needed after Dockerfile edits)
+	docker compose -f deploy/docker-compose.yml build
+
 up:               ## bring up the full stack (app + llama-server + whisper-server)
 	touch egg.yaml
-	docker compose -f deploy/docker-compose.yml up --build -d
+	docker compose -f deploy/docker-compose.yml up -d
 
 down:
 	docker compose -f deploy/docker-compose.yml down

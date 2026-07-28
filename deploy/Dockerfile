@@ -8,7 +8,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
+COPY device/pyproject.toml ./device/
+RUN pip install --no-cache-dir -e ./device
 COPY device/ ./device/
 COPY fixtures/ ./fixtures/
-RUN pip install --no-cache-dir -e ./device
 CMD ["python", "-m", "coco_egg.main"]
