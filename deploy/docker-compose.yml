@@ -7,7 +7,7 @@ services:
       - --port
       - "8080"
       - -c
-      - "1024"
+      - "2048"
       - --reasoning-budget
       - "0"
     volumes:
