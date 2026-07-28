@@ -36,12 +36,11 @@ services:
     restart: unless-stopped
 
   whisper:
-    # ENTRYPOINT is ["bash", "-c"], so CMD must be a single shell string.
-    # Upstream's docker README binds to 127.0.0.1; that isn't reachable from
-    # a sibling container on the bridge, so bind to 0.0.0.0.
-    image: ghcr.io/ggml-org/whisper.cpp:main
-    command:
-      - whisper-server --host 0.0.0.0 --port 8081 -m /models/ggml-base.en.bin
+    # Upstream publishes amd64 only; build locally so arm64 hosts (Raspberry
+    # Pi) work. ENTRYPOINT is whisper-server; command supplies its flags.
+    image: coco-whisper:dev
+    build: { context: ., dockerfile: whisper.Dockerfile}
+    command: ["--host", "0.0.0.0", "--port", "8081", "-m", "/models/ggml-base.en.bin"]
     volumes:
       - ../models:/models:ro
     ports:
@@ -49,6 +48,7 @@ services:
     restart: unless-stopped
 
   egg:
+    container_name: egg
     image: coco-egg:dev
     build: { context: .., dockerfile: deploy/Dockerfile }
     depends_on: [llama-tutor, llama-embed, whisper]

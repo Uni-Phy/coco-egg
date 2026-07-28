@@ -59,7 +59,10 @@ docker:
 
 up:               ## bring up the full stack (app + llama-server + whisper-server)
 	touch egg.yaml
-	docker compose -f deploy/docker-compose.yml up --build
+	docker compose -f deploy/docker-compose.yml up --build -d
 
 down:
 	docker compose -f deploy/docker-compose.yml down
+
+attach:
+	docker attach egg
