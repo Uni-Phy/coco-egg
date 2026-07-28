@@ -43,6 +43,14 @@ def set_ui(state: UiState) -> None:
     print(f"[{state.name}]", flush=True)
 
 
+def _nudge(cfg: dict, reason: str) -> None:
+    """Nothing came through — say so, so the learner isn't left in dead air."""
+    events.end_turn(reason=reason)
+    set_ui(UiState.SPEAKING)
+    play_wav(synthesize("Sorry, I didn't catch that. Try again.", cfg), cfg)
+    set_ui(UiState.IDLE)
+
+
 def one_turn(cfg: dict) -> None:
     events.begin_turn()
     set_ui(UiState.LISTENING)
@@ -54,8 +62,7 @@ def one_turn(cfg: dict) -> None:
     # the trailing-silence hangover too, so it counts as latency.
     audio, t0 = record_utterance(cfg, on_block=txn.push)
     if audio.size == 0:
-        events.end_turn(reason="no-audio")
-        set_ui(UiState.IDLE)
+        _nudge(cfg, "no-audio")
         return
     set_ui(UiState.THINKING)
     # The hangover is dead air the learner waits through before any work
@@ -67,8 +74,7 @@ def one_turn(cfg: dict) -> None:
     events.emit("stage", stage="asr", seconds=round(time.monotonic() - t_asr, 3))
     events.emit("heard", text=question)
     if not question:
-        events.end_turn(reason="no-speech")
-        set_ui(UiState.IDLE)
+        _nudge(cfg, "no-speech")
         return
     print(f"  heard: {question}")
     # Stream the reply sentence-by-sentence: speak each one as it lands, so

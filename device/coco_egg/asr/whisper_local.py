@@ -2,10 +2,17 @@
 from __future__ import annotations
 
 import io
+import re
 import wave
 
 import numpy as np
 import requests
+
+# Whisper marks non-speech input with bracket tags — [BLANK_AUDIO], [MUSIC],
+# (silence), [Applause]. Sent to the LLM they read as a literal question and
+# the model politely improvises, so a button press with no speech comes back
+# as a generic tutor intro. Strip these; if nothing is left, it was silence.
+_TAG = re.compile(r"[\[\(][^\]\)]*[\]\)]")
 
 
 def transcribe(wav_path: str, cfg: dict) -> str:
@@ -39,6 +46,8 @@ def _post(url: str, wav_file, cfg: dict) -> str:
     )
     resp.raise_for_status()
     text = (resp.json().get("text") or "").strip()
+    if text and not _TAG.sub("", text).strip():
+        text = ""
     if not text:
         print("  whisper: no speech detected", flush=True)
     return text
