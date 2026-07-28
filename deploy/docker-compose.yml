@@ -55,6 +55,9 @@ services:
     devices: ["/dev/snd:/dev/snd"]
     stdin_open: true            # keyboard trigger reads stdin via input()
     tty: true
+    # `docker attach` fools stdout into block-buffering; force flush per line.
+    environment:
+      PYTHONUNBUFFERED: "1"
     volumes:
       - ../device:/app/device                # editable install -> host edits + `make restart` reload
       - ../fixtures:/app/fixtures:ro
