@@ -199,3 +199,51 @@ def test_the_eval_question_set_is_never_a_nomination():
     ]
     caught = [q for q in questions if llama_client.is_topic_nomination(q)]
     assert not caught, f"course questions treated as subject changes: {caught}"
+
+
+# --- what actually reaches the speaker -------------------------------------
+#
+# Measured on the device: 4 replies in 20 came back carrying markdown emphasis
+# and hard line breaks, and Piper reads the asterisks out loud. The model is
+# answering a chat prompt, so it formats for a screen this device does not have.
+
+@pytest.mark.parametrize("raw, spoken", [
+    ('Here is a song:\n**"Happy birthday to you"**',
+     'Here is a song: "Happy birthday to you"'),
+    # Mid-stream: the closing pair has not arrived yet, which is why the rule
+    # deletes the characters rather than matching them as pairs.
+    ('Let me start:  \n**"Hey, hey', 'Let me start: "Hey, hey'),
+    ('# Heading\nSome text', 'Heading Some text'),
+    ('Use `code` here.', 'Use code here.'),
+    ('*emphasis* and **strong**', 'emphasis and strong'),
+    # Ordinary prose must come through untouched.
+    ('A magnet will not stick to copper. It only attracts iron.',
+     'A magnet will not stick to copper. It only attracts iron.'),
+])
+def test_markdown_never_reaches_the_speaker(raw, spoken):
+    assert llama_client.visible_text(raw) == spoken
+
+
+def test_think_blocks_and_emoji_are_still_stripped():
+    """The markdown pass must not have displaced what was already there.
+
+    Compared stripped, because visible_text() deliberately does NOT trim the
+    tail: _SENTENCE_END splits on the whitespace AFTER punctuation, so trimming
+    it would hold every finished sentence back until the next token arrived and
+    cost first-audio latency. split_ready_sentences() strips each sentence, so
+    nothing trailing ever reaches Piper.
+    """
+    assert llama_client.visible_text("<think>hmm</think>Gravity pulls.") == "Gravity pulls."
+    assert llama_client.visible_text("Well done! \U0001F600").strip() == "Well done!"
+
+
+def test_a_finished_sentence_is_still_emitted_without_waiting():
+    """The reason visible_text() leaves the trailing space alone."""
+    sentences, rest = llama_client.split_ready_sentences(
+        llama_client.visible_text("**Gravity pulls.** "))
+    assert sentences == ["Gravity pulls."]
+
+
+def test_devanagari_survives():
+    """Hindi/Marathi packs must not be collateral damage."""
+    assert "पानी" in llama_client.visible_text("पानी is water.")

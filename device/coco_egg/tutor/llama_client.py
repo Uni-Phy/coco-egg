@@ -41,6 +41,11 @@ _EMOJI = re.compile(
 # previous turn rather than naming its own subject.
 _PRONOUN = re.compile(r"\b(it|its|that|this|they|them|their|those|these|one)\b", re.I)
 
+# Markdown the model emits for a screen that does not exist here.
+_MARKUP = re.compile(r"[*`]+")
+_HEADING = re.compile(r"^\s{0,3}#{1,6}\s*", re.M)
+_WHITESPACE = re.compile(r"\s+")
+
 # Openers: how a learner starts or ends a session rather than asks something.
 # Both are anchored at the start, because these words only open a turn — "can
 # WE study maths" proposes, "can a magnet stick to copper" asks, and only the
@@ -321,10 +326,32 @@ def _fallback_sentences(hits: list[dict]) -> Iterator[str]:
 
 
 def visible_text(raw: str) -> str:
-    """Speakable text: no <think> blocks, no emoji, no unclosed tag leaking."""
+    """Speakable text: no <think> blocks, no emoji, no markup, no line breaks."""
     raw = _EMOJI.sub("", _THINK_PAIR.sub("", raw))
     open_tag = raw.find("<think>")
-    return raw if open_tag == -1 else raw[:open_tag]
+    if open_tag != -1:
+        raw = raw[:open_tag]
+    return _speakable(raw)
+
+
+def _speakable(text: str) -> str:
+    """Strip the markdown the model writes but nobody can hear.
+
+    Measured on the device: 4 replies in 20 came back with markdown emphasis
+    and hard line breaks — 'Here\'s a happy birthday song:\n**"Happy birthday
+    to you...' — and Piper reads the asterisks out. The model is answering a
+    CHAT prompt, so it formats for a screen; this device has no screen.
+
+    Characters are deleted rather than matched as pairs, because this runs on a
+    growing buffer while the reply streams: at the moment '**Hey' has arrived
+    the closing pair does not exist yet, so a `\*\*(.+?)\*\*` rule would let the
+    first asterisks through and speak them.
+    """
+    text = _MARKUP.sub("", text)
+    text = _HEADING.sub("", text)
+    # Newlines are not pauses to a sentence splitter, they are just whitespace
+    # that breaks _SENTENCE_END matching mid-reply.
+    return _WHITESPACE.sub(" ", text)
 
 
 def split_ready_sentences(buf: str) -> tuple[list[str], str]:
