@@ -15,6 +15,12 @@ services:
     ports:
       - "8080:8080" # host-side debugging (curl /health)
     restart: unless-stopped
+    # llama-server grows ~11MB per varied request and never gives it back
+    # (984MB fresh -> 5.8GB after 11h on the bench; docs/model-notes.md §8).
+    # The Pi has 8GB and no swap, so cap it and let restart:unless-stopped
+    # recycle the container instead of the kernel picking a victim. Bounds the
+    # blast radius; it does not fix the leak.
+    mem_limit: 3g
 
   llama-embed:
     # bge-small embedding server for semantic retrieval (tutor/embed.py).
@@ -63,5 +69,6 @@ services:
       - ../fixtures:/app/fixtures:ro
       - ../models:/app/models:ro
       - ../transcripts:/app/transcripts
+      - ../state:/app/state                  # derived profile + embedding cache
       - ../egg.yaml:/app/egg.yaml:ro
     restart: unless-stopped

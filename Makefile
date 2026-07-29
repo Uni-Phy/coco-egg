@@ -62,6 +62,9 @@ build:            ## rebuild egg + whisper images (only needed after Dockerfile 
 
 up:               ## bring up the full stack (app + llama-server + whisper-server)
 	touch egg.yaml
+	# Bind-mount sources must exist first, or docker creates them root-owned
+	# and the container cannot write its derived profile or embedding cache.
+	mkdir -p state transcripts
 	docker compose -f deploy/docker-compose.yml up -d
 
 down:

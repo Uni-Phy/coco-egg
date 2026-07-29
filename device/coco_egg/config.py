@@ -58,7 +58,11 @@ DEFAULTS = {
         # Written by tutor/profile_builder.py from transcripts, and merged
         # UNDER the hand-written profile above — observation fills gaps, it
         # does not overrule a person. "" disables the builder.
-        "profile_derived": "learner-derived.yaml",
+        # Lives under state/ because that is the only writable path mounted
+        # into the container: anything else lands in the container layer and is
+        # lost on `make build`, which would silently reset a learner's profile
+        # every deploy.
+        "profile_derived": "state/learner-derived.yaml",
         # Prior turns kept so a follow-up has something to follow ("why?",
         # "tell me more"). They sit ABOVE the retrieved material in the prompt,
         # which is what makes them nearly free: history is append-only, so it
@@ -74,7 +78,7 @@ DEFAULTS = {
         # Unreachable => lexical fallback (see tutor/embed.py).
         "embed_url": "http://llama-embed:8082",
         "embed_timeout_s": 20,
-        "embed_cache": ".embed-cache",
+        "embed_cache": "state/.embed-cache",
     },
     "tts": {
         "voice": "models/en_US-lessac-medium.onnx",

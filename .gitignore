@@ -18,3 +18,4 @@ egg.yaml
 learner.yaml
 .embed-cache/
 .DS_Store
+state/
