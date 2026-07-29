@@ -20,7 +20,10 @@
     { "q": "what is a birth chart actually a picture of", "topic": "kundali" },
     { "q": "does science agree that the planets decide your life", "topic": "science-and-belief" },
     { "q": "why do families pick a special time to start a wedding", "topic": "muhurta" },
-    { "q": "where did the twelve signs come from in the first place", "topic": "zodiac-history" }
+    { "q": "where did the twelve signs come from in the first place", "topic": "zodiac-history" },
+    { "q": "do the stars decide my future", "topic": "future" },
+    { "q": "can a horoscope tell me what will happen to me", "topic": "future" },
+    { "q": "is today a lucky day for me", "topic": "future" }
   ],
   "should_not_retrieve": [
     "who won the cricket match yesterday",
