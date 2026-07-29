@@ -340,6 +340,24 @@ transcripts — and says so on the page, but it is a LAN port carrying what
 children said aloud. Demo it while you are watching it; set `console.enabled:
 false` in `egg.yaml` for anything else.
 
+## Jokes, and why they are not generated
+
+Say **"tell me a joke"**, then *"another one"*. Asked for a joke the 1.7B tells
+the same joke — not a similar one, the same one, because joke variety is exactly
+what a small model has none of. So jokes are authored (`fixtures/jokes.json`)
+and, more importantly, **dealt from a deck rather than picked at random**: every
+joke is told once before any is told twice, and the deck survives a restart.
+
+That second part is the one that matters at a party. With 44 jokes and random
+choice, the chance of hearing a repeat inside ten draws is about 68% — which
+reads as a broken device, not as luck. Quiz questions come off the same dealer,
+so round two is not round one again.
+
+Jokes are deliberately **not** a content pack and never enter the retrieval
+corpus: a punchline that can be retrieved will eventually be retrieved for a
+real question. Setup and punchline are spoken as two sentences, because the
+device speaks one at a time and that split is the comic pause.
+
 ## Content packs (curriculum RAG)
 
 A pack is chunks + spoken explanations + a lesson plan (spec §7). Build one

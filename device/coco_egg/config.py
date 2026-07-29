@@ -86,6 +86,16 @@ DEFAULTS = {
         # Questions in one round of quiz mode (tutor/quiz.py). Short on
         # purpose: the game has to end while a child still wants more of it.
         "quiz_questions": 5,
+        # Jokes the device can tell (tutor/jokes.py). NOT a content pack and
+        # never loaded into the retrieval corpus — a joke that can be retrieved
+        # will eventually be retrieved for a real question. "" disables them.
+        "jokes": "fixtures/jokes.json",
+        # Where the no-repeat decks remember what has already been told
+        # (tutor/deck.py). Under state/ because that is the only writable path
+        # mounted into the container; without it a restart mid-party deals the
+        # same opener again, which is the one repeat anybody notices.
+        "jokes_deck": "state/jokes-deck.json",
+        "quiz_deck": "state/quiz-deck",
     },
     "tts": {
         "voice": "models/en_US-lessac-medium.onnx",

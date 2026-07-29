@@ -19,10 +19,11 @@ otherwise be answered with a friendly invitation to ask a question instead.
 """
 from __future__ import annotations
 
-import random
+import hashlib
 import re
 from typing import Iterator
 
+from .deck import Deck
 from .llama_client import _get_pack
 
 DEFAULT_QUESTIONS = 5
@@ -99,6 +100,25 @@ def _subject_filter(text: str, items: list[dict]) -> list[dict]:
     return picked or items
 
 
+_decks: dict[str, Deck] = {}
+
+
+def _dealer(items: list[dict], cfg: dict) -> Deck:
+    """A no-repeat deck per question set, so round two is not round one again.
+
+    random.sample() picks fresh each round, which means the same question can
+    open three rounds running — at a party that reads as a broken device rather
+    than as chance. Keyed by the content, so a filtered subject gets its own
+    deck and editing a pack resets it.
+    """
+    digest = hashlib.sha256("\n".join(i["q"] for i in items).encode()).hexdigest()[:16]
+    if digest not in _decks:
+        path = cfg["tutor"].get("quiz_deck")
+        _decks[digest] = Deck(len(items), digest,
+                              f"{path}-{digest}.json" if path else None)
+    return _decks[digest]
+
+
 def _summary() -> str:
     n = len(_game.questions)
     got = _game.correct
@@ -168,7 +188,7 @@ def _start(text: str, cfg: dict) -> Iterator[str]:
     items = _subject_filter(text, items)
     want = min(int(cfg["tutor"].get("quiz_questions", DEFAULT_QUESTIONS)), len(items))
     _game.clear()
-    _game.questions = random.sample(items, want)
+    _game.questions = [items[i] for i in _dealer(items, cfg).draw_many(want)]
     subject = _game.questions[0].get("subject", "")
     lead = f"Alright! {want} questions" + (f" on {subject}. " if subject else ". ")
     yield _ask(_game.questions[0], lead)
