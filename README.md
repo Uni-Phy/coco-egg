@@ -152,6 +152,13 @@ goes now:
 3. **Silence hangover** — 1.2s of dead air before work starts. A push-to-talk
    button (spec decision #5) removes it outright.
 
+**On a grounded turn the LLM stage is prefill-bound, not decode-bound** — 186
+prompt tokens / 3756 ms of prefill against 28 tokens / 2822 ms of decode, so 57%
+of it is spent before a single word is generated. That matters when choosing a
+lever: a faster-decoding model improves the smaller half, while **shrinking the
+prompt improves the larger one**. Grounding and conversation history are what
+fill it, which is why the history fix in v0.5 (below) was worth ~2.5s a turn.
+
 The **first** turn used to be worse than all of them, because it also paid the
 pack load and the prefill of the static system prefix. `tutor.warm()` now does
 both at startup on a background thread, the way `preload()` already did for the
@@ -192,12 +199,19 @@ reached the water cycle. Measured on `tools/eval_retrieval.py`:
 | path | recall | false positives |
 |---|---|---|
 | lexical only (fallback) | 55% | 3% |
-| semantic + lexical tie-break | **82%** | 6% |
+| semantic + lexical tie-break | **82%** | 12% |
 
-Measured inside the release container at 143 chunks / 8 subjects. Recall
+Measured inside the release container at 164 chunks / 9 subjects. Recall
 plateaus near 82% however loose the floor gets (`--sweep`), so the remaining
 misses are a **ranking** problem, not a threshold one — "why does it get dark at
 night" loses to the moon lesson rather than failing to clear the bar.
+
+When a question matters and retrieval misses it, the fix is usually a chunk, not
+a threshold. *"Do the stars decide my future"* reached the sky course's
+starlight lessons and never got near Jyotisha, because the chunk that answers it
+was written in the words of a study ("personality or life events") and nobody
+asks it that way. Writing it in the asker's vocabulary fixed it; no floor would
+have.
 
 If the embedding server is unreachable it falls back to lexical — degraded, not
 broken. Returning nothing stays a normal, frequent outcome.

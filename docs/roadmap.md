@@ -51,7 +51,18 @@ comes first, or the course library is decorative.
 *Exit: the seven questions above retrieve the right lesson, and the three
 known false positives still return nothing.*
 
-## v0.5 — courses at scale (goal 1)
+## v0.5 — SHIPPED, but not this list
+
+What actually shipped as v0.5: the Jyotisha demo course (21 chunks), quiz mode,
+and three faults found in a real session — the verbatim-repeat on a subject
+change, the history window re-prefilling every turn, and a retrieval miss on the
+question the course exists to answer. See `docs/model-notes.md` §11–12.
+
+The items below were the *plan* for v0.5 and did not ship. They move to v0.6.
+Left here rather than rewritten, because the gap between what was planned and
+what a week of real use demanded is the more useful record.
+
+## v0.5 (planned) — courses at scale (goal 1)
 
 - **PDF → pack, hardened.** `tools/build_pack.py` already does .txt/.md/.pdf
   with `--llm` polish (the civics pack was built this way). Needs: better
@@ -157,3 +168,43 @@ Out-of-pack questions are answered from model knowledge rather than refused
 answers outside curated subjects. Retrieval recall is what shrinks the
 out-of-pack surface — another reason v0.4 comes first. The eval harness should
 measure it so this can be revisited with data.
+
+---
+
+## Performance track (added 2026-07-29, from Jenya's review)
+
+Measured first, because the obvious lever was the wrong one. On a grounded turn
+the LLM stage is **prefill-bound**: 186 prompt tokens / 3756 ms of prefill
+against 28 tokens / 2822 ms of decode — 57% of the stage before a word is
+generated. A faster-decoding model improves the smaller half.
+
+1. **Model swap to LFM2.5 1.2B.** Reported on Pi 5: 71 t/s prefill, 15 t/s
+   decode, against our measured 49.5 / 9.9. Applying those ratios projects
+   6.58s → 4.80s on a grounded turn, saving ~1.8s. Worth doing. Gate it on the
+   three accuracy cases that forced the 0.6B → 1.7B move (magnet/copper,
+   magnet/aluminium, breakfast) plus `make eval` — 1.2B sits between the model
+   that failed them and the one that passes, so "similar quality" is a claim to
+   test, not assume.
+2. **Shrink the prompt.** Same lever as (1) and it compounds with it, since
+   prefill is the larger half. `grounding_full_chunks` is already 1; the
+   remaining spend is the system prefix and history.
+3. **First audio on a clause boundary, not a sentence.** Streaming already
+   speaks sentence one as it lands, so the lever is not `max_reply_chars` (a
+   whole-reply cap) but *when the first chunk is considered speakable*. Splitting
+   the first utterance at a comma would start audio sooner without shortening
+   the answer. Cheap, and the risk is prosody — a clipped-sounding fragment.
+4. **ASR: `ggml-tiny.en` before Moonshine.** Both attack the same thing (whisper
+   pads every utterance to a fixed 30s encoder window, so 2.07s is paid whatever
+   the length). `tiny.en` is a URL change on the server we already run; Moonshine
+   is a new runtime. Try the cheap one first. Moonshine's noise-robustness trade
+   is genuinely cheaper for us than for most — the eMeet has hardware AEC.
+5. **Silero VAD** for the 1.2s hangover, if hands-free must stay. Push-to-talk
+   (spec decision #5) removes it outright and is still the simpler answer.
+6. **Orange Pi 5 Pro (DDR5).** Decode is memory-bandwidth-bound, so the +29–58%
+   is the right physics. Correctly ranked last: it means migrating the whole
+   DietPi and audio stack for a gain that (2) and (3) partly deliver in software.
+
+**Model swapping is a continuous process, so it needs a harness, not a
+procedure.** One command to switch models, one to run the regression — the three
+accuracy cases, `make eval`, and the prefill/decode split — so a candidate is a
+ten-minute decision instead of a vibe. That harness comes before (1).
