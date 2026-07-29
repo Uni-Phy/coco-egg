@@ -36,8 +36,14 @@ _PUNCT = re.compile(r"[^\w\s]", re.UNICODE)
 # this is what a general ASR does to an unfamiliar two-word phrase, and the
 # demo path has to tolerate it.
 _START = re.compile(
-    r"\b(quiz|test)\s*m[ey]\b|\bquiz\s*time\b|\b(play|start|begin|do)\s+(a\s+)?quiz\b"
-    r"|\bask\s+me\s+(some\s+)?questions?\b|^\s*quiz\s*$", re.I)
+    # ^quiz\w* first, and it is the one that matters: chasing spellings loses.
+    # The same spoken "quiz me" came back as "Quizmy" on one run and "Quizmi" on
+    # the next, so matching the elision letter by letter was always going to be
+    # a step behind. An utterance that STARTS with quiz-something is a request
+    # to play, whatever the ASR made of the second word.
+    r"^\s*quiz\w*\b"
+    r"|\b(quiz|test)\s*m[ey]\b|\bquiz\s*time\b|\b(play|start|begin|do)\s+(a\s+)?quiz\b"
+    r"|\bask\s+me\s+(some\s+)?questions?\b", re.I)
 _STOP = re.compile(
     r"\b(stop|quit|exit|enough|finished|done|no more)\b", re.I)
 _REPEAT = re.compile(r"\b(repeat|again|say that again|pardon|what was that)\b", re.I)

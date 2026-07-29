@@ -40,6 +40,8 @@ def play(text, cfg):
     # back as one word, and that is the commonest way to start a quiz.
     "Quizmy",
     "Quizmy on Jaya Tisha",
+    "Quizmi.",          # same phrase, different run, different spelling
+    "Quiz me on the spy",
     "quizme",
     "test me",
     "let's play a quiz",
