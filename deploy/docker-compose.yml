@@ -3,7 +3,7 @@ services:
     image: ghcr.io/ggml-org/llama.cpp:server
     command:
       - -m
-      - /models/Qwen3-0.6B-Q4_K_M.gguf
+      - /models/Qwen3-1.7B-Q4_K_M.gguf
       - --port
       - "8080"
       - -c

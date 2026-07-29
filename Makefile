@@ -1,9 +1,9 @@
 .PHONY: setup models serve serve-embed run test lint docker build up down attach
 
-TUTOR_GGUF = models/Qwen3-0.6B-Q4_K_M.gguf
+TUTOR_GGUF = models/Qwen3-1.7B-Q4_K_M.gguf
 EMBED_GGUF = models/bge-small-en-v1.5-f16.gguf
 
-QWEN_URL    = https://huggingface.co/unsloth/Qwen3-0.6B-GGUF/resolve/main/Qwen3-0.6B-Q4_K_M.gguf
+QWEN_URL    = https://huggingface.co/unsloth/Qwen3-1.7B-GGUF/resolve/main/Qwen3-1.7B-Q4_K_M.gguf
 WHISPER_URL = https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-base.en.bin
 PIPER_URL   = https://huggingface.co/rhasspy/piper-voices/resolve/main/en/en_US/lessac/medium
 EMBED_URL   = https://huggingface.co/CompendiumLabs/bge-small-en-v1.5-gguf/resolve/main/bge-small-en-v1.5-f16.gguf
@@ -16,7 +16,7 @@ models: $(TUTOR_GGUF) models/ggml-base.en.bin \
         $(EMBED_GGUF)  ## fetch tutor LLM + whisper + piper voice + retrieval embeddings into models/
 
 $(TUTOR_GGUF):
-	@echo "==> tutor LLM: Qwen3-0.6B Q4_K_M (~380 MB)"
+	@echo "==> tutor LLM: Qwen3-1.7B Q4_K_M (~1.1 GB)"
 	@mkdir -p models
 	wget -q --show-progress -O $@ $(QWEN_URL)
 

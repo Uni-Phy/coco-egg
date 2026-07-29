@@ -229,3 +229,38 @@ whether a newer llama.cpp build fixes it.
 
 Practical bench note: restart the tutor server before any timing measurement
 or demo, or the numbers are measuring the leak rather than the model.
+
+## 9. Reverted to Qwen3-1.7B for the v0.4 release
+
+**[DECIDED 2026-07-29]** §5 took the 0.6B for speed and RAM. Measured again on
+the release container, with semantic retrieval, 143 chunks and conversation
+memory all in place, the accuracy gap is decisive and the RAM argument is gone:
+
+| | 0.6B | 1.7B |
+|---|---|---|
+| perceived end-to-end | ~5.0s | **8.32s** |
+| LLM first sentence | 2.34s | 3.53s |
+| container memory | ~1.0 GB | 1.49 GB (3 GB cap) |
+| "will a magnet stick to copper?" | **"Yes"** — wrong | "will **not** stick" |
+| "does a magnet stick to aluminium?" | **"Yes"** — wrong | "**doesn't** stick" |
+| "what did I have for breakfast?" | invents a sandwich | "I'm not sure what you had" |
+
+The yes-bias is the reason. §3 recorded it, and a prompt guard was written and
+measured and did not fix it — the 0.6B still produced *"Yes, a magnet can stick
+to an aluminum spoon. It works on iron, nickel and cobalt, but not on
+aluminum"*, agreeing and contradicting inside one sentence. That is a model
+capability limit, and a bigger model clears it.
+
+The trade is accuracy over speed, taken deliberately. 8.3s is bad, but 5.0s was
+also nowhere near the ~2-3s bar, so the choice was never fast-vs-slow — it was
+wrong-and-slow against right-and-slower. A tutor that tells a child a magnet
+sticks to copper has failed at the thing it exists to do.
+
+RAM stopped being the argument once the leak was capped: `mem_limit: 3g` plus
+`restart: unless-stopped` bounds the container either way, and the 1.7B sits at
+1.49 GB of that.
+
+**This is not permanent.** The route back to a small model is the behaviour
+fine-tune in §4's plan — train faithfulness and negation handling into a 0.6B
+from the transcripts we now record, rather than hoping a prompt will hold it.
+That is the whole point of the model-factory loop (spec §3).
