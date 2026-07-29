@@ -9,6 +9,9 @@ dependencies = [
     "requests>=2.31",
     "pyyaml>=6.0",
     "piper-tts>=1.2",
+    # Optional ASR backend. Import is lazy; only loaded when
+    # cfg["asr"]["backend"] == "moonshine". Ships arm64 wheels.
+    "moonshine-voice>=0.1",
 ]
 
 [project.optional-dependencies]

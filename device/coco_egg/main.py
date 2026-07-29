@@ -19,12 +19,12 @@ import tty
 import wave
 
 from . import config, console, events, trigger
-from .asr import StreamingTranscriber, transcribe
 from .audio import play_wav, record_utterance
 from .states import UiState
 from .sync import transcript
 from .tutor import profile_builder
-from .tts import preload, synthesize
+from .asr import StreamingTranscriber, transcribe, preload as preload_asr
+from .tts import synthesize, preload as preload_tts
 from .tutor import remember, stream_sentences, warm
 
 
@@ -220,9 +220,10 @@ def run() -> None:
         raise SystemExit("coco-egg: no TTY and no console — nothing can start a turn. "
                          "Run docker with -it, or enable the console.")
 
-    preload(cfg)   # pay the ~2.1s voice load now, not on the first learner
-    warm(cfg)      # and the pack load + static-prefix prefill, in the background
-    console.serve(cfg)   # observer only; a failure here must not stop teaching
+    preload_tts(cfg)   # pay the ~2.1s Piper voice load now, not on the first learner
+    preload_asr(cfg)   # and moonshine's model download/init (no-op for whisper)
+    warm(cfg)          # and the pack load + static-prefix prefill, in the background
+    console.serve(cfg) # observer only; a failure here must not stop teaching
     # Complete turn records come off the event bus, and each write nudges the
     # profile builder — event-based, so an idle device does no work at all.
     transcript.start(cfg, on_complete=profile_builder.on_turn)

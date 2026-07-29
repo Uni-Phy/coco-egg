@@ -25,6 +25,9 @@ DEFAULTS = {
         "silence_rms": 0.005,
     },
     "asr": {
+        # "whisper" (whisper.cpp via whisper-server) or "moonshine" (in-process
+        # moonshine-voice). Whisper stays default until the on-device A/B is in.
+        "backend": "whisper",
         # whisper.cpp whisper-server. whisper docker service by default;
         # override to 127.0.0.1:8081 for a locally-run whisper-server.
         "whisper_url": "http://whisper:8081",
