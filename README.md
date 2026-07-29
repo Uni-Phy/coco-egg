@@ -120,6 +120,34 @@ Host github.com
     IdentitiesOnly yes
 ```
 
+## If the tutor says "I can't reach my tutor brain"
+
+That is the offline fallback: llama-server is unreachable. It has twice been
+the same cause, so check this first.
+
+```shell
+ss -ltnp | grep :8080      # who owns the port?
+docker ps -a | grep llama  # exited (255) with no network attached?
+```
+
+A **bare-metal `llama-server` grabbing port 8080 before docker can** is the
+culprit. There is a `llama-server.service` systemd unit on the bench Pi that
+starts one at boot; it binds `127.0.0.1`, so it answers `curl localhost:8080`
+from the host while being invisible to every container — which makes it look
+like the model is fine and the app is broken. Docker's `llama-tutor` then fails
+its port bind, exits 255, and gets no network at all.
+
+Pick one deployment model and stick to it. The compose stack is the documented
+one, so:
+
+```shell
+sudo systemctl disable --now llama-server
+docker compose -f deploy/docker-compose.yml up -d --force-recreate llama-tutor
+```
+
+The device survives reboots on its own once nothing is competing for the port —
+every service is `restart: unless-stopped`.
+
 ## Measured on real hardware (M0 bench)
 
 Pi 5 8GB / Cortex-A76 / DietPi (Debian 13), eMeet M0 Plus USB speakerphone.
