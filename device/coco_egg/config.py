@@ -67,8 +67,12 @@ DEFAULTS = {
         # "tell me more"). They sit ABOVE the retrieved material in the prompt,
         # which is what makes them nearly free: history is append-only, so it
         # lands in llama-server's cached prefix instead of being re-prefilled.
-        # 0 disables it. See tutor/history.py.
-        "history_turns": 3,
+        # This is a CAP, not a fixed depth — the window grows to it and then
+        # drops back in one go, because evicting one turn per turn shifted the
+        # prefix and re-prefilled the whole conversation every time (measured:
+        # 74 tokens appending vs 203 evicting). 0 disables it. See
+        # tutor/history.py.
+        "history_turns": 4,
         # How many retrieved chunks are quoted in full. The rest are named
         # only. Three full chunks cost ~422 prompt tokens (~2.8s of a ~3.5s
         # answer) and were mostly near-ties of the same topic. See _material().

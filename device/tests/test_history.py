@@ -21,12 +21,42 @@ def _clean():
     llama_client.forget()
 
 
-def test_window_keeps_only_the_last_n_turns():
-    h = History(turns=2)
-    for i in range(5):
+def test_the_window_never_grows_past_its_cap():
+    h = History(turns=4)
+    for i in range(20):
         h.add(f"q{i}", f"a{i}")
-    assert len(h) == 2
-    assert [m["content"] for m in h.messages()] == ["q3", "a3", "q4", "a4"]
+        assert len(h) <= 4
+    assert len(h) >= 1     # a trim must never empty it
+
+
+def test_the_newest_turn_is_always_kept():
+    h = History(turns=4)
+    for i in range(20):
+        h.add(f"q{i}", f"a{i}")
+        assert h.last_question() == f"q{i}"
+
+
+def test_eviction_is_batched_not_sliding():
+    """The measured reason this is not a deque (see the module docstring).
+
+    A sliding window shifts the prompt prefix on every turn once it is full, so
+    llama-server re-prefills the whole conversation every time: measured at 74
+    tokens when appending versus 203 when one turn was evicted. Batching means
+    most turns are pure appends onto a prefix that is still cached.
+    """
+    h = History(turns=4)
+    trims, appends = 0, 0
+    for i in range(20):
+        before = [m["content"] for m in h.messages()]
+        h.add(f"q{i}", f"a{i}")
+        after = [m["content"] for m in h.messages()]
+        if after[:len(before)] == before:
+            appends += 1        # prefix preserved: cache survives
+        else:
+            trims += 1
+    assert trims, "nothing was ever evicted — the cap is not being applied"
+    # A deque would trim on every turn once full. Batching must do far better.
+    assert appends > trims * 2, f"{appends} appends vs {trims} trims"
 
 
 def test_empty_turns_are_not_recorded():
@@ -69,10 +99,12 @@ def test_appending_a_turn_does_not_disturb_the_existing_prefix(cfg):
     the shared prefix would break and the whole conversation would be
     re-prefilled — which is exactly the cost this design exists to avoid.
     """
+    # A real follow-up, not a bare noun: a one-word turn is a topic nomination
+    # and deliberately drops the history, which would test the opposite thing.
     llama_client.remember("q1", "a1", cfg)
-    before, _ = llama_client.build_messages("current", cfg)
+    before, _ = llama_client.build_messages("how does that work", cfg)
     llama_client.remember("q2", "a2", cfg)
-    after, _ = llama_client.build_messages("current", cfg)
+    after, _ = llama_client.build_messages("how does that work", cfg)
 
     # every message of `before` except the volatile last one is a prefix of `after`
     assert after[:len(before) - 1] == before[:-1]
@@ -87,9 +119,11 @@ def test_history_can_be_disabled(cfg):
 
 
 def test_forget_clears_between_learners(cfg):
+    # Asked as a question, so the empty history is what forget() did and not a
+    # side effect of the topic-nomination rule.
     llama_client.remember("q", "a", cfg)
     llama_client.forget()
-    messages, _ = llama_client.build_messages("fresh", cfg)
+    messages, _ = llama_client.build_messages("how does a pump work", cfg)
     assert [m["role"] for m in messages] == ["system", "user"]
 
 

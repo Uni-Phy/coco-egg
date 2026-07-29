@@ -23,7 +23,7 @@ from .. import events
 from . import profile
 from .history import DEFAULT_TURNS, History
 from .pack import Pack, _content_tokens
-from .prompts import GROUNDING, LEARNER, OPENER, SYSTEM, UNKNOWN
+from .prompts import GROUNDING, LEARNER, OPENER, SYSTEM, TOPIC, UNKNOWN
 
 _SENTENCE_END = re.compile(r"(?<=[.!?])\s+")
 _THINK_PAIR = re.compile(r"<think>.*?</think>", re.DOTALL)
@@ -49,13 +49,23 @@ _GREETING = re.compile(
     r"^\s*(hi|hello|hey|namaste|greetings|good\s+(morning|afternoon|evening|night)"
     r"|bye|goodbye|see\s+you|thanks|thank\s+you)\b", re.I)
 _PROPOSAL = re.compile(
-    r"^\s*(let'?s|shall\s+we|can\s+we|could\s+we|i\s+want\s+to|i\s+wanna"
-    r"|i'?d\s+like\s+to|teach\s+me)\b", re.I)
+    r"^\s*(let'?s|let\s+us|shall\s+we|can\s+we|could\s+we|i\s+want\s+to|i\s+wanna"
+    # "i would like to" spelled out: the contraction-only form missed it on the
+    # device, and whisper transcribes the full words far more often than "i'd".
+    r"|i'?d\s+like\s+to|i\s+would\s+like\s+to|teach\s+me)\b", re.I)
 # Interrogatives only — a real question hiding inside an opener ("thanks, what
 # is a fraction", "let's say I have 3 apples, how many is that") must still be
 # answered as a question. Deliberately NOT the auxiliaries is/are/do/can: "let's
 # DO maths" is an opener, and including them would break every proposal.
 _WH = re.compile(r"\b(what|why|how|when|where|who|whom|whose|which)\b", re.I)
+# A yes/no question opens with an auxiliary and may carry no wh-word at all.
+# Anchored at the start, and kept OUT of _WH on purpose: mid-sentence these are
+# ordinary words ("let's DO maths"), and only the leading position makes a
+# question. Caught by the eval guard — "is zero just nothing" reduces to one
+# content token, because `nothing` is a stopword, and looked like a bare noun.
+_AUX_QUESTION = re.compile(
+    r"^\s*(is|are|was|were|am|do|does|did|can|could|will|would|shall|should"
+    r"|has|have|had|may|might)\b", re.I)
 
 _pack: Pack | None = None
 _pack_lock = threading.Lock()
@@ -95,6 +105,28 @@ def is_opener(question: str) -> bool:
     if not q or _WH.search(q):
         return False
     return bool(_GREETING.match(q) or _PROPOSAL.match(q))
+
+
+def is_topic_nomination(question: str) -> bool:
+    """Did the learner just NAME a subject instead of asking about it?
+
+    "Astrology." is not a question, and on the device it was answered with the
+    previous turn's kickboxing reply word for word — grounding had correctly
+    retrieved the planets lesson and the model ignored it. A bare noun carries
+    no instruction, so the strongest thing left in the context wins, and that is
+    whatever the tutor last said.
+
+    Narrow by design. One or two content words and no interrogative: "what is a
+    fraction" has a wh-word, "tell me more" has no content words at all (it is a
+    follow-up, and retrieval_query already handles it), and "do plants eat mud"
+    has three. Openers are excluded because they are checked first and mean
+    something different — "let's study physics" proposes a subject to start,
+    while "Astrology." states one to teach right now.
+    """
+    q = question.strip()
+    if not q or _WH.search(q) or _AUX_QUESTION.match(q) or is_opener(q):
+        return False
+    return 1 <= len(_content_tokens(q)) <= 2
 
 
 def _static_system(cfg: dict) -> str:
@@ -195,15 +227,28 @@ def build_messages(question: str, cfg: dict) -> tuple[list[dict], list[dict]]:
     every subsequent turn.
     """
     opener = is_opener(question)
-    if opener:
-        events.emit("opener", text=question)
+    nomination = is_topic_nomination(question)
+    if opener or nomination:
+        events.emit("opener" if opener else "topic", text=question)
     hits = [] if opener else _retrieve(question, cfg)
-    turn = question
+
+    parts = []
     if hits:
-        turn = GROUNDING.format(material=_material(hits, cfg)).strip() + "\n\n" + question
+        parts.append(GROUNDING.format(material=_material(hits, cfg)).strip())
     elif opener:
-        turn = OPENER.strip() + "\n\n" + question
-    prior = _history.messages() if cfg["tutor"].get("history_turns", 0) else []
+        parts.append(OPENER.strip())
+    if nomination:
+        parts.append(TOPIC.strip())
+    turn = "\n\n".join(parts + [question])
+
+    # A named subject drops the history for this turn. Instruction alone was not
+    # enough to beat context dominance on a 1.7B — the previous answer is right
+    # there and repeating it is the path of least resistance. It costs one
+    # cache miss on the turn the learner changes subject, which is a turn that
+    # was going to miss anyway, and remember() still records this turn so the
+    # next follow-up has something to follow.
+    keep_history = cfg["tutor"].get("history_turns", 0) and not nomination
+    prior = _history.messages() if keep_history else []
     return ([{"role": "system", "content": _static_system(cfg)}]
             + prior
             + [{"role": "user", "content": turn}]), hits

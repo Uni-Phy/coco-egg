@@ -128,3 +128,74 @@ def test_a_question_still_reaches_retrieval(cfg):
 def test_empty_input_is_not_an_opener():
     assert not is_opener("")
     assert not is_opener("   ")
+
+
+# --- naming a subject, rather than asking about it -------------------------
+#
+# Measured on the device 2026-07-29: after two turns about kickboxing, the
+# single word "Astrology." came back with the kickboxing answer VERBATIM, even
+# though retrieval had correctly found the planets lesson and put it in the
+# prompt. A bare noun carries no instruction, so the strongest thing in context
+# wins — and that is whatever the tutor last said.
+
+@pytest.mark.parametrize("said", [
+    "astrology",
+    "Kickboxing.",
+    "photosynthesis",
+    "the water cycle",
+    "fractions",
+])
+def test_a_named_subject_is_a_nomination(said):
+    assert llama_client.is_topic_nomination(said)
+
+
+@pytest.mark.parametrize("said", [
+    "what is a fraction",              # a question, however short
+    "why is the sky blue",
+    "tell me more",                    # a follow-up: no content words at all
+    "do plants eat mud",               # three content words
+    "is zero just nothing",            # yes/no question; `nothing` is a stopword
+    "are magnets attracted to copper",
+    "can magnets pull wood",
+    "hello",                           # an opener, checked first
+    "let's study physics",
+    "i would like to learn",
+    "",
+])
+def test_these_are_not_nominations(said):
+    assert not llama_client.is_topic_nomination(said)
+
+
+def test_a_nomination_drops_the_history(cfg):
+    """The actual fix for the kickboxing repeat.
+
+    Instruction alone did not beat context dominance on a 1.7B — the previous
+    answer sits right there and repeating it is the path of least resistance.
+    """
+    llama_client.remember("Kickboxing.", "Kickboxing is a sport where you kick.", cfg)
+    messages, _ = llama_client.build_messages("Astrology.", cfg)
+
+    assert [m["role"] for m in messages] == ["system", "user"]
+    assert "Kickboxing" not in messages[-1]["content"]
+    assert "NEW subject" in messages[-1]["content"]
+
+
+def test_a_follow_up_still_keeps_its_history(cfg):
+    """Guard the other direction: dropping history for real follow-ups would
+    reintroduce the bug conversation memory was added to fix."""
+    llama_client.remember("what is friction", "It resists sliding.", cfg)
+    messages, _ = llama_client.build_messages("why do we need it", cfg)
+    assert [m["role"] for m in messages] == ["system", "user", "assistant", "user"]
+
+
+def test_the_eval_question_set_is_never_a_nomination():
+    """Nominations skip the history but still retrieve, so a course question
+    caught here would not break retrieval — but it would be told it had
+    changed subject mid-lesson, which is wrong and worth catching."""
+    questions = [
+        r["q"]
+        for f in sorted(SOURCES.glob("*.questions.json"))
+        for r in json.loads(f.read_text()).get("should_retrieve", [])
+    ]
+    caught = [q for q in questions if llama_client.is_topic_nomination(q)]
+    assert not caught, f"course questions treated as subject changes: {caught}"

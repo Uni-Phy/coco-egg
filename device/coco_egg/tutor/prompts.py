@@ -60,6 +60,21 @@ Reply in one or two short, warm sentences. If they are starting, invite them
 to ask about something specific. Do not deliver a lesson yet.
 """
 
+# Appended when the learner names a subject instead of asking about it —
+# "Astrology.", "Kickboxing.", "the water cycle". Measured on the device
+# 2026-07-29: after two turns about kickboxing, the single word "Astrology."
+# came back with the kickboxing answer VERBATIM, ignoring grounding that had
+# correctly retrieved the planets lesson. A bare noun carries no instruction, so
+# a thin model falls back on the strongest thing in its context, which is
+# whatever it just said. Naming the new subject explicitly, and dropping the
+# history for that turn (llama_client.build_messages), is what stops it.
+TOPIC = """
+The student has named a NEW subject rather than asked a question about it.
+Teach them something interesting about this subject in two or three short
+sentences, then ask what they would like to know. Ignore any earlier subject —
+they have moved on.
+"""
+
 # Spoken when the LLM is unreachable AND no chunk matches — the offline floor,
 # where the pack is the only knowledge on the device. Short and warm; with no
 # model and no matching lesson there is genuinely nothing to teach from.
