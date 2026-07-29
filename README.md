@@ -160,8 +160,13 @@ reached the water cycle. Measured on `tools/eval_retrieval.py`:
 
 | path | recall | false positives |
 |---|---|---|
-| lexical only | 33% | 0% |
-| semantic + lexical tie-break | **87%** | 29% |
+| lexical only (fallback) | 55% | 3% |
+| semantic + lexical tie-break | **82%** | 6% |
+
+Measured inside the release container at 143 chunks / 8 subjects. Recall
+plateaus near 82% however loose the floor gets (`--sweep`), so the remaining
+misses are a **ranking** problem, not a threshold one — "why does it get dark at
+night" loses to the moon lesson rather than failing to clear the bar.
 
 If the embedding server is unreachable it falls back to lexical — degraded, not
 broken. Returning nothing stays a normal, frequent outcome.
