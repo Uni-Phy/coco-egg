@@ -494,3 +494,63 @@ an unrounded float spoke as "7.499999999999999s".
 **Auth is not in this release.** The console serves only live events, never
 stored transcripts, and says so on the page — but it is an open LAN port
 carrying what children said out loud. It is demo-while-watching until v0.6.
+
+## 15. whisper vs moonshine, and a diagnosis that was wrong twice first (v0.6)
+
+**The wrong turns first, because the sequence is the lesson.** A live session
+produced garbled transcripts — "Is that hard? created life created life", "Thank
+you for listening.", "What is". Three explanations were offered, in order:
+
+1. *Moonshine is not in the path, the device is unaffected.* Wrong. It was read
+   from the committed defaults; `egg.yaml` is gitignored and had been switched to
+   `backend: moonshine` without anyone noticing.
+2. *Moonshine is the cause.* Also wrong. The app started at 10:07:19, eight
+   seconds BEFORE `egg.yaml` was edited at 10:07:27, and config is read once at
+   process start — so that instance ran whisper, and whisper produced "Is that
+   hard? created life created life" at 10:37. Moonshine had three turns total.
+3. *The audio is the common factor.* Closer, and still a guess.
+
+What made all three possible: **the startup banner printed `whisper:
+http://whisper:8081` regardless of the backend**, because `config.summary()`
+hardcoded the line. The one field you read to learn which ASR is live said the
+wrong thing. It now names the backend.
+
+And recording was the only stage with no measurement, so a garbled transcript
+could not be told apart from a learner too far from the mic. Every turn now
+carries rms, peak and duration against the silence floor.
+
+**Then the actual measurement.** `tools/asr_ab.py`: Piper synthesises ten real
+tutor questions, both backends transcribe the same WAVs, scored as word error
+rate against the known text. Fixed audio, known answer, no microphone.
+
+| backend | WER | exact | per utterance |
+|---|---|---|---|
+| whisper `ggml-base.en` | **18%** | **8/10** | 1.72s |
+| moonshine | 42% | 1/10 | 0.89s |
+
+Moonshine is roughly **twice as fast and less than half as accurate** — but the
+number is unfair to it, because the failure is a BUG rather than a quality
+ceiling:
+
+    sky ALONE, fresh process   -> 'Why is the'        (lost "sky blue")
+    sky after another utterance -> 'Why is the?'
+    sky again, immediately      -> 'Blue. Why is it?'  ("Blue." from the RUN BEFORE)
+
+**Moonshine never finalises its last chunk.** The tail is dropped from every
+utterance, stays in the buffer, and is prepended to the next one. One fault,
+both symptoms — it explains "Do the stars decide?" losing "my future" and then
+"Future? Why is the sky?" on the following line, and it explains the live
+"What is" and "On this plugin On this plugin".
+
+The device is back on whisper until that is fixed. The speed win is real and
+worth returning for.
+
+Whisper's own two misses are worth noting for a curriculum device: both were
+proper nouns — "nakshatra" came back "an act chattra", "jyotisha" as "Jaya
+Tisha". A general ASR has never seen the vocabulary a subject pack is built on,
+and "quiz me on jyotisha" failing to match its subject filter is a direct
+consequence.
+
+Caveat this measurement states about itself: synthetic speech is clean, evenly
+paced and close-miked. Noise robustness is exactly where moonshine is expected
+to give ground, so this is a ceiling and a ranking, not a classroom.
