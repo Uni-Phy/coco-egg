@@ -19,7 +19,7 @@ import tty
 import wave
 
 from . import config, console, events, trigger
-from .audio import play_wav, record_utterance
+from .audio import level, play_wav, record_utterance
 from .states import UiState
 from .sync import transcript
 from .tutor import profile_builder
@@ -67,6 +67,13 @@ def one_turn(cfg: dict) -> None:
     # t0 is end-of-speech, not "recorder returned": the learner sits through
     # the trailing-silence hangover too, so it counts as latency.
     audio, t0 = record_utterance(cfg, on_block=txn.push)
+    # How loud was it? The recording was the one stage with no measurement, so
+    # a garbled transcript could not be told apart from a learner too far from
+    # the mic. Compare rms against audio.silence_rms in the trace.
+    rms, peak = level(audio)
+    events.emit("audio", rms=round(rms, 5), peak=round(peak, 4),
+                seconds=round(audio.size / cfg["audio"]["sample_rate"], 2),
+                floor=cfg["audio"]["silence_rms"])
     if audio.size == 0:
         _nudge(cfg, "no-audio")
         return

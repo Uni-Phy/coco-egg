@@ -51,7 +51,13 @@ def _record(event: dict) -> None:
             return
         if not _open_turn:
             return
-        if kind == "heard":
+        if kind == "audio":
+            # How loud the question actually was. Without it a garbled
+            # transcript is unattributable — a bad backend and a learner too
+            # far from the mic look identical in the record.
+            _open_turn["audio"] = {k: event.get(k)
+                                   for k in ("rms", "peak", "seconds", "floor")}
+        elif kind == "heard":
             _open_turn["heard"] = event.get("text", "")
         elif kind == "retrieved":
             _open_turn["path"] = event.get("path")

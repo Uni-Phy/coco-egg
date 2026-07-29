@@ -107,6 +107,23 @@ def record_utterance(cfg: dict, on_block: BlockCallback | None = None) -> tuple[
     return audio, speech_end
 
 
+def level(audio: np.ndarray) -> tuple[float, float]:
+    """(rms, peak) of an utterance, both 0..1. How loud was it, really?
+
+    Without this the recording is the one stage with no measurement, and a
+    garbled transcript is unattributable: whisper and moonshine both returned
+    nonsense on 2026-07-29 ("Is that hard? created life created life", "Thank
+    you for listening.") and there was no way to tell a bad backend from a
+    learner who was too far from the mic. Compare against audio.silence_rms:
+    an utterance whose rms sits near the silence threshold never had a question
+    in it, whatever the transcript claims.
+    """
+    if audio.size == 0:
+        return 0.0, 0.0
+    f = audio.astype(np.float32) / 32768.0
+    return float(np.sqrt(np.mean(f ** 2))), float(np.max(np.abs(f)))
+
+
 def write_wav(audio: np.ndarray, sr: int) -> str:
     f = tempfile.NamedTemporaryFile(suffix=".wav", delete=False)
     with wave.open(f.name, "wb") as w:

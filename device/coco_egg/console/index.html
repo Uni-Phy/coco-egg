@@ -235,6 +235,16 @@ function handle(ev) {
       show(ev.state);
       if (ev.state === "LISTENING") $("#said").textContent = "";
       break;
+    case "audio": {
+      // Loud enough to be a question? rms near the floor means it never was,
+      // whatever the transcript ends up claiming.
+      const weak = ev.rms < ev.floor * 3;
+      card().querySelector(".chunks").insertAdjacentHTML("beforebegin",
+        `<div class="meta${weak ? " warn" : ""}">mic ${ev.seconds}s ·`
+        + ` rms ${ev.rms} (floor ${ev.floor}) · peak ${ev.peak}`
+        + `${weak ? " — barely above silence" : ""}</div>`);
+      break;
+    }
     case "heard":
       $("#said").textContent = ev.text || "";
       card().querySelector(".heard").textContent = ev.text || "(nothing)";
