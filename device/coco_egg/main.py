@@ -24,7 +24,7 @@ from .states import UiState
 from .sync import transcript
 from .tutor import profile_builder
 from .tts import preload, synthesize
-from .tutor import remember, stream_sentences
+from .tutor import remember, stream_sentences, warm
 
 
 MENU = (
@@ -192,6 +192,7 @@ def run() -> None:
         raise SystemExit("coco-egg: stdin is not a TTY. Run docker with -it (or compose tty:true).")
 
     preload(cfg)   # pay the ~2.1s voice load now, not on the first learner
+    warm(cfg)      # and the pack load + static-prefix prefill, in the background
     # Complete turn records come off the event bus, and each write nudges the
     # profile builder — event-based, so an idle device does no work at all.
     transcript.start(cfg, on_complete=profile_builder.on_turn)

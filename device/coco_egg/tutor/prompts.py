@@ -47,6 +47,19 @@ Adapt how you explain — the words, the examples, the pace — to suit them.
 Never change the facts to fit their preferences.
 """
 
+# Appended when the learner opened or closed the conversation instead of asking
+# something. Measured on the device: "let's study physics" retrieved the
+# measurement-units lesson and got a lecture about metres. A greeting has no
+# subject to teach, and a proposal names a whole subject rather than a
+# question — answering either with a lesson picks the topic FOR the learner.
+# Ask them what they want instead; the follow-up then grounds properly, and
+# history carries the subject across (see llama_client.retrieval_query).
+OPENER = """
+The student is starting or ending a conversation, not asking a question.
+Reply in one or two short, warm sentences. If they are starting, invite them
+to ask about something specific. Do not deliver a lesson yet.
+"""
+
 # Spoken when the LLM is unreachable AND no chunk matches — the offline floor,
 # where the pack is the only knowledge on the device. Short and warm; with no
 # model and no matching lesson there is genuinely nothing to teach from.

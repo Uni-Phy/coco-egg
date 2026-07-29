@@ -13,6 +13,7 @@ from __future__ import annotations
 
 import json
 import re
+import threading
 import time
 from typing import Iterator
 
@@ -22,7 +23,7 @@ from .. import events
 from . import profile
 from .history import DEFAULT_TURNS, History
 from .pack import Pack, _content_tokens
-from .prompts import GROUNDING, LEARNER, SYSTEM, UNKNOWN
+from .prompts import GROUNDING, LEARNER, OPENER, SYSTEM, UNKNOWN
 
 _SENTENCE_END = re.compile(r"(?<=[.!?])\s+")
 _THINK_PAIR = re.compile(r"<think>.*?</think>", re.DOTALL)
@@ -40,19 +41,60 @@ _EMOJI = re.compile(
 # previous turn rather than naming its own subject.
 _PRONOUN = re.compile(r"\b(it|its|that|this|they|them|their|those|these|one)\b", re.I)
 
+# Openers: how a learner starts or ends a session rather than asks something.
+# Both are anchored at the start, because these words only open a turn — "can
+# WE study maths" proposes, "can a magnet stick to copper" asks, and only the
+# first begins with the phrase.
+_GREETING = re.compile(
+    r"^\s*(hi|hello|hey|namaste|greetings|good\s+(morning|afternoon|evening|night)"
+    r"|bye|goodbye|see\s+you|thanks|thank\s+you)\b", re.I)
+_PROPOSAL = re.compile(
+    r"^\s*(let'?s|shall\s+we|can\s+we|could\s+we|i\s+want\s+to|i\s+wanna"
+    r"|i'?d\s+like\s+to|teach\s+me)\b", re.I)
+# Interrogatives only — a real question hiding inside an opener ("thanks, what
+# is a fraction", "let's say I have 3 apples, how many is that") must still be
+# answered as a question. Deliberately NOT the auxiliaries is/are/do/can: "let's
+# DO maths" is an opener, and including them would break every proposal.
+_WH = re.compile(r"\b(what|why|how|when|where|who|whom|whose|which)\b", re.I)
+
 _pack: Pack | None = None
+_pack_lock = threading.Lock()
 _history = History(DEFAULT_TURNS)
 
 
 def _get_pack(cfg: dict) -> Pack | None:
     global _pack
-    if _pack is None:
-        _pack = Pack.load_config(cfg["tutor"].get("pack"))
-        if _pack:
-            print(f"  pack: {len(_pack.chunks)} chunks across "
-                  f"{len(_pack.subjects) or 1} subject(s): "
-                  f"{', '.join(_pack.subjects) or _pack.topic}", flush=True)
+    # Locked because warm() loads the pack on a background thread: without it a
+    # learner pressing the button during boot would read and embed the corpus a
+    # second time, on the turn we are trying to make fast.
+    with _pack_lock:
+        if _pack is None:
+            _pack = Pack.load_config(cfg["tutor"].get("pack"))
+            if _pack:
+                print(f"  pack: {len(_pack.chunks)} chunks across "
+                      f"{len(_pack.subjects) or 1} subject(s): "
+                      f"{', '.join(_pack.subjects) or _pack.topic}", flush=True)
     return _pack
+
+
+def is_opener(question: str) -> bool:
+    """Is this a greeting or a proposal rather than a question to answer?
+
+    Openers do not get grounded. "let's study physics" measured on the device
+    retrieved the measurement-units lesson and produced a lecture about metres:
+    a whole subject is not a question, so retrieval picks an arbitrary lesson
+    inside it and the learner never gets to say what they actually wanted.
+
+    Uniform rule, on purpose: an opener never grounds, even when it names
+    something we teach. "I want to learn about fractions" is better answered
+    with "great — what about them?" than with a lesson chosen for them, and the
+    answer to the real question that follows is grounded normally (history
+    carries the subject through retrieval_query).
+    """
+    q = question.strip()
+    if not q or _WH.search(q):
+        return False
+    return bool(_GREETING.match(q) or _PROPOSAL.match(q))
 
 
 def _static_system(cfg: dict) -> str:
@@ -152,10 +194,15 @@ def build_messages(question: str, cfg: dict) -> tuple[list[dict], list[dict]]:
     the volatile tail is free, and anything inserted above it is paid for on
     every subsequent turn.
     """
-    hits = _retrieve(question, cfg)
+    opener = is_opener(question)
+    if opener:
+        events.emit("opener", text=question)
+    hits = [] if opener else _retrieve(question, cfg)
     turn = question
     if hits:
         turn = GROUNDING.format(material=_material(hits, cfg)).strip() + "\n\n" + question
+    elif opener:
+        turn = OPENER.strip() + "\n\n" + question
     prior = _history.messages() if cfg["tutor"].get("history_turns", 0) else []
     return ([{"role": "system", "content": _static_system(cfg)}]
             + prior
@@ -176,6 +223,43 @@ def remember(question: str, reply: str, cfg: dict) -> None:
 def forget() -> None:
     """Drop the conversation — a new learner must not inherit the last one."""
     _history.clear()
+
+
+def _warm(cfg: dict) -> None:
+    _get_pack(cfg)                      # corpus + embedding cache off disk
+    t = cfg["tutor"]
+    try:
+        requests.post(
+            f"{t['llama_url']}/v1/chat/completions",
+            json={
+                "stream": False,
+                "max_tokens": 1,        # we want the prefill, not the answer
+                "chat_template_kwargs": {"enable_thinking": False},
+                "messages": [{"role": "system", "content": _static_system(cfg)},
+                             {"role": "user", "content": "hello"}],
+            },
+            timeout=t["timeout_s"],
+        )
+    except requests.RequestException:
+        pass   # best effort: an unwarmed first turn is slow, never broken
+
+
+def warm(cfg: dict) -> None:
+    """Pay the first-turn costs before a learner is waiting on them.
+
+    Two of them, both otherwise charged to whoever asks the first question:
+    loading the pack off disk, and prefilling the static system prefix that
+    every turn shares. llama-server keeps the KV cache for the longest common
+    prefix, so once these tokens are computed the real first question only
+    prefills its own tail — the same trick prompt ordering already relies on
+    (build_messages), applied one turn earlier.
+
+    Sibling of tts.preload(), which exists for the same reason. Backgrounded
+    rather than blocking, because llama-server may still be loading its model
+    when the app starts: a warm that is not ready yet must delay nothing, and
+    a warm that fails outright must break nothing.
+    """
+    threading.Thread(target=_warm, args=(cfg,), daemon=True).start()
 
 
 def _fallback_sentences(hits: list[dict]) -> Iterator[str]:

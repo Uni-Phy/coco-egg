@@ -121,6 +121,13 @@ goes now:
 3. **Silence hangover** — 1.2s of dead air before work starts. A push-to-talk
    button (spec decision #5) removes it outright.
 
+The **first** turn used to be worse than all of them, because it also paid the
+pack load and the prefill of the static system prefix. `tutor.warm()` now does
+both at startup on a background thread, the way `preload()` already did for the
+Piper voice. Measured against the live server: **172 prompt tokens / 3339 ms
+cold vs 16 tokens / 365 ms warmed — ~3.0s off the first turn.** Later turns were
+never affected; they already shared that prefix.
+
 Note the mic is an eMeet M0 Plus with **hardware AEC**: it cancels its own
 speaker output almost completely (a full-volume tone played into it records at
 the noise floor). That is what stops the egg hearing itself, but it also means
@@ -158,6 +165,16 @@ reached the water cycle. Measured on `tools/eval_retrieval.py`:
 
 If the embedding server is unreachable it falls back to lexical — degraded, not
 broken. Returning nothing stays a normal, frequent outcome.
+
+**Openers are never grounded (v0.4).** *"Let's study physics"* used to retrieve
+the measurement-units lesson and answer with a lecture about metres. A whole
+subject is not a question, so retrieval picks some arbitrary lesson inside it
+and the learner never gets to say what they wanted. Greetings and proposals
+(`let's`, `shall we`, `can we`, `i want to`, `teach me`, with no interrogative)
+now skip retrieval and get a short reply that invites a specific question — and
+the question that follows grounds normally, because history carries the subject
+across. A real question hiding behind a greeting (*"thanks, what is a
+fraction"*) is still answered as a question.
 
 Still hardcoded, and worth revisiting: one pack file at a time
 (`tutor.pack`), an English-only stopword list, and a `max_reply_chars` cut.

@@ -264,3 +264,51 @@ RAM stopped being the argument once the leak was capped: `mem_limit: 3g` plus
 fine-tune in §4's plan — train faithfulness and negation handling into a 0.6B
 from the transcripts we now record, rather than hoping a prompt will hold it.
 That is the whole point of the model-factory loop (spec §3).
+
+## 10. Openers are not questions, and the first turn is not free (v0.4)
+
+Two small changes, both aimed at the first thirty seconds of a demo rather than
+the median turn.
+
+**Openers.** *"Let's study physics"* retrieved the measurement-units lesson and
+answered with a lecture about metres. The bug is not retrieval quality — the
+lesson genuinely is inside physics. It is that a whole subject is not a
+question, so retrieval picks an arbitrary lesson within it and the learner never
+gets asked what they actually wanted. Same for *"hello"*, which has no subject at
+all.
+
+`llama_client.is_opener()` classes a turn as an opener when it starts with a
+greeting or a proposal (`let's`, `shall we`, `can we`, `i want to`, `teach me`)
+and contains no interrogative. Openers skip retrieval entirely and get
+`prompts.OPENER`, which asks the model to reply warmly and invite a specific
+question.
+
+The rule is uniform on purpose: an opener never grounds, *even when it names
+something we teach*. "I want to learn about fractions" is better answered with
+"great — what about them?" than with a lesson chosen on the learner's behalf,
+and the real question that follows grounds normally (`retrieval_query` carries
+the subject across).
+
+The risk this creates is the opposite failure — swallowing a real question — so
+`test_opener.py` asserts that no question shipped by any course is ever classed
+as an opener. That guard is load-bearing: the eval calls `retrieve_semantic()`
+directly and would never see this rule fire.
+
+**Warming.** The static system prefix was prefilled on whichever turn came
+first. `llama_client.warm()` now pays it at startup, on a background thread,
+alongside loading the pack. Measured against the live server, with the nonce
+placed first so the prompt is genuinely novel:
+
+| | prefill | time |
+|---|---|---|
+| cold | 172 tokens | 3339 ms |
+| warmed | 16 tokens | 365 ms |
+
+**~3.0s off the first turn.** First turn only — every later turn already shared
+that prefix, which is the point of the ordering in `build_messages()`.
+
+Worth recording how the first attempt lied: with the nonce *appended* to the
+system prompt, the "cold" run reported 31 tokens, because the server still had
+the real SYSTEM cached from live turns and only recomputed the tail. Prefix
+caching is prefix-based — a benchmark for it has to differ at the first token or
+it measures nothing.
