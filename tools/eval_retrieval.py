@@ -54,14 +54,22 @@ def topic_matches(chunk: dict, expected: str) -> bool:
 
 # (question, expected chunk id). Phrased as a child would, never as the pack
 # does — that is the whole point of the file.
+#
+# Expected ids were reconciled once, on 2026-07-29, after the packs were built:
+# several labels were written before the chunks existed and named the same
+# lesson differently ("respiration" for what became `breathing-and-oxygen`).
+# Each was changed only after READING the retrieved chunk and confirming it
+# answers the question. Do not reconcile by setting the label to whatever
+# currently retrieves — that makes this file agree with the code by
+# construction and stops it being able to fail.
 SHOULD_RETRIEVE = [
-    ("how do animals breathe", "respiration"),
-    ("why do we need air", "respiration"),
+    ("how do animals breathe", "breathing-and-oxygen"),
+    ("why do we need air", "breathing-and-oxygen"),
     ("what do plants need to grow", "photosynthesis"),
     ("why are leaves green", "photosynthesis"),
     ("do plants eat mud", "plants-soil"),
-    ("how does rain happen", "water-cycle"),
-    ("where do clouds come from", "water-cycle"),
+    ("how does rain happen", "clouds-and-rain"),
+    ("where do clouds come from", "clouds-and-rain"),
     ("what is one half", "fractions"),
     ("if I cut a chapati in two what do I have", "fractions"),
     ("what rights do I have", "constitution"),
@@ -74,7 +82,9 @@ SHOULD_RETRIEVE = [
     # It is the question children ask most, and grounding it wrongly on the
     # water cycle is what exposed the whole precision problem — so the sky
     # course now teaches it and this is a hit, not a false positive.
-    ("why is the sky blue", "sky-blue"),
+    ("why is the sky blue", "light-and-sky"),
+    # Was a should_not_retrieve case until the maths course landed.
+    ("what is 7 times 8", "times-tables-patterns"),
 ]
 
 # Nothing in the library answers these. Grounding one of them is how the tutor
@@ -84,7 +94,6 @@ SHOULD_NOT_RETRIEVE = [
     "what is the range",
     "what is game theory",
     "who is my teacher",
-    "what is 7 times 8",
     "tell me a joke",
 ]
 
