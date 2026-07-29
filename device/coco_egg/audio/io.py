@@ -59,8 +59,19 @@ def record_utterance(cfg: dict, on_block: BlockCallback | None = None) -> tuple[
     a = cfg["audio"]
     sr = a["sample_rate"]
     block = int(sr * 0.1)
-    silence_blocks_needed = int(a["silence_stop_s"] / 0.1)
-    max_blocks = int(a["max_utterance_s"] / 0.1)
+    # round(), not int(): 1.2 / 0.1 is 11.999999999999998 in floating point, so
+    # int() silently truncated a configured 1.2s hangover to 1.1s and a 30s cap
+    # to 29.9s. The defaults were lowered to match what the device was actually
+    # doing, so this fixes the arithmetic without changing behaviour.
+    silence_blocks_needed = round(a["silence_stop_s"] / 0.1)
+    max_blocks = round(a["max_utterance_s"] / 0.1)
+    # Separate from silence_stop_s, which only applies once speech has STARTED.
+    # With no speech at all the recorder ran to max_utterance_s, so pressing the
+    # button and saying nothing bought 30 seconds of dead air — measured on the
+    # device as a hangover of 30.048s. In front of an audience that is the worst
+    # failure mode the loop has, because it looks like a hang rather than a miss.
+    # 0 restores the old behaviour.
+    give_up_blocks = round(a.get("no_speech_s", 0) / 0.1)
 
     device = resolve_input(cfg)
     chunks: list[np.ndarray] = []
@@ -70,7 +81,7 @@ def record_utterance(cfg: dict, on_block: BlockCallback | None = None) -> tuple[
     with sd.InputStream(samplerate=sr, channels=1, dtype="int16",
                         device=device,
                         blocksize=block) as stream:
-        for _ in range(max_blocks):
+        for elapsed_blocks in range(max_blocks):
             data, _ = stream.read(block)
             mono = data[:, 0]
             chunk = mono.copy()
@@ -86,6 +97,12 @@ def record_utterance(cfg: dict, on_block: BlockCallback | None = None) -> tuple[
                 on_block(chunk, is_silent)
             if voiced_yet and is_silent and silent >= silence_blocks_needed:
                 break
+            # Nobody started talking. Give the turn back rather than holding the
+            # room. Checked AFTER on_block so the streaming transcriber still
+            # sees every block it would have seen.
+            if (not voiced_yet and give_up_blocks
+                    and elapsed_blocks + 1 >= give_up_blocks):
+                return np.zeros(0, dtype=np.int16), speech_end
     audio = np.concatenate(chunks) if chunks else np.zeros(0, dtype=np.int16)
     return audio, speech_end
 

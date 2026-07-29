@@ -16,13 +16,24 @@ DEFAULTS = {
         "output_device": "default",
         "sample_rate": 16000,
         "max_utterance_s": 30,
-        "silence_stop_s": 1.2,   # stop recording after this much trailing silence
+        # Trailing silence that ends an utterance. 1.1, not 1.2, because 1.1
+        # is what the device has always actually used: int(1.2/0.1) is 11,
+        # not 12. The rounding is fixed in audio/io.py; the default is set
+        # to the measured behaviour so nothing silently got slower.
+        "silence_stop_s": 1.1,
         # RMS threshold, tuned on the M0 bench (Pi 5 + eMeet M0 Plus). Measured
         # there: room noise floor sits at 0.00003 rms, while real speech sags to
         # 0.014 mid-sentence. At the old 0.010 a learner who paused to think got
         # cut off mid-question ("What is the" instead of the whole sentence), so
         # this sits well under the speech sag and still 150x over the noise floor.
         "silence_rms": 0.005,
+        # Give up if nobody starts talking at all. Distinct from silence_stop_s,
+        # which only applies once speech HAS started — with none, the recorder
+        # ran to max_utterance_s and a button press with no question bought 30
+        # seconds of dead air (measured on the device). 4s is long enough to
+        # draw breath and short enough that a miss reads as a miss rather than
+        # as a hang. 0 disables it.
+        "no_speech_s": 4.0,
     },
     "asr": {
         # "whisper" (whisper.cpp via whisper-server) or "moonshine" (in-process
