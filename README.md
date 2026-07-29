@@ -90,6 +90,37 @@ make build  # start containers with `--build` - rebuilds egg and whisper images.
             # Only needed after a Dockerfile edit.
 ```
 
+## Updating a device
+
+`device/`, `fixtures/`, `tools/` and `egg.yaml` are bind-mounted into the egg
+container, so a code or content change is a pull and a restart — no image
+rebuild unless the Dockerfile changed.
+
+```shell
+git pull && docker restart egg
+```
+
+Give it ~15s before the first question: `tutor.warm()` is loading the pack and
+prefilling the static prompt prefix in the background, and racing it costs you
+the ~3.0s that buys.
+
+Then check it on real hardware, which is the only check that counts:
+
+```shell
+docker exec -it egg python tools/relcheck.py
+```
+
+A device needs a GitHub **deploy key** to pull. If the key is not one of ssh's
+default names it will never be offered, and `git pull` fails with
+`Permission denied (publickey)` while `ssh -i <key> -T git@github.com`
+authenticates perfectly — point `~/.ssh/config` at it:
+
+```
+Host github.com
+    IdentityFile ~/.ssh/id_coco
+    IdentitiesOnly yes
+```
+
 ## Measured on real hardware (M0 bench)
 
 Pi 5 8GB / Cortex-A76 / DietPi (Debian 13), eMeet M0 Plus USB speakerphone.
