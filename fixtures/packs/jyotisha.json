@@ -1,0 +1,384 @@
+{
+  "topic": "Jyotisha: the Indian sky tradition",
+  "lesson": [
+    {
+      "id": "jyotisha",
+      "goal": "Students should understand that Jyotisha has two main aspects: astronomy and astrology."
+    },
+    {
+      "id": "panchanga",
+      "goal": "Understand the significance and components of the panchanga in traditional Indian astronomy and its use in determining dates for festivals and weddings."
+    },
+    {
+      "id": "tithi",
+      "goal": "Understand that a tithi is a lunar day and how it shifts over time."
+    },
+    {
+      "id": "week-days-and-planets",
+      "goal": "Students should understand that the seven days of the week are named after the sun, moon, and five planets visible to the naked eye, and that this concept is shared across cultures."
+    },
+    {
+      "id": "nakshatra",
+      "goal": "Students should understand that a nakshatra is a celestial division of the moon's path and how it relates to a person's birth."
+    },
+    {
+      "id": "rashi-and-nakshatras",
+      "goal": "Students should understand the concept of rashi and nakshatras, and their role in astrology and horoscopes."
+    },
+    {
+      "id": "navagraha",
+      "goal": "Students should understand that the Navagraha are nine celestial bodies considered influential, even though they are not planets."
+    },
+    {
+      "id": "rahu-and-ketu",
+      "goal": "Students should understand that Rahu and Ketu are points where the moon's path crosses the sun's path, and they are important for predicting eclipses."
+    },
+    {
+      "id": "eclipses-and-ancient-astronomy",
+      "goal": "Students should understand that eclipses occur when celestial bodies block each other's light, and that ancient Indian astronomers like Aryabhata explained these events through observation and reasoning."
+    },
+    {
+      "id": "lunisolar-calendar",
+      "goal": "Students should understand how the Indian calendar adjusts for both the moon and the sun to keep seasonal festivals aligned."
+    },
+    {
+      "id": "sankranti-and-festival-dates",
+      "goal": "Students should understand that Sankranti is based on the sun's movement and aligns with the solar calendar, while festivals like Diwali and Holi are based on the moon's movement."
+    },
+    {
+      "id": "precession-and-zodiacs",
+      "goal": "Understand how precession affects the alignment of zodiac signs in different astrology systems."
+    },
+    {
+      "id": "ayanamsa",
+      "goal": "Understand that the ayanamsa measures the drift between the star zodiac and the season zodiac, and it is essential for accurate astronomical calculations."
+    },
+    {
+      "id": "indian-astronomers",
+      "goal": "Students should understand the contributions of Indian mathematicians to the development of mathematics and its influence on the world."
+    },
+    {
+      "id": "jantar-mantar",
+      "goal": "Students should understand how Jantar Mantar is an astronomical observatory and its unique features like the Samrat Yantra."
+    },
+    {
+      "id": "farming-and-the-calendar",
+      "goal": "Students should understand how calendars are based on natural events like the sun's movement and how they help with farming and festivals."
+    },
+    {
+      "id": "kundali-map",
+      "goal": "Understand that the kundali is a map of planetary positions at birth, which the tradition interprets meaningfully, but the positions themselves are scientific measurements."
+    },
+    {
+      "id": "jyotisha-and-science",
+      "goal": "Students should understand that Jyotisha has a strong cultural and traditional basis but is not scientifically proven."
+    },
+    {
+      "id": "muhurta",
+      "goal": "Students should understand that Muhurta is the practice of selecting a favorable time in Jyotisha, often used to determine auspicious moments for important events."
+    },
+    {
+      "id": "zodiac",
+      "goal": "Students should understand that the zodiac is a shared human invention that has been adapted by different cultures while keeping the core concept of dividing the sky into twelve parts."
+    }
+  ],
+  "chunks": [
+    {
+      "id": "jyotisha",
+      "title": "Jyotisha",
+      "text": "Jyotisha means the knowledge of light, and it is the old Indian study of the sky. For thousands of years people here watched the sun, the moon, the planets and the stars, wrote down exactly where they were, and worked out how they move. That careful watching gave India its calendar, its festival dates, its planting seasons and its way of finding direction at night. Jyotisha has two sides that are worth keeping separate in your mind. One side works out where things in the sky actually are and when they will get there, and that is astronomy, checkable by anybody with a clear night. The other side reads meaning into those positions for a person's life, and that is astrology, which is a matter of belief and tradition rather than something a measurement can settle.",
+      "explain": "Jyotisha means the knowledge of light, and it is the old Indian study of the sky. For thousands of years people here watched the sun, the moon, the planets and the stars, wrote down exactly where they were, and worked out how they move. That careful watching gave India its calendar, its festival dates, its planting seasons and its way of finding direction at night."
+    },
+    {
+      "id": "panchanga",
+      "title": "Panchanga",
+      "text": "The panchanga is the traditional Indian almanac, and its name simply means five limbs. Those five parts are the tithi, the vara, the nakshatra, the yoga and the karana, and together they describe any given day completely in the old system. A village priest reading a panchanga can tell you which lunar day it is, which weekday, which star the moon is sitting in, and which combinations apply. It is still printed and still used, in homes across India, to fix the date of a wedding or a festival. What makes it remarkable is that all five quantities are worked out from the positions of just two objects, the sun and the moon, tracked with great care over centuries.",
+      "explain": "The panchanga is the traditional Indian almanac, and its name simply means five limbs. Those five parts are the tithi, the vara, the nakshatra, the yoga and the karana, and together they describe any given day completely in the old system. A village priest reading a panchanga can tell you which lunar day it is, which weekday, which star the moon is sitting in, and which combinations apply."
+    },
+    {
+      "id": "tithi",
+      "title": "Tithi",
+      "text": "A tithi is a lunar day, and it is not the same thing as the day you get from the sun. A tithi is the time the moon takes to pull twelve degrees further ahead of the sun in the sky. Thirty tithis make one full cycle from new moon to new moon and back. Because the moon does not travel at a perfectly even speed, a tithi is not a fixed length. It runs anywhere from about twenty hours to about twenty seven. That is why a festival tied to a tithi can seem to shift about on an ordinary calendar, and why a panchanga tells you not just the tithi but the exact hour it begins and ends.",
+      "explain": "A tithi is a lunar day, and it is not the same thing as the day you get from the sun. A tithi is the time the moon takes to pull twelve degrees further ahead of the sun in the sky. Thirty tithis make one full cycle from new moon to new moon and back."
+    },
+    {
+      "id": "week-days-and-planets",
+      "title": "Week Days and Planets",
+      "text": "The seven days of the week are named after the sun, the moon and the five planets you can see without a telescope. Ravivar is the sun's day, Somvar the moon's, Mangalvar takes Mars, Budhvar Mercury, Guruvar Jupiter, Shukravar Venus and Shanivar Saturn. Now look at English. Sunday is the sun, Monday the moon, and Saturday is Saturn. In French, Mardi is Mars and Mercredi is Mercury. The same seven bodies, in the same order, name the week across cultures that were separated by enormous distances. It is one of the oldest ideas humans still use every single day.",
+      "explain": "The seven days of the week are named after the sun, the moon and the five planets you can see without a telescope. Ravivar is the sun's day, Somvar the moon's, Mangalvar takes Mars, Budhvar Mercury, Guruvar Jupiter, Shukravar Venus and Shanivar Saturn. Now look at English."
+    },
+    {
+      "id": "nakshatra",
+      "title": "Nakshatra",
+      "text": "A nakshatra is a patch of sky the moon passes through, and the old system divides the moon's whole path into twenty seven of them. The moon goes right round the sky in about twenty seven days, so it moves through roughly one nakshatra each day, which is exactly why there are twenty seven. Each one is named after the star pattern in it, like Rohini, Ashwini or Chitra. The nakshatra the moon was in when a child was born is that child's birth star, and in many families it decides the first syllable of the child's name. If you know your nakshatra, you know where the moon stood on the night you were born.",
+      "explain": "A nakshatra is a patch of sky the moon passes through, and the old system divides the moon's whole path into twenty seven of them. The moon goes right round the sky in about twenty seven days, so it moves through roughly one nakshatra each day, which is exactly why there are twenty seven. Each one is named after the star pattern in it, like Rohini, Ashwini or Chitra."
+    },
+    {
+      "id": "rashi-and-nakshatras",
+      "title": "Rashi and Nakshatras",
+      "text": "A rashi is a sign, and there are twelve of them dividing the sun's yearly path around the sky. The sun appears to travel right round the sky once a year, always along the same line, and that line is called the ecliptic. Cut it into twelve equal parts and you have the twelve rashis, from Mesha through to Meena. The sun spends about a month in each. Twelve rashis and twenty seven nakshatras are two different rulers laid along the same road, one convenient for the sun and one convenient for the moon, and a panchanga uses both at once.",
+      "explain": "A rashi is a sign, and there are twelve of them dividing the sun's yearly path around the sky. The sun appears to travel right round the sky once a year, always along the same line, and that line is called the ecliptic. Cut it into twelve equal parts and you have the twelve rashis, from Mesha through to Meena."
+    },
+    {
+      "id": "navagraha",
+      "title": "Navagraha",
+      "text": "The navagraha are the nine grahas of the tradition, and graha does not really mean planet. It means one that seizes or takes hold, so the word is about influence rather than about being a world. The nine are the sun, the moon, Mars, Mercury, Jupiter, Venus, Saturn, and then Rahu and Ketu. Notice what is in that list and what is not. The sun is a star and the moon is our satellite, yet both are counted, because the list is of things that move against the fixed stars as seen from earth. Uranus and Neptune are missing for a very good reason. You cannot see them with your eyes alone.",
+      "explain": "The navagraha are the nine grahas of the tradition, and graha does not really mean planet. It means one that seizes or takes hold, so the word is about influence rather than about being a world. The nine are the sun, the moon, Mars, Mercury, Jupiter, Venus, Saturn, and then Rahu and Ketu."
+    },
+    {
+      "id": "rahu-and-ketu",
+      "title": "Rahu and Ketu",
+      "text": "Rahu and Ketu are the two that surprise people, because they are not objects at all. They are points. The moon's path around the earth is tilted a little against the sun's path, so the two paths cross at exactly two places, on opposite sides of the sky. Those two crossing points are Rahu and Ketu. They matter enormously because eclipses can only happen when the sun and moon meet near one of them. The old story says a demon swallows the sun, and the demon's head and tail are these two points. Underneath the story sits real geometry, and that geometry predicts eclipses correctly.",
+      "explain": "Rahu and Ketu are the two that surprise people, because they are not objects at all. They are points. The moon's path around the earth is tilted a little against the sun's path, so the two paths cross at exactly two places, on opposite sides of the sky."
+    },
+    {
+      "id": "eclipses-and-ancient-astronomy",
+      "title": "Eclipses and Ancient Astronomy",
+      "text": "An eclipse is a shadow, and Indian astronomers said so a very long time ago. Aryabhata, writing about fifteen hundred years ago, stated plainly that the moon has no light of its own, that a lunar eclipse is the earth's shadow falling on the moon, and that a solar eclipse is the moon's shadow falling on the earth. He also said the earth spins on its axis, and that the stars only seem to wheel overhead because we are the ones turning. He worked all this out with no telescope, from patient measurement and hard arithmetic, and he was right.",
+      "explain": "An eclipse is a shadow, and Indian astronomers said so a very long time ago. Aryabhata, writing about fifteen hundred years ago, stated plainly that the moon has no light of its own, that a lunar eclipse is the earth's shadow falling on the moon, and that a solar eclipse is the moon's shadow falling on the earth. He also said the earth spins on its axis, and that the stars only seem to wheel overhead because we are the ones turning."
+    },
+    {
+      "id": "lunisolar-calendar",
+      "title": "Lunisolar Calendar",
+      "text": "The Indian calendar is lunisolar, which means it tries to keep step with the moon and the sun at the same time. Twelve lunar months come to about three hundred and fifty four days, while the year the seasons follow is about three hundred and sixty five. Left alone, the months would drift backwards through the seasons and a monsoon festival would eventually land in winter. The fix is an extra month, the adhika masa, slipped in roughly every third year to catch the calendar up. That is why Diwali does not fall on the same English date each year, but never wanders far from autumn either.",
+      "explain": "The Indian calendar is lunisolar, which means it tries to keep step with the moon and the sun at the same time. Twelve lunar months come to about three hundred and fifty four days, while the year the seasons follow is about three hundred and sixty five. Left alone, the months would drift backwards through the seasons and a monsoon festival would eventually land in winter."
+    },
+    {
+      "id": "sankranti-and-festival-dates",
+      "title": "Sankranti and Festival Dates",
+      "text": "Sankranti means the sun crossing over from one rashi into the next, and it happens twelve times a year. Makar Sankranti, when the sun enters Makara, is the famous one, and it is celebrated as Pongal, Lohri, Bihu and Uttarayan depending on where you live. Here is the thing worth noticing. Makar Sankranti sits on about the fourteenth of January every single year, while Diwali and Holi move around by weeks. The reason is simple once you know it. Sankranti is reckoned from the sun, so it matches the English calendar, which is also solar. The moving festivals are reckoned from the moon.",
+      "explain": "Sankranti means the sun crossing over from one rashi into the next, and it happens twelve times a year. Makar Sankranti, when the sun enters Makara, is the famous one, and it is celebrated as Pongal, Lohri, Bihu and Uttarayan depending on where you live. Here is the thing worth noticing."
+    },
+    {
+      "id": "precession-and-zodiacs",
+      "title": "Precession and Zodiacs",
+      "text": "Precession is the slow wobble of the earth, and it is the reason two zodiacs exist. The earth spins like a top, and like a top it also leans round very slowly, taking about twenty six thousand years for one full wobble. So the direction the earth's axis points keeps changing, and the whole sky appears to creep gradually against the seasons. Indian jyotisha measures the signs against the actual stars, which is called nirayana. Western astrology measures them against the seasons, which is called sayana. The gap between the two is now about twenty four degrees, which is why your Indian sign is usually the one before your Western one.",
+      "explain": "Precession is the slow wobble of the earth, and it is the reason two zodiacs exist. The earth spins like a top, and like a top it also leans round very slowly, taking about twenty six thousand years for one full wobble. So the direction the earth's axis points keeps changing, and the whole sky appears to creep gradually against the seasons."
+    },
+    {
+      "id": "ayanamsa",
+      "title": "Ayanamsa",
+      "text": "The ayanamsa is the number that measures that gap, and keeping it right is real astronomical work. Because the wobble is slow but never stops, the difference between the star zodiac and the season zodiac grows by about one degree every seventy two years. An almanac maker has to know the current value to place the rashis correctly, and Indian astronomers have tracked and argued over it for centuries. Around the fifth century the two zodiacs lined up almost exactly and the ayanamsa was near zero. Everything since is the slow drift of a spinning planet, written down carefully by people who noticed.",
+      "explain": "The ayanamsa is the number that measures that gap, and keeping it right is real astronomical work. Because the wobble is slow but never stops, the difference between the star zodiac and the season zodiac grows by about one degree every seventy two years. An almanac maker has to know the current value to place the rashis correctly, and Indian astronomers have tracked and argued over it for centuries."
+    },
+    {
+      "id": "indian-astronomers",
+      "title": "Indian Astronomers",
+      "text": "Aryabhata was not alone, and the line of Indian astronomers ran for well over a thousand years. Varahamihira gathered the knowledge of his time into one great compilation. Brahmagupta worked out rules for calculating with zero and with negative numbers, which mathematics everywhere still uses. Bhaskara the second wrote on the motion of planets and on ideas that come close to the calculus of much later centuries. In Kerala, Madhava and the school that followed him found infinite series for sines and for pi, some two hundred years before similar work appeared in Europe. All of it grew out of the need to predict the sky accurately.",
+      "explain": "Aryabhata was not alone, and the line of Indian astronomers ran for well over a thousand years. Varahamihira gathered the knowledge of his time into one great compilation. Brahmagupta worked out rules for calculating with zero and with negative numbers, which mathematics everywhere still uses."
+    },
+    {
+      "id": "jantar-mantar",
+      "title": "Jantar Mantar",
+      "text": "Jantar Mantar is astronomy you can walk around inside. In the seventeen hundreds Sawai Jai Singh the second built five of these observatories, at Jaipur, Delhi, Ujjain, Mathura and Varanasi, out of stone and plaster rather than brass, because he wanted instruments big enough to be read precisely and steady enough not to warp. The Samrat Yantra at Jaipur is a sundial almost as tall as a nine storey building, and its shadow edge moves about a millimetre every second. Built with no glass and no electricity, it tells the local time to within about two seconds, and it still works today.",
+      "explain": "Jantar Mantar is astronomy you can walk around inside. In the seventeen hundreds Sawai Jai Singh the second built five of these observatories, at Jaipur, Delhi, Ujjain, Mathura and Varanasi, out of stone and plaster rather than brass, because he wanted instruments big enough to be read precisely and steady enough not to warp. The Samrat Yantra at Jaipur is a sundial almost as tall as a nine storey building, and its shadow edge moves about a millimetre every second."
+    },
+    {
+      "id": "farming-and-the-calendar",
+      "title": "Farming and the Calendar",
+      "text": "The old astronomers had to be right, because farming depended on it. A calendar that slipped would tell a village to sow at the wrong time, and a wrong sowing meant a lost crop and a hungry year. Knowing when the monsoon was due, when the days would start lengthening, and when the cold would break was not an academic matter, it was survival. Festivals grew up around exactly these turning points, which is why so many of them mark a harvest or a solstice. Sky watching in India began as a practical craft, and the mathematics came from the demand for accuracy.",
+      "explain": "The old astronomers had to be right, because farming depended on it. A calendar that slipped would tell a village to sow at the wrong time, and a wrong sowing meant a lost crop and a hungry year. Knowing when the monsoon was due, when the days would start lengthening, and when the cold would break was not an academic matter, it was survival."
+    },
+    {
+      "id": "kundali-map",
+      "title": "Kundali Map",
+      "text": "A kundali is a birth chart, and what it actually is, is a map. It records where the sun, the moon and the visible planets stood, as seen from one place on earth, at one particular moment. That much is plain astronomy, and it can be checked and recomputed by anybody with the right method. The tradition then reads meaning into that arrangement, holding that the pattern at birth speaks to a person's nature and their life. Those two things sit on very different footings. The positions are measurements. The meanings are what the tradition teaches, and they are not the kind of claim a measurement can confirm.",
+      "explain": "A kundali is a birth chart, and what it actually is, is a map. It records where the sun, the moon and the visible planets stood, as seen from one place on earth, at one particular moment. That much is plain astronomy, and it can be checked and recomputed by anybody with the right method."
+    },
+    {
+      "id": "jyotisha-and-science",
+      "title": "Jyotisha and Science",
+      "text": "It is worth being straight about what science says here. Careful modern studies have tested whether the positions of planets at birth predict personality or life events, and they have not found an effect. So the fair way to hold jyotisha is this. Its astronomy is genuinely excellent, and much of it was centuries ahead of the rest of the world. Its calendar still runs Indian life and runs it well. Its predictive side is a tradition of meaning, deeply woven into culture and family life, and you can learn it and respect it while knowing it is belief rather than tested fact. Both things are true at once, and neither one cancels the other.",
+      "explain": "It is worth being straight about what science says here. Careful modern studies have tested whether the positions of planets at birth predict personality or life events, and they have not found an effect. So the fair way to hold jyotisha is this."
+    },
+    {
+      "id": "muhurta",
+      "title": "Muhurta",
+      "text": "Muhurta is the practice of choosing a good moment, and it is one of the most visible parts of jyotisha in daily life. Before a wedding, a housewarming, the start of a business or a child's first lesson, many families consult a panchanga to pick an auspicious time. The tradition holds that certain combinations of tithi, nakshatra and weekday favour certain undertakings. There is something quietly sensible in the custom too, whatever you make of the reasoning. It makes families stop, agree on a date together, and treat a beginning as something that deserves marking.",
+      "explain": "Muhurta is the practice of choosing a good moment, and it is one of the most visible parts of jyotisha in daily life. Before a wedding, a housewarming, the start of a business or a child's first lesson, many families consult a panchanga to pick an auspicious time. The tradition holds that certain combinations of tithi, nakshatra and weekday favour certain undertakings."
+    },
+    {
+      "id": "zodiac",
+      "title": "Zodiac",
+      "text": "The zodiac is a shared human invention, and tracing it is a lovely piece of history. The idea of cutting the sun's path into twelve parts appears first in Babylon, well over two thousand years ago. It travelled to Greece, and it travelled to India, and each place shaped it in its own way while keeping the twelve. That is why an Indian rashi and a Western sign line up name for name, Mesha with Aries, Vrishabha with Taurus, all the way round. Different civilisations looked up at the same sky, divided it in the same way, and passed the idea along until it belonged to everyone.",
+      "explain": "The zodiac is a shared human invention, and tracing it is a lovely piece of history. The idea of cutting the sun's path into twelve parts appears first in Babylon, well over two thousand years ago. It travelled to Greece, and it travelled to India, and each place shaped it in its own way while keeping the twelve."
+    }
+  ],
+  "quiz": [
+    {
+      "q": "What does the word jyotisha mean?",
+      "a": "It means the knowledge of light.",
+      "accept": [
+        "light"
+      ]
+    },
+    {
+      "q": "A panchanga has five limbs. What does the word panchanga mean?",
+      "a": "Five limbs. Pancha means five.",
+      "accept": [
+        "five",
+        "5"
+      ]
+    },
+    {
+      "q": "How many tithis make one full round, from new moon back to new moon?",
+      "a": "Thirty.",
+      "accept": [
+        "thirty",
+        "30"
+      ]
+    },
+    {
+      "q": "Shanivar is named after a planet. Which one?",
+      "a": "Saturn. And so is Saturday, in English.",
+      "accept": [
+        "saturn",
+        "shani"
+      ]
+    },
+    {
+      "q": "How many nakshatras is the moon's path divided into?",
+      "a": "Twenty seven, roughly one for each day of the moon's journey.",
+      "accept": [
+        "twenty seven",
+        "twenty-seven",
+        "27"
+      ]
+    },
+    {
+      "q": "How many rashis are there?",
+      "a": "Twelve. The sun spends about a month in each.",
+      "accept": [
+        "twelve",
+        "12"
+      ]
+    },
+    {
+      "q": "How many grahas are there in the navagraha?",
+      "a": "Nine. Nava means nine.",
+      "accept": [
+        "nine",
+        "9"
+      ]
+    },
+    {
+      "q": "Rahu and Ketu are not objects in the sky. So what are they?",
+      "a": "The two points where the moon's path crosses the sun's path.",
+      "accept": [
+        "point",
+        "cross",
+        "meet",
+        "intersect"
+      ]
+    },
+    {
+      "q": "Who said, about fifteen hundred years ago, that an eclipse is only a shadow?",
+      "a": "Aryabhata.",
+      "accept": [
+        "aryabhata",
+        "arya bhata",
+        "aryabhatta"
+      ]
+    },
+    {
+      "q": "What gets added to the Indian calendar to keep it in step with the seasons?",
+      "a": "An extra month, called the adhika masa.",
+      "accept": [
+        "month",
+        "adhika"
+      ]
+    },
+    {
+      "q": "Why does Makar Sankranti land on nearly the same date every year?",
+      "a": "Because it is reckoned from the sun, and so is the English calendar.",
+      "accept": [
+        "sun",
+        "solar"
+      ]
+    },
+    {
+      "q": "What is the slow wobble of the earth called?",
+      "a": "Precession. One full wobble takes about twenty six thousand years.",
+      "accept": [
+        "precession",
+        "wobble"
+      ]
+    },
+    {
+      "q": "Roughly how many degrees apart are the Indian and Western zodiacs now?",
+      "a": "About twenty four degrees.",
+      "accept": [
+        "twenty four",
+        "twenty-four",
+        "24"
+      ]
+    },
+    {
+      "q": "Which Indian astronomer wrote the rules for calculating with zero?",
+      "a": "Brahmagupta.",
+      "accept": [
+        "brahmagupta",
+        "brahma gupta"
+      ]
+    },
+    {
+      "q": "Who built the five Jantar Mantar observatories?",
+      "a": "Sawai Jai Singh the second.",
+      "accept": [
+        "jai singh",
+        "jaisingh",
+        "sawai"
+      ]
+    },
+    {
+      "q": "Which city has the giant Samrat Yantra sundial?",
+      "a": "Jaipur.",
+      "accept": [
+        "jaipur"
+      ]
+    },
+    {
+      "q": "A kundali is a map. A map of what?",
+      "a": "The sky, as it stood at the moment somebody was born.",
+      "accept": [
+        "sky",
+        "star",
+        "planet",
+        "birth",
+        "heaven"
+      ]
+    },
+    {
+      "q": "When scientists tested whether birth planets predict personality, what did they find?",
+      "a": "They found no effect at all.",
+      "accept": [
+        "no effect",
+        "nothing",
+        "not find",
+        "not found",
+        "didn t find",
+        "did not find",
+        "no link",
+        "none"
+      ]
+    },
+    {
+      "q": "What is the practice of choosing an auspicious moment called?",
+      "a": "Muhurta.",
+      "accept": [
+        "muhurta",
+        "muhurat",
+        "muhurath"
+      ]
+    },
+    {
+      "q": "Which ancient civilisation first cut the sun's path into twelve parts?",
+      "a": "Babylon.",
+      "accept": [
+        "babylon",
+        "babylonia",
+        "mesopotamia"
+      ]
+    }
+  ]
+}

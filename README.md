@@ -184,6 +184,34 @@ fraction"*) is still answered as a question.
 Still hardcoded, and worth revisiting: one pack file at a time
 (`tutor.pack`), an English-only stopword list, and a `max_reply_chars` cut.
 
+## Quiz mode — the egg as quiz master
+
+Say **"quiz me"**, *"let's play a quiz"* or *"ask me some questions"* and the
+device turns into a quiz master: it asks, you answer aloud, it marks you and
+keeps score. *"Stop"* ends it early, *"say that again"* repeats, *"I don't
+know"* passes without being marked harshly. `quiz me on the sky` limits the
+round to a matching subject.
+
+**No model is involved, and that is the design.** A quiz turn is a question, a
+verdict and the next question — at 3.5s of generation each that stops being a
+game. Questions are authored in the pack and marked against a generous
+accept-list, so a turn costs only TTS (~1.4s) and cannot be hallucinated. Same
+reasoning that keeps `explain` away from the LLM in `build_pack.py`: being
+confidently wrong while claiming to *mark* a child is the worst failure the
+device has available.
+
+The cost is real: judging is string matching, so an unusually phrased correct
+answer gets marked wrong. Accept-lists carry numerals and words both, and a
+wrong verdict always states the answer rather than only the miss. A pack with no
+authored questions says so instead of inventing any.
+
+```
+learner> let's play a quiz
+egg    > Alright! 3 questions on Jyotisha. Question 1. How many rashis are there?
+learner> twelve
+egg    > Correct! Twelve. The sun spends about a month in each.
+```
+
 ## Content packs (curriculum RAG)
 
 A pack is chunks + spoken explanations + a lesson plan (spec §7). Build one

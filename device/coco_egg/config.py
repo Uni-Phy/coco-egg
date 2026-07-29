@@ -79,6 +79,9 @@ DEFAULTS = {
         "embed_url": "http://llama-embed:8082",
         "embed_timeout_s": 20,
         "embed_cache": "state/.embed-cache",
+        # Questions in one round of quiz mode (tutor/quiz.py). Short on
+        # purpose: the game has to end while a child still wants more of it.
+        "quiz_questions": 5,
     },
     "tts": {
         "voice": "models/en_US-lessac-medium.onnx",

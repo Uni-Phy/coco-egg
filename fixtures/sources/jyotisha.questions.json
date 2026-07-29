@@ -1,0 +1,32 @@
+{
+  "subject": "Jyotisha — the Indian sky tradition",
+  "should_retrieve": [
+    { "q": "what is the old indian way of studying the sky", "topic": "jyotisha" },
+    { "q": "what book do priests use to find festival dates", "topic": "panchanga" },
+    { "q": "why is a moon day not the same length as a normal day", "topic": "tithi" },
+    { "q": "why is saturday named after saturn in english as well", "topic": "week-and-planets" },
+    { "q": "which star was the moon sitting in when i was born", "topic": "nakshatra" },
+    { "q": "what are the twelve signs the sun travels through", "topic": "rashi" },
+    { "q": "which nine things does the old tradition watch in the sky", "topic": "navagraha" },
+    { "q": "why do eclipses not happen every single month", "topic": "rahu-ketu" },
+    { "q": "who first worked out that an eclipse is only a shadow", "topic": "eclipse-shadow" },
+    { "q": "why does diwali land on a different date every year", "topic": "calendar" },
+    { "q": "why does makar sankranti always come in january", "topic": "sankranti" },
+    { "q": "why is my indian star sign different from the western one", "topic": "precession" },
+    { "q": "how big is the gap between the two zodiacs now", "topic": "ayanamsa" },
+    { "q": "who were the great old indian sky scientists", "topic": "astronomers" },
+    { "q": "is there a huge stone sundial somewhere in india", "topic": "jantar-mantar" },
+    { "q": "why did farmers care so much about watching the sky", "topic": "farming" },
+    { "q": "what is a birth chart actually a picture of", "topic": "kundali" },
+    { "q": "does science agree that the planets decide your life", "topic": "science-and-belief" },
+    { "q": "why do families pick a special time to start a wedding", "topic": "muhurta" },
+    { "q": "where did the twelve signs come from in the first place", "topic": "zodiac-history" }
+  ],
+  "should_not_retrieve": [
+    "who won the cricket match yesterday",
+    "what did i have for lunch",
+    "how do i solve for x",
+    "what is my wifi password",
+    "tell me a story about a dragon"
+  ]
+}

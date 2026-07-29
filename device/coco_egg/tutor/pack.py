@@ -159,6 +159,14 @@ class Pack:
             for c in d["chunks"]:
                 c.setdefault("subject", d.get("topic", ""))
                 self.chunks.append(c)
+        # Authored quiz questions, optional and per-pack (tutor/quiz.py). A pack
+        # without them simply is not quizzable — the alternative, generating
+        # them from chunks at runtime, is what that module exists to avoid.
+        self.quiz: list[dict] = []
+        for d in data:
+            for item in d.get("quiz", []):
+                item.setdefault("subject", d.get("topic", ""))
+                self.quiz.append(item)
         n_docs = len(self.chunks)
         df: dict[str, int] = {}
         for c in self.chunks:

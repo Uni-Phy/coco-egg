@@ -312,3 +312,53 @@ system prompt, the "cold" run reported 31 tokens, because the server still had
 the real SYSTEM cached from live turns and only recomputed the tail. Prefix
 caching is prefix-based — a benchmark for it has to differ at the first token or
 it measures nothing.
+
+## 11. Jyotisha as the demo course, and a quiz that never asks the model (v0.5)
+
+**The course.** Jyotisha is taught as what it actually is — the Indian sky and
+calendar tradition. Twenty chunks: panchanga, tithi, nakshatra, rashi,
+navagraha, Rahu and Ketu as the nodes where the moon's path crosses the sun's,
+precession and the ayanamsa, the lunisolar calendar and the adhika masa, why
+Sankranti is fixed while Diwali moves, Aryabhata on eclipses, Jantar Mantar.
+
+The framing was a judgement call worth recording. The course separates the
+astronomy, which is checkable and genuinely was centuries ahead, from the
+predictive tradition, which is presented as *what the tradition holds*. One
+chunk addresses the science question head-on rather than leaving it implied:
+studies have not found an effect, the calendar still works, both are true.
+Teaching it any other way would mean either asserting predictions to children as
+fact, or dismissing a living tradition — and the pack is the authority the model
+defers to, so whatever it says is what gets taught.
+
+Two chunk titles were hand-corrected after the build. The 1.7B titled the
+paragraph about Aryabhata, Brahmagupta and Madhava "Indian Mathematics", and the
+one about farmers needing an accurate calendar "Calendar and Seasons". Both name
+something real in the text but not what the chunk is *about*, and a title is a
+retrieval key at 3x weight — so the title was fixed rather than the eval label
+bent to match it.
+
+Measured with the course in, at 163 chunks / 9 subjects: **recall 82%, false
+positives 12%** (was 82% / 6% at 143 chunks / 8 subjects). Recall held; 16 of
+the 20 new questions land, in line with the rest of the library. Some of the FP
+rise is this course's own negatives — "what did I have for lunch" now reaches
+the digestion lesson.
+
+**The quiz.** `tutor/quiz.py` is deliberately LLM-free. The reasoning is
+latency-shaped: a quiz turn is question, verdict, next question, and at ~3.5s of
+generation apiece it stops being a game. Authored questions plus an accept-list
+cost only TTS, about 1.4s, and cannot be hallucinated. It is the same call as
+`build_pack.llm_polish` refusing to generate `explain` — being confidently wrong
+while *marking* a child is the worst failure mode the device has.
+
+The cost is stated rather than hidden: judging is substring matching, so a
+correct answer phrased unusually is marked wrong. Accept-lists carry numerals
+and words both (whisper returns either), and a wrong verdict always speaks the
+answer.
+
+Two things that only showed up when it ran: "let's play a quiz" is a textbook
+`is_opener()` match, so the router in `tutor/__init__.py` has to check the quiz
+FIRST or a request to play gets answered with an invitation to ask a question
+instead. And the verdict originally spliced the answer after "the answer is",
+which spoke as *"The answer is The two points where..."* — answers are full
+sentences, several of them proper nouns, so the answer now follows as its own
+sentence.
