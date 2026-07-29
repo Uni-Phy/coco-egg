@@ -17,7 +17,7 @@ import time
 import tty
 import wave
 
-from . import config, events
+from . import config, console, events
 from .asr import StreamingTranscriber, transcribe
 from .audio import play_wav, record_utterance
 from .states import UiState
@@ -193,6 +193,7 @@ def run() -> None:
 
     preload(cfg)   # pay the ~2.1s voice load now, not on the first learner
     warm(cfg)      # and the pack load + static-prefix prefill, in the background
+    console.serve(cfg)   # observer only; a failure here must not stop teaching
     # Complete turn records come off the event bus, and each write nudges the
     # profile builder — event-based, so an idle device does no work at all.
     transcript.start(cfg, on_complete=profile_builder.on_turn)

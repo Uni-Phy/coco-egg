@@ -71,6 +71,8 @@ services:
     build: { context: .., dockerfile: deploy/Dockerfile }
     depends_on: [llama-tutor, llama-embed, whisper]
     devices: ["/dev/snd:/dev/snd"]
+    ports:
+      - "8090:8090"             # console: student view + dev trace (no auth yet)
     stdin_open: true            # keyboard trigger reads stdin via input()
     tty: true
     # `docker attach` fools stdout into block-buffering; force flush per line.

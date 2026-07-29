@@ -93,6 +93,18 @@ DEFAULTS = {
     "sync": {
         "transcript_dir": "transcripts",   # buffered locally; SYNC state ships these
     },
+    "console": {
+        # Student view (an LED-ring prototype driven by presentation.CUES) plus
+        # a dev trace, on one page. See coco_egg/console/.
+        #
+        # NO AUTHENTICATION YET, and the events carry what a child said aloud.
+        # It serves only LIVE events — never stored transcripts — and is meant
+        # for a LAN you control while somebody is watching it. Set enabled:false
+        # for anything else until auth lands.
+        "enabled": True,
+        "host": "0.0.0.0",
+        "port": 8090,
+    },
     "trigger": {
         "mode": "keyboard",   # bench: Enter key. Device: "gpio" (M1, XVF3800 GPI)
     },

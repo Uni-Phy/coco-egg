@@ -1,0 +1,282 @@
+<!doctype html>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>coco-egg</title>
+<style>
+  /* The student view is a renderer of presentation.CUES and holds no colours
+     of its own — every hue, period and dwell arrives from /cues, which is the
+     same table the M1 LED driver reads. Motion is the load-bearing channel:
+     no two states share one, so the ring stays readable with colour switched
+     off (colour blindness, daylight on a diffuser, GPO pins). */
+  :root { --cue: #5A4632; --ring: 260px; --stroke: 14px; }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; margin: 0; }
+  body {
+    background: #12100E; color: #E8E0D4; overflow: hidden;
+    font: 15px/1.5 ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+    display: grid; place-items: center;
+  }
+
+  /* --- student view ------------------------------------------------------ */
+  #stage { display: grid; place-items: center; gap: 28px; }
+  #ringwrap { width: calc(var(--ring) * .76); height: var(--ring); position: relative; }
+  svg {
+    width: 100%; height: 100%; overflow: visible;
+    /* The glow lives on the <svg> element, not on <circle>. An SVG child's
+       filter clips to the filter region, which drew the halo as a visible
+       lighter SQUARE around the ring. */
+    filter: drop-shadow(0 0 18px color-mix(in srgb, var(--cue) 45%, transparent));
+  }
+  path { fill: none; stroke-width: var(--stroke); stroke-linejoin: round; }
+  #track { stroke: #ffffff10; }
+  #ring { stroke: var(--cue); }
+  #label {
+    font-size: 12px; letter-spacing: .18em; text-transform: uppercase;
+    color: #ffffff55; min-height: 1.2em;
+  }
+  #said {
+    max-width: 34ch; text-align: center; color: #ffffffcc; min-height: 3em;
+    font-size: 18px;
+  }
+
+  /* One animation per motion. Durations come from period_ms at runtime. */
+  .breathe #ring { animation: breathe var(--period) ease-in-out infinite; }
+  .pulse   #ring { animation: pulse   var(--period) ease-in-out infinite; }
+  .steady  #ring { opacity: 1; }
+  .sigh    #ring { animation: sigh    var(--period) ease-out 1 both; }
+  .nudge   #ringwrap { animation: nudge var(--period) ease-in-out infinite; }
+  /* fill is driven by stroke-dashoffset in JS: it grows toward the ring and
+     never closes it, so an overrun visibly slows instead of sitting at 100%. */
+
+  @keyframes breathe { 0%,100% { opacity:.45; stroke-width:calc(var(--stroke)*.8) }
+                       50%     { opacity:.95; stroke-width:var(--stroke) } }
+  @keyframes pulse   { 0%,100% { opacity:.5 } 50% { opacity:1 } }
+  @keyframes sigh    { 0% { opacity:.9 } 100% { opacity:.15 } }
+  @keyframes nudge   { 0%,100% { transform:translateX(0) }
+                       25% { transform:translateX(-7px) } 75% { transform:translateX(7px) } }
+
+  /* --- dev view ---------------------------------------------------------- */
+  #dev {
+    position: fixed; inset: 0 0 0 auto; width: min(560px, 100%);
+    background: #0C0B09; border-left: 1px solid #ffffff14;
+    transform: translateX(100%); transition: transform .18s ease;
+    display: flex; flex-direction: column;
+  }
+  body.dev #dev { transform: none; }
+  #devhead {
+    padding: 12px 16px; border-bottom: 1px solid #ffffff14;
+    display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+  }
+  #turns { overflow-y: auto; padding: 12px 16px 32px; flex: 1; }
+  .turn { border-top: 1px solid #ffffff10; padding: 12px 0; }
+  .turn:first-child { border-top: 0; }
+  .heard { font-size: 16px; color: #fff; margin-bottom: 6px; }
+  .heard::before { content: "› "; color: #ffffff44; }
+  .reply { color: #9FD0F0; margin: 4px 0 8px; }
+  .meta { color: #ffffff66; font-size: 12px; }
+  table { border-collapse: collapse; width: 100%; margin: 6px 0; font-size: 12px; }
+  td { padding: 2px 6px 2px 0; color: #ffffff88; }
+  td.score { text-align: right; font-variant-numeric: tabular-nums; }
+  tr.kept td { color: #7FE0A8; }
+  tr.cut td { color: #ffffff44; }
+  .stages { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 6px; }
+  .stage {
+    font-size: 11px; padding: 2px 7px; border-radius: 999px;
+    background: #ffffff0d; color: #ffffff99; font-variant-numeric: tabular-nums;
+  }
+  .stage.slow { background: #E0A02022; color: #E0A020; }
+  .warn { color: #E0A020; }
+  .pill {
+    font-size: 11px; padding: 2px 8px; border-radius: 999px;
+    background: #ffffff0d; color: #ffffff88;
+  }
+  .pill.live { background: #3FBF6F22; color: #3FBF6F; }
+  .pill.down { background: #B4726A22; color: #B4726A; }
+  .pill.risk { background: #B4726A22; color: #D9A09A; }
+  kbd {
+    font: inherit; font-size: 11px; padding: 1px 6px; border-radius: 4px;
+    background: #ffffff12; color: #ffffff88;
+  }
+  #stage { transition: transform .18s ease; }
+  @media (min-width: 900px) {
+    body.dev #stage { transform: translateX(-280px) scale(.86); }
+  }
+  #hint { position: fixed; bottom: 14px; left: 16px; color: #ffffff33; font-size: 12px; }
+</style>
+
+<div id="stage">
+  <div id="ringwrap">
+    <svg viewBox="0 0 120 120">
+      <path id="track" d="M 60 6 C 79 6, 98 38, 98 68 C 98 95, 82 114, 60 114 C 38 114, 22 95, 22 68 C 22 38, 41 6, 60 6 Z"></path>
+      <path id="ring"  d="M 60 6 C 79 6, 98 38, 98 68 C 98 95, 82 114, 60 114 C 38 114, 22 95, 22 68 C 22 38, 41 6, 60 6 Z"></path>
+    </svg>
+  </div>
+  <div id="label">idle</div>
+  <div id="said"></div>
+</div>
+
+<div id="dev">
+  <div id="devhead">
+    <strong>trace</strong>
+    <span id="conn" class="pill down">connecting</span>
+    <span id="drops" class="pill" hidden></span>
+    <span class="pill risk">no auth · live only</span>
+    <span style="margin-left:auto"><kbd>d</kbd> close</span>
+  </div>
+  <div id="turns"></div>
+</div>
+
+<div id="hint"><kbd>d</kbd> dev trace</div>
+
+<script>
+const $ = (s) => document.querySelector(s);
+const CIRC = $("#ring").getTotalLength();   // measured, so reshaping the egg is safe
+let CUES = {};
+let turns = new Map();
+let dwellUntil = 0, pending = null, exitTimer = null, fillTimer = null;
+
+$("#ring").style.strokeDasharray = CIRC;
+$("#ring").style.strokeDashoffset = 0;
+
+fetch("/cues").then(r => r.json()).then(t => { CUES = t; paint("IDLE"); });
+
+/* min_dwell_ms is not cosmetic: a fully-degraded turn can run start-to-end in
+   milliseconds, and with no floor the ring strobes through four states inside
+   one frame. A cue arriving too early is held, not dropped. */
+function show(state) {
+  const now = performance.now();
+  if (now < dwellUntil) { pending = state; return; }
+  paint(state);
+}
+
+function paint(state) {
+  const cue = CUES[state] || CUES.IDLE;
+  if (!cue) return;
+  const stage = $("#stage"), ring = $("#ring");
+  clearTimeout(exitTimer); clearInterval(fillTimer);
+
+  stage.className = "";                       // drop the previous motion
+  ring.style.strokeDashoffset = 0;
+  void stage.offsetWidth;                     // restart one-shot animations
+  document.documentElement.style.setProperty("--cue", cue.colour);
+  if (cue.period_ms) {
+    document.documentElement.style.setProperty("--period", cue.period_ms + "ms");
+  }
+  stage.classList.add(cue.motion);
+  $("#label").textContent = state.toLowerCase();
+
+  if (cue.motion === "fill") growTowardsTheRing(cue.period_ms);
+  dwellUntil = performance.now() + (cue.min_dwell_ms || 0);
+  if (cue.exit_ms) exitTimer = setTimeout(() => show("IDLE"), cue.exit_ms);
+  setTimeout(() => { if (pending) { const p = pending; pending = null; show(p); } },
+             cue.min_dwell_ms || 0);
+}
+
+/* Asymptotic on purpose. THINKING's period is the median time-to-first-audio,
+   so a normal turn is one near-lap; a slow one keeps creeping instead of
+   hitting 100% and sitting there looking stuck. */
+function growTowardsTheRing(periodMs) {
+  const t0 = performance.now();
+  fillTimer = setInterval(() => {
+    const frac = 1 - Math.exp(-(performance.now() - t0) / (periodMs || 5000));
+    $("#ring").style.strokeDashoffset = CIRC * (1 - 0.92 * frac);
+  }, 40);
+}
+
+/* --- dev trace ---------------------------------------------------------- */
+function turnCard(id) {
+  if (turns.has(id)) return turns.get(id);
+  const el = document.createElement("div");
+  el.className = "turn";
+  el.innerHTML = `<div class="heard"></div><div class="chunks"></div>
+                  <div class="reply"></div><div class="stages"></div>
+                  <div class="outcome meta"></div>`;
+  $("#turns").prepend(el);
+  turns.set(id, el);
+  while (turns.size > 30) {                   // a browser left open all day
+    const oldest = Math.min(...turns.keys());
+    turns.get(oldest).remove(); turns.delete(oldest);
+  }
+  return el;
+}
+
+function renderChunks(el, ev) {
+  const rows = (ev.chunks || []).map(c => `
+    <tr class="${c.kept ? "kept" : "cut"}">
+      <td>${c.kept ? "▸" : " "}</td><td>${esc(c.id)}</td>
+      <td class="score">${(c.score ?? 0).toFixed(3)}</td>
+      <td>${c.lexical_bonus ? "+lex" : ""}</td>
+    </tr>`).join("");
+  el.querySelector(".chunks").innerHTML = rows
+    ? `<table>${rows}</table><div class="meta">${esc(ev.path)} · floor ${ev.floor}</div>`
+    : `<div class="meta">retrieved nothing</div>`;
+}
+
+const esc = (s) => String(s ?? "").replace(/[<>&]/g, c => (
+  { "<": "&lt;", ">": "&gt;", "&": "&amp;" }[c]));
+
+function handle(ev) {
+  if (ev.dropped) {
+    $("#drops").hidden = false;
+    $("#drops").textContent = ev.dropped + " dropped";
+  }
+  const card = () => turnCard(ev.turn);
+  switch (ev.kind) {
+    case "state":
+      show(ev.state);
+      if (ev.state === "LISTENING") $("#said").textContent = "";
+      break;
+    case "heard":
+      $("#said").textContent = ev.text || "";
+      card().querySelector(".heard").textContent = ev.text || "(nothing)";
+      break;
+    case "retrieved": renderChunks(card(), ev); break;
+    case "opener":
+    case "topic":
+      card().querySelector(".chunks").innerHTML =
+        `<div class="meta">${ev.kind === "opener" ? "opener" : "new subject"}` +
+        ` — not grounded</div>`;
+      break;
+    case "sentence": {
+      const r = card().querySelector(".reply");
+      r.textContent = (r.textContent + " " + (ev.text || "")).trim();
+      break;
+    }
+    case "stage": {
+      const slow = ev.seconds >= 3;
+      card().querySelector(".stages").insertAdjacentHTML("beforeend",
+        `<span class="stage ${slow ? "slow" : ""}">${esc(ev.stage)} ${ev.seconds}s</span>`);
+      break;
+    }
+    case "degraded":
+      card().querySelector(".outcome").insertAdjacentHTML("beforeend",
+        `<div class="warn">degraded: ${esc(ev.component)} → ${esc(ev.fallback)}</div>`);
+      break;
+    case "error":
+      card().querySelector(".outcome").insertAdjacentHTML("beforeend",
+        `<div class="warn">${esc(ev.error)}: ${esc(ev.message)}</div>`);
+      show("ERROR");
+      break;
+    case "turn.end":
+      if (ev.reason === "no-audio" || ev.reason === "no-speech") show("UNHEARD");
+      card().querySelector(".outcome").insertAdjacentHTML("beforeend",
+        `<div>${esc(ev.reason)}${ev.latency_s ? " · " + Number(ev.latency_s).toFixed(1) + "s to first audio" : ""}</div>`);
+      break;
+  }
+}
+
+/* EventSource reconnects on its own, which is what we want on a device that
+   may restart under the browser. The page shows IDLE until the first real
+   state event — a tab opened mid-turn corrects itself within one turn. */
+function connect() {
+  const es = new EventSource("/events");
+  es.onopen = () => { $("#conn").textContent = "live"; $("#conn").className = "pill live"; };
+  es.onerror = () => { $("#conn").textContent = "reconnecting"; $("#conn").className = "pill down"; };
+  es.onmessage = (m) => { try { handle(JSON.parse(m.data)); } catch (e) { console.warn(e); } };
+}
+connect();
+
+addEventListener("keydown", (e) => {
+  if (e.key === "d" || e.key === "D") document.body.classList.toggle("dev");
+});
+</script>
