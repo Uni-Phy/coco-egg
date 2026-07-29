@@ -29,8 +29,14 @@ from .llama_client import _get_pack
 DEFAULT_QUESTIONS = 5
 
 _PUNCT = re.compile(r"[^\w\s]", re.UNICODE)
+# `\s*m[ey]` rather than `\s+me`, because the trigger has to survive ASR rather
+# than assume it. Measured with tools/asr_ab.py: whisper renders spoken "quiz
+# me" as the single word "Quizmy", and "quiz me on jyotisha" as "Quizmy on Jaya
+# Tisha" — so the most natural way to start a quiz never fired. Elision like
+# this is what a general ASR does to an unfamiliar two-word phrase, and the
+# demo path has to tolerate it.
 _START = re.compile(
-    r"\b(quiz|test)\s+me\b|\bquiz\s+time\b|\b(play|start|begin|do)\s+(a\s+)?quiz\b"
+    r"\b(quiz|test)\s*m[ey]\b|\bquiz\s*time\b|\b(play|start|begin|do)\s+(a\s+)?quiz\b"
     r"|\bask\s+me\s+(some\s+)?questions?\b|^\s*quiz\s*$", re.I)
 _STOP = re.compile(
     r"\b(stop|quit|exit|enough|finished|done|no more)\b", re.I)

@@ -35,6 +35,13 @@ def play(text, cfg):
 @pytest.mark.parametrize("said", [
     "quiz me",
     "quiz me on jyotisha",
+    # What whisper ACTUALLY returns for these, measured with tools/asr_ab.py.
+    # The trigger has to survive the ASR, not assume it: spoken "quiz me" comes
+    # back as one word, and that is the commonest way to start a quiz.
+    "Quizmy",
+    "Quizmy on Jaya Tisha",
+    "quizme",
+    "test me",
     "let's play a quiz",
     "start a quiz",
     "ask me some questions",
