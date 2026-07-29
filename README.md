@@ -37,9 +37,9 @@ On a Pi 5 with the eMeet M0 Plus plugged in.
 > sudo dietpi-software
 > ```
 >
-> Add user to the `audio` group:
+> Add user to `audio` and `docker` groups:
 > ```shell
-> sudo usermod -aG audio $USER
+> sudo usermod -aG audio,docker $USER
 > ```
 >
 > Then configure audio:
@@ -86,8 +86,7 @@ Other commands:
 
 ```shell
 make down   # stop containers
-make build  # start containers with `--build` - rebuilds egg and whisper images.
-            # Only needed after a Dockerfile edit.
+make build  # rebuilds egg and whisper images. Only needed after a Dockerfile edit.
 ```
 
 ## Updating a device
