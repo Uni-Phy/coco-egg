@@ -104,6 +104,10 @@ DEFAULTS = {
         # never loaded into the retrieval corpus — a joke that can be retrieved
         # will eventually be retrieved for a real question. "" disables them.
         "jokes": "fixtures/jokes.json",
+        # The egg's introduction, spoken VERBATIM (tutor/intro.py). The one mode
+        # where the exact words are the point, so they are authored rather than
+        # generated and never go near the model. "" disables it.
+        "intro": "fixtures/intro.json",
         # Where the no-repeat decks remember what has already been told
         # (tutor/deck.py). Under state/ because that is the only writable path
         # mounted into the container; without it a restart mid-party deals the

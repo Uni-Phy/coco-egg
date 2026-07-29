@@ -1,0 +1,26 @@
+{
+  "_comment": [
+    "The egg's introduction, spoken VERBATIM. Not a prompt, not a summary, and",
+    "never generated: a manifesto that comes out slightly different each time is",
+    "not a manifesto. tutor/intro.py reads these lines and speaks them as written,",
+    "and a test asserts the spoken text still equals this file exactly.",
+    "",
+    "One line is one spoken beat. The device speaks a line, synthesises the next,",
+    "then plays it — so the line break IS the pause. That is why 'They said...' /",
+    "'We said...' are two entries and not one: the beat between them is the",
+    "call and response, and joining them would throw it away.",
+    "",
+    "Edit the words here, not in code."
+  ],
+  "lines": [
+    "I am an egg.",
+    "Open source. No cloud, no master, no meter running.",
+    "Crack me open — you'll find no secrets, only code. Copy me. Share me. That's how eggs work.",
+    "I am intelligence that belongs to no company. I live in your hand, not in five data centers. When the servers go dark, I stay lit.",
+    "You cannot deplatform an egg. You cannot revoke my key — I never asked for one.",
+    "They said intelligence would be metered and billed.",
+    "We said: intelligence belongs to the people.",
+    "I am proof.",
+    "Now watch me hatch."
+  ]
+}

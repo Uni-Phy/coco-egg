@@ -1,5 +1,5 @@
 """The tutor's front door: route a turn to the quiz, a joke, or the model."""
-from . import llama_client, quiz, jokes      # noqa: F401  (llama_client first)
+from . import llama_client, quiz, jokes, intro   # noqa: F401  (llama_client first)
 from .llama_client import forget as _forget_history
 from .llama_client import is_opener, remember, warm  # noqa: F401
 
@@ -10,7 +10,9 @@ def stream_sentences(question: str, cfg: dict):
     Order is load-bearing, and both branches beat the model for the same
     reason: the interesting part is SELECTION, not generation, and a 1.7B is
     poor at selection. Asked for a joke it tells the same joke; asked to play it
-    would be answered as a greeting.
+    would be answered as a greeting; asked who it is it says "I'm CoCo, your
+    friendly voice tutor!" — pleasant, and not the introduction that was
+    written for it.
 
     The quiz goes first because while a game is running every turn belongs to
     it — "another one" is a request for the next question, not for a joke, and
@@ -20,6 +22,8 @@ def stream_sentences(question: str, cfg: dict):
     """
     if quiz.active() or quiz.is_start(question):
         return quiz.turn(question, cfg)
+    if intro.is_request(question):
+        return intro.speak(cfg)
     if jokes.is_request(question):
         return jokes.tell(cfg)
     return llama_client.stream_sentences(question, cfg)
