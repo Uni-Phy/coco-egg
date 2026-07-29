@@ -78,7 +78,26 @@ the LLM polish in ~30s for 3 chunks) and keeps it offline-capable. On the node
 gives better chunking from a bigger model. Recommend: node when connected,
 device as fallback, same tool either way.
 
-## v0.6 — the console (goal 3)
+## v0.6 — auth, then the rest of the console
+
+The console itself shipped in v0.5, and it shipped the view this section argued
+for: the reasoning trace, plus the student cue view that doubles as the LED
+prototype. What is left is what makes it safe and what makes it useful beyond
+watching.
+
+- **Authentication. This gates everything else here**, and it is the reason the
+  console is demo-while-watching today. The page carries what children said
+  aloud, and it is currently an open LAN port. Nothing below ships before it.
+- Transcript browser — the first thing auth unlocks, and by far the most
+  sensitive. Also the input to the profile loop in v0.7.
+- Authoring: upload a PDF → build → *preview what it retrieves* → publish.
+- Learner profile editing.
+- Device/fleet status. Still lowest priority; ShellHub already covers access.
+
+Carried from the v0.5 plan, which did not ship: PDF→pack hardening, a pack
+registry, and node sync.
+
+### What the console section originally argued, kept because it held up
 
 **It runs on the device**, not the node — offline-first is the product, and a
 console you cannot open in a classroom with no internet is the wrong artifact.

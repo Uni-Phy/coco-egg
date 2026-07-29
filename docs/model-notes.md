@@ -430,3 +430,67 @@ subject like this one. Before the fix the model answered the future question
 from its own knowledge, unframed — *"astrology is a way people have used to
 understand the connections between the stars and our lives"*. After it:
 *"The stars don't decide your future. Your choices and effort matter more."*
+
+## 13. A harness that disproved a claim in this file (v0.5)
+
+`tools/model_check.py` exists because swapping models became a continuous
+process, and judging a candidate by listening to it is not a method. Its first
+run disproved something §9 and the README both asserted.
+
+**The 1.7B does not reliably refuse to invent the learner's life.** §9 and the
+README said it "gets all three of those right". Sampled six times it fabricated
+the breakfast answer four times — *"You had something warm and tasty for
+breakfast! It could be eggs, toast, or a fruit smoothie."* The original claim
+came from one run at temperature 0.7, which is not a measurement.
+
+Two faults, so two fixes. SYSTEM said only "if you do not know, say so", which a
+thin model reads as being about facts in the world; it now says explicitly that
+it cannot see the student's own life, with the carve-out conversation memory
+requires — unless they said so in this conversation. Verified 5/5 after.
+
+And the harness itself: cases declare `repeat`, and all runs must pass. **A case
+that fails a third of the time is invisible to a single sample**, which is
+precisely how the wrong claim got written down here in the first place.
+
+One more trap worth recording, because it cost a round to see. The first version
+of the breakfast check rejected any reply matching `\byou had\b` — and the
+*correct* answer quotes the question: "I don't have information about what you
+had for breakfast". Five right answers were marked wrong. A false FAIL is as
+expensive as a false PASS: it condemns a model that is behaving. The check now
+uses a lookbehind so it catches the assertion, not the relative clause.
+
+Qwen3-0.6B stays in `models.json` marked KNOWN BAD deliberately. The harness must
+fail on it. If it ever passes, the harness is broken, not the model.
+
+## 14. The console, and why the student view is an egg (v0.5)
+
+`presentation.CUES` had existed for a while with nothing rendering it. The
+console is the renderer, and the design constraint is that it must stay a
+faithful one: the table is served over `/cues` rather than copied into the page,
+and a test asserts the two agree. The moment the page carries its own colours or
+periods, the student view stops being a usable prototype of the M1 LED ring —
+which is most of its value, since the ring is "non-negotiable UX" (spec §5) on a
+device that cannot show it yet.
+
+Motion is the load-bearing channel and colour is decoration. No two states share
+a motion, so a cue survives colour blindness, a diffuser in daylight, and an M1
+renderer holding nothing but GPO pins. `min_dwell_ms` is not cosmetic either: a
+fully degraded turn can run start to end in milliseconds, and with no floor the
+egg strobes through four states inside one frame.
+
+The three properties the console must not break all come from `events.py`, and
+one is easy to lose by accident: **it subscribes only while a browser is
+connected**. A permanent subscriber makes `events.active()` always true, and
+`pack.py` ranks and formats every retrieval candidate when it is — work done for
+nobody on a classroom device with no laptop open, which is the normal case.
+Tested in both directions, including that a closed tab unsubscribes.
+
+Three rendering bugs found only by looking at it, which is the argument for
+looking at it: an SVG child's `filter` clips to the filter region and drew the
+glow as a visible square; `querySelector(".meta")` found the `.meta` nested
+inside the chunks block, so every turn's outcome rendered above its reply; and
+an unrounded float spoke as "7.499999999999999s".
+
+**Auth is not in this release.** The console serves only live events, never
+stored transcripts, and says so on the page — but it is an open LAN port
+carrying what children said out loud. It is demo-while-watching until v0.6.

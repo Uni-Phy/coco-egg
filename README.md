@@ -286,6 +286,53 @@ learner> twelve
 egg    > Correct! Twelve. The sun spends about a month in each.
 ```
 
+## The console — what the egg is doing, and why
+
+`http://<device>:8090` while the app is running. Two views, one page, because
+they want the same events.
+
+**The student view is an egg** that shows state: breathing amber when idle,
+green while it listens, filling while it thinks, steady blue while it speaks. It
+is a renderer of `presentation.CUES` and holds no colours of its own — the table
+arrives over `/cues`, which is the **same one the M1 LED ring driver will read**.
+That is most of why it exists: the screenless device needs its ring designed and
+watched before the hardware lands, and this way the driver becomes a second
+renderer rather than a redesign.
+
+Motion carries the meaning, not colour. No two states share a motion, so the cue
+survives colour blindness, a diffuser washed out by classroom daylight, and a
+renderer holding nothing but GPO pins. THINKING grows toward the outline and
+never closes it, so an overrun visibly slows instead of sitting at 100% looking
+stuck.
+
+**Press `d` for the dev trace** — the reasoning behind the answer:
+
+```
+› which star was the moon sitting in when i was born
+  ▸ nakshatra              0.781  +lex
+  ▸ rashi-and-nakshatras   0.702
+    kundali-map            0.648        semantic · floor 0.62
+  A nakshatra is a patch of sky the moon travels through. …
+  hangover 1.2s   retrieval 0.4s   llm_first_sentence 3.5s   tts 1.3s
+```
+
+Every candidate with its score and whether it was kept, the reply as it streams,
+per-stage timings with slow ones flagged, and degraded fallbacks. It shows the
+difference between *retrieved nothing* and *new subject, deliberately not
+grounded* — invisible in the spoken answer, and the cause of a whole afternoon's
+confusion before it existed.
+
+See it without a device, mic or models:
+
+```shell
+python tools/console_demo.py
+```
+
+**No authentication yet (v0.6).** It serves only live events — never stored
+transcripts — and says so on the page, but it is a LAN port carrying what
+children said aloud. Demo it while you are watching it; set `console.enabled:
+false` in `egg.yaml` for anything else.
+
 ## Content packs (curriculum RAG)
 
 A pack is chunks + spoken explanations + a lesson plan (spec §7). Build one
