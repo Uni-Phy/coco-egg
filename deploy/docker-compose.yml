@@ -67,6 +67,7 @@ services:
     volumes:
       - ../device:/app/device                # editable install -> host edits + `make restart` reload
       - ../fixtures:/app/fixtures:ro
+      - ../tools:/app/tools:ro               # eval harness, to verify a deploy
       - ../models:/app/models:ro
       - ../transcripts:/app/transcripts
       - ../state:/app/state                  # derived profile + embedding cache
