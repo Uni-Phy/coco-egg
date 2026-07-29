@@ -159,10 +159,17 @@ def load(path: str | None = None) -> dict:
     return cfg
 
 def summary(cfg: dict) -> str:
+    # Name the BACKEND, not a URL that may not be in use. This line printed
+    # "whisper: http://whisper:8081" while moonshine was running and the whisper
+    # server was untouched — it is the one line you read to find out which ASR
+    # is live, and it said the wrong thing.
+    backend = cfg["asr"].get("backend", "whisper")
+    asr = (f"{backend} (in-process)" if backend == "moonshine"
+           else f"{backend} {cfg['asr']['whisper_url']}")
     return "\n".join([
         f"  audio in:   {cfg['audio']['input_device']}",
         f"  audio out:  {cfg['audio']['output_device']}",
-        f"  whisper:    {cfg['asr']['whisper_url']}",
+        f"  asr:        {asr}",
         f"  llama:      {cfg['tutor']['llama_url']}",
         f"  embed:      {cfg['tutor']['embed_url']}",
         f"  tts voice:  {cfg['tts']['voice']}\n",
