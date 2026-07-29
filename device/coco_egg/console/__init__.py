@@ -33,6 +33,7 @@ from __future__ import annotations
 
 import json
 import pathlib
+import sys
 import threading
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
@@ -110,6 +111,19 @@ class Handler(BaseHTTPRequestHandler):
             pass       # the tab closed; the `with` has already unsubscribed
 
 
+class _Server(ThreadingHTTPServer):
+    """Silences the traceback socketserver prints when a client TCP-hangs up
+    before or during the request. Browsers open speculative connections and
+    tabs close mid-SSE; neither is actionable."""
+
+    def handle_error(self, request, client_address) -> None:
+        exc = sys.exc_info()[1]
+        if isinstance(exc, (ConnectionResetError, BrokenPipeError,
+                            ConnectionAbortedError)):
+            return
+        super().handle_error(request, client_address)
+
+
 def serve(cfg: dict) -> ThreadingHTTPServer | None:
     """Start the console on a daemon thread. Never fatal to the voice loop.
 
@@ -122,7 +136,7 @@ def serve(cfg: dict) -> ThreadingHTTPServer | None:
         return None
     host, port = c.get("host", "0.0.0.0"), int(c.get("port", 8090))
     try:
-        httpd = ThreadingHTTPServer((host, port), Handler)
+        httpd = _Server((host, port), Handler)
     except OSError as e:
         print(f"  console: not started ({e.__class__.__name__}: {e})", flush=True)
         return None
