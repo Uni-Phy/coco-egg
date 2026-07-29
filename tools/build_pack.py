@@ -59,7 +59,7 @@ def slugify(title: str) -> str:
 
 def heuristic_chunk(text: str, index: int) -> dict:
     """No-LLM chunk: first few words become the title, first sentences the explain."""
-    sentences, rest = _SENTENCE_END.split(text + " ")[:-1], _SENTENCE_END.split(text + " ")[-1]
+    sentences = _SENTENCE_END.split(text + " ")[:-1]
     title = " ".join(text.split()[:5])
     explain = " ".join(sentences[:3]).strip() or text
     return {"id": f"{index:02d}-{slugify(title)}", "title": title,

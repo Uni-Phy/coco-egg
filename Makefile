@@ -1,4 +1,5 @@
-.PHONY: setup models serve serve-embed run test lint docker build up down attach
+.PHONY: setup models serve serve-embed run test lint docker build up down attach \
+        model-list model-use model-add model-check
 
 TUTOR_GGUF = models/Qwen3-1.7B-Q4_K_M.gguf
 EMBED_GGUF = models/bge-small-en-v1.5-f16.gguf
@@ -72,3 +73,22 @@ down:
 
 attach:
 	docker attach egg
+
+# --- tutor model swapping ---------------------------------------------------
+# Swapping is continuous, so it is a registry (models.json) plus commands, not a
+# procedure. The live choice lands in deploy/.env, which is gitignored: a bench
+# and a device may legitimately run different models.
+
+model-list:       ## show registered tutor models and which one is live
+	@.venv/bin/python tools/model_switch.py list
+
+model-use:        ## switch tutor model: make model-use NAME=qwen3-1.7b
+	@.venv/bin/python tools/model_switch.py use $(NAME)
+	@docker compose -f deploy/docker-compose.yml up -d llama-tutor
+	@echo "==> llama-tutor restarting; run 'make model-check' once it is healthy"
+
+model-add:        ## register a new one: make model-add NAME=x URL=... FILE=y.gguf
+	@.venv/bin/python tools/model_switch.py add $(NAME) $(URL) $(FILE)
+
+model-check:      ## accuracy cases + prefill/decode split against the running model
+	docker exec egg python tools/model_check.py

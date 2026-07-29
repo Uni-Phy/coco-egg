@@ -1,0 +1,40 @@
+{
+  "_comment": [
+    "Tutor LLM candidates. Swapping models is a continuous process, so it is a",
+    "registry plus two commands rather than a procedure:",
+    "",
+    "    make model-list",
+    "    make model-use NAME=qwen3-1.7b     # fetch if needed, restart, verify",
+    "    make model-check                   # accuracy + perf against the running one",
+    "",
+    "Which model is live is machine-local (deploy/.env, gitignored) — the bench",
+    "and a device may legitimately differ. The default lives in the compose file.",
+    "",
+    "Swapping the TUTOR model does not affect retrieval; that is the embed model.",
+    "So the regression here is behaviour and speed, and `make eval` is unchanged."
+  ],
+  "models": [
+    {
+      "name": "qwen3-1.7b",
+      "file": "Qwen3-1.7B-Q4_K_M.gguf",
+      "url": "https://huggingface.co/unsloth/Qwen3-1.7B-GGUF/resolve/main/Qwen3-1.7B-Q4_K_M.gguf",
+      "size": "1.1 GB",
+      "default": true,
+      "notes": "Shipped in v0.4/v0.5. Measured 49.5 tok/s prefill, 9.9 decode. Passes all accuracy cases."
+    },
+    {
+      "name": "qwen3-0.6b",
+      "file": "Qwen3-0.6B-Q4_K_M.gguf",
+      "url": "https://huggingface.co/unsloth/Qwen3-0.6B-GGUF/resolve/main/Qwen3-0.6B-Q4_K_M.gguf",
+      "size": "0.4 GB",
+      "notes": "KNOWN BAD, kept deliberately. ~5.0s loop but answers yes to yes/no questions regardless of the lesson, and invents facts. model-check MUST fail on this one — if it passes, the harness is broken, not the model."
+    },
+    {
+      "name": "lfm2.5-1.2b",
+      "file": null,
+      "url": null,
+      "size": "~0.8 GB",
+      "notes": "Jenya's recommendation. Reported on Pi 5: 71 tok/s prefill, 15 decode, against our 49.5/9.9 — projects ~1.8s off a grounded turn. URL deliberately left blank rather than guessed: fill it with `make model-add NAME=lfm2.5-1.2b URL=... FILE=...` once the GGUF repo path is confirmed. It sits between the model that fails the accuracy cases and the one that passes, so run model-check before believing 'similar quality'."
+    }
+  ]
+}

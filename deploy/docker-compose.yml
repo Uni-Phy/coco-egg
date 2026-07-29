@@ -2,8 +2,11 @@ services:
   llama-tutor:
     image: ghcr.io/ggml-org/llama.cpp:server
     command:
+      # Which model is live comes from deploy/.env (gitignored, written by
+      # `make model-use`) so a bench and a device can differ without a code
+      # change. The default here is what ships — see models.json.
       - -m
-      - /models/Qwen3-1.7B-Q4_K_M.gguf
+      - /models/${TUTOR_MODEL:-Qwen3-1.7B-Q4_K_M.gguf}
       - --port
       - "8080"
       - -c
