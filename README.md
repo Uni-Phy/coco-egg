@@ -138,9 +138,38 @@ measured inside the release container:
 **Model choice is a deliberate accuracy-over-speed trade.** Qwen3-0.6B runs the
 same loop at ~5.0s, but it answers "Yes" to yes/no questions regardless of the
 lesson in front of it — *"Yes, a magnet will stick to a copper wire"* — and
-invents facts, *"I had a sandwich for breakfast"*. The 1.7B gets all three of
-those right. Prompting could not fix the 0.6B's yes-bias; a bigger model did.
-For a tutor teaching children, confidently wrong is a worse failure than slow.
+invents facts, *"I had a sandwich for breakfast"*. Prompting could not fix the
+yes-bias; a bigger model did. For a tutor teaching children, confidently wrong
+is a worse failure than slow.
+
+*This README previously claimed the 1.7B "gets all three of those right". It did
+not.* Sampled six times it fabricated the breakfast answer four times — *"You had
+something warm and tasty for breakfast!"* — and the original claim came from a
+single run at temperature 0.7. Fixed by telling the model explicitly that it
+cannot see the student's own life, and now verified 5/5 by `make model-check`,
+which samples the flaky cases rather than trusting one run. **A case that fails a
+third of the time is invisible to a single sample**, which is how the wrong claim
+got written down.
+
+## Swapping the tutor model
+
+Swapping is a continuous process, so it is a registry plus two commands:
+
+```shell
+make model-list                    # candidates, and which is live
+make model-use NAME=qwen3-1.7b     # fetch if needed, restart llama-tutor
+make model-check                   # accuracy cases + prefill/decode split
+```
+
+`models.json` is the tracked registry; the live choice lands in `deploy/.env`
+(gitignored — a bench and a device may legitimately differ). Swapping the tutor
+model does **not** affect retrieval, which uses the embed model, so `make eval`
+is a separate and unchanged gate.
+
+`model-check`'s accuracy cases are not invented: each is a real failure a real
+model produced on this device. Qwen3-0.6B stays registered as `KNOWN BAD` on
+purpose — the harness must fail on it, and if it ever passes, the harness is
+broken rather than the model.
 
 **The latency bar is still not met.** Spec §16 floated ~2–3s. Where the time
 goes now:
