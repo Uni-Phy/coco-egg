@@ -13,11 +13,12 @@ from __future__ import annotations
 import pathlib
 import sys
 import termios
+import threading
 import time
 import tty
 import wave
 
-from . import config, console, events
+from . import config, console, events, trigger
 from .asr import StreamingTranscriber, transcribe
 from .audio import play_wav, record_utterance
 from .states import UiState
@@ -27,8 +28,13 @@ from .tts import preload, synthesize
 from .tutor import remember, stream_sentences, warm
 
 
+CONSOLE_ONLY_MENU = (
+    "No TTY. Press SPACE in the console to speak.\n"
+    "[Ctrl-C] exit"
+)
+
 MENU = (
-    "[Enter] speak: mic -> ASR -> LLM -> TTS\n"
+    "[Enter] speak: mic -> ASR -> LLM -> TTS  (or SPACE in the console)\n"
     "[w]     wav:   sample WAV -> ASR -> LLM -> TTS\n"
     "[q]     text:  sample question -> LLM -> TTS\n"
     "[r]     reply: sample reply -> TTS\n"
@@ -182,14 +188,37 @@ def bench_turn(cfg: dict, start_at: str, output_mode: str) -> None:
     set_ui(UiState.IDLE)
 
 
+def _keyboard(fd: int) -> None:
+    """Feed the bench keyboard into the same queue the console uses.
+
+    On a thread so the loop can wait on one place for both. Reading stdin
+    directly in the loop is what made the console unable to start a turn.
+    """
+    try:
+        tty.setcbreak(fd)
+        while True:
+            ch = sys.stdin.read(1)
+            if not ch:                 # stdin closed
+                trigger.close()
+                return
+            trigger.request("keyboard", key=ch)
+    except (OSError, ValueError):
+        trigger.close()
+
+
 def run() -> None:
     cfg = config.load()
     print("coco-egg zero — local voice loop.")
     print(config.summary(cfg))
     if cfg["trigger"]["mode"] != "keyboard":
         raise NotImplementedError("gpio trigger arrives at M1")
-    if not sys.stdin.isatty():
-        raise SystemExit("coco-egg: stdin is not a TTY. Run docker with -it (or compose tty:true).")
+    # A TTY is no longer required, only useful: with the console enabled the
+    # egg is fully drivable from a browser, which is also what `docker compose
+    # up -d` (no -it) gives you.
+    keyboard = sys.stdin.isatty()
+    if not keyboard and not cfg.get("console", {}).get("enabled", True):
+        raise SystemExit("coco-egg: no TTY and no console — nothing can start a turn. "
+                         "Run docker with -it, or enable the console.")
 
     preload(cfg)   # pay the ~2.1s voice load now, not on the first learner
     warm(cfg)      # and the pack load + static-prefix prefill, in the background
@@ -200,18 +229,31 @@ def run() -> None:
 
     output_mode = "device"
 
-    fd = sys.stdin.fileno()
-    old_attrs = termios.tcgetattr(fd)
+    old_attrs, fd = None, None
+    if keyboard:
+        fd = sys.stdin.fileno()
+        old_attrs = termios.tcgetattr(fd)
+        threading.Thread(target=_keyboard, args=(fd,), daemon=True).start()
     try:
-        tty.setcbreak(fd)
         while True:
-            print(MENU, flush=True)
+            print(MENU if keyboard else CONSOLE_ONLY_MENU, flush=True)
             print(f"Output: {output_mode}\n")
-            ch = sys.stdin.read(1)
-            if not ch:  # stdin closed
+            # ONE place to wait, for every source. The keyboard thread and the
+            # console's POST /trigger both call trigger.request(), so a turn
+            # started from a browser and a turn started from the terminal run
+            # the same code below. GPIO at M1 is a third caller, not a third
+            # branch. Polled rather than blocking so Ctrl-C stays responsive.
+            event = None
+            while event is None:
+                event = trigger.wait(timeout=0.5)
+            if event.get("source") == "eof":
                 break
+            # The console has one action and it means "ask a question", which
+            # is what Enter means here. The bench keys stay keyboard-only.
+            key = event.get("key", "\r") if event["source"] == "keyboard" else "\r"
+            trigger.begin()
             try:
-                match ch:
+                match key:
                     case "\r" | "\n":
                         one_turn(cfg)
                     case "w":
@@ -227,10 +269,13 @@ def run() -> None:
                 events.emit("error", where="turn", error=e.__class__.__name__, message=str(e))
                 set_ui(UiState.ERROR)
                 print(f"  error: {e}\n", file=sys.stderr)
+            finally:
+                trigger.end()
     except KeyboardInterrupt:
         print()
     finally:
-        termios.tcsetattr(fd, termios.TCSADRAIN, old_attrs)
+        if old_attrs is not None:
+            termios.tcsetattr(fd, termios.TCSADRAIN, old_attrs)
 
 
 if __name__ == "__main__":

@@ -305,6 +305,12 @@ renderer holding nothing but GPO pins. THINKING grows toward the outline and
 never closes it, so an overrun visibly slows instead of sitting at 100% looking
 stuck.
 
+**Press `space` to talk** (or tap the egg). It goes through the same trigger
+queue as Enter in the terminal — the console is a second *caller* of one route,
+not a second route, so GPIO at M1 becomes a third caller rather than a third
+branch. A press while the egg is still answering is refused, not banked, so an
+impatient tap does not queue four turns.
+
 **Press `d` for the dev trace** — the reasoning behind the answer:
 
 ```
@@ -325,7 +331,8 @@ confusion before it existed.
 See it without a device, mic or models:
 
 ```shell
-python tools/console_demo.py
+python tools/console_demo.py          # space advances a scripted turn
+python tools/console_demo.py --auto   # free-run
 ```
 
 **No authentication yet (v0.6).** It serves only live events — never stored

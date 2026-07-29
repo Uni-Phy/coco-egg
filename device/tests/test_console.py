@@ -6,11 +6,12 @@ somebody opened a laptop — or because nobody did.
 """
 import json
 import threading
+import urllib.error
 import urllib.request
 
 import pytest
 
-from coco_egg import console, events, presentation
+from coco_egg import console, events, presentation, trigger
 
 
 @pytest.fixture
@@ -105,6 +106,37 @@ def test_a_connected_browser_receives_events(server):
     reader.join(timeout=5)
     assert received and received[0]["kind"] == "state"
     assert received[0]["state"] == "THINKING"
+
+
+def test_space_in_the_console_starts_a_turn(server):
+    """The console is the demo surface, so it has to be able to ask a question."""
+    trigger.end()
+    while trigger.wait(timeout=0) is not None:
+        pass
+    req = urllib.request.Request(f"{server}/trigger", method="POST", data=b"")
+    with urllib.request.urlopen(req, timeout=5) as r:
+        assert r.status == 200 and json.loads(r.read())["ok"] is True
+    assert trigger.wait(timeout=1)["source"] == "console"
+
+
+def test_pressing_space_mid_turn_is_refused_not_banked(server):
+    """409 so the page can say "still answering" instead of queueing turns."""
+    trigger.begin()
+    try:
+        req = urllib.request.Request(f"{server}/trigger", method="POST", data=b"")
+        with pytest.raises(urllib.error.HTTPError) as exc:
+            urllib.request.urlopen(req, timeout=5)
+        assert exc.value.code == 409
+        assert json.loads(exc.value.read())["reason"] == "busy"
+    finally:
+        trigger.end()
+
+
+def test_posting_anywhere_else_is_a_404(server):
+    req = urllib.request.Request(f"{server}/events", method="POST", data=b"")
+    with pytest.raises(urllib.error.HTTPError) as exc:
+        urllib.request.urlopen(req, timeout=5)
+    assert exc.value.code == 404
 
 
 def test_a_disconnected_browser_unsubscribes(server):

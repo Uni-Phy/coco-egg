@@ -1,7 +1,8 @@
 """Drive the console with a scripted session — no mic, no models, no device.
 
-    python tools/console_demo.py            # http://localhost:8090
-    python tools/console_demo.py --once     # one turn, then exit
+    python tools/console_demo.py            # http://localhost:8090, space to advance
+    python tools/console_demo.py --auto     # free-run, no space bar needed
+    python tools/console_demo.py --once     # one pass, then exit
 
 The console renders `presentation.CUES`, and until now nothing could exercise
 that table end to end without a Pi, a microphone and a person. This publishes
@@ -25,7 +26,7 @@ import time
 
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1] / "device"))
 
-from coco_egg import config, console, events            # noqa: E402
+from coco_egg import config, console, events, trigger   # noqa: E402
 
 
 def wait(seconds: float) -> None:
@@ -128,15 +129,36 @@ def main() -> None:
         sys.exit("console did not start")
     print("  demo: open the URL above, press 'd' for the dev trace. Ctrl-C to stop.",
           flush=True)
-    once = "--once" in sys.argv
+    once, auto = "--once" in sys.argv, "--auto" in sys.argv
     try:
         while True:
             for step in SESSION:
-                turn(**step)
+                if not auto and not await_space():
+                    return
+                try:
+                    turn(**step)
+                finally:
+                    trigger.end()
             if once:
                 return
     except KeyboardInterrupt:
         print()
+
+
+def await_space() -> bool:
+    """Block until the console asks for a turn. False if stdin closed.
+
+    Same queue the device uses, so the demo exercises the real trigger path
+    rather than a stand-in for it.
+    """
+    print("  waiting — press space in the console", flush=True)
+    event = None
+    while event is None:
+        event = trigger.wait(timeout=0.5)
+    if event.get("source") == "eof":
+        return False
+    trigger.begin()
+    return True
 
 
 if __name__ == "__main__":

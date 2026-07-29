@@ -36,7 +36,7 @@ import pathlib
 import threading
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
-from .. import events, presentation
+from .. import events, presentation, trigger
 
 INDEX = pathlib.Path(__file__).parent / "index.html"
 
@@ -72,6 +72,19 @@ class Handler(BaseHTTPRequestHandler):
                 self._stream()
             case _:
                 self._send(404, b"not found", "text/plain")
+
+    def do_POST(self) -> None:     # noqa: N802  (BaseHTTPRequestHandler's name)
+        if self.path.split("?")[0] != "/trigger":
+            self._send(404, b"not found", "text/plain")
+            return
+        # The console is the demo surface, so space bar here has to do what
+        # Enter does in the terminal. Rejected rather than queued while a turn
+        # runs, so the page can say "still answering" instead of silently
+        # banking presses (trigger.py).
+        started = trigger.request("console")
+        body = json.dumps({"ok": started,
+                           "reason": "" if started else "busy"}).encode()
+        self._send(200 if started else 409, body, "application/json")
 
     def _stream(self) -> None:
         """SSE. Subscribes on connect and unsubscribes on disconnect."""

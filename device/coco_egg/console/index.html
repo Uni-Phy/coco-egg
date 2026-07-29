@@ -34,6 +34,11 @@
     font-size: 12px; letter-spacing: .18em; text-transform: uppercase;
     color: #ffffff55; min-height: 1.2em;
   }
+  #prompt {
+    font-size: 13px; color: #ffffff44; min-height: 1.4em; letter-spacing: .04em;
+  }
+  #prompt.flash { color: #E0A020; }
+  #ringwrap { cursor: pointer; -webkit-tap-highlight-color: transparent; }
   #said {
     max-width: 34ch; text-align: center; color: #ffffffcc; min-height: 3em;
     font-size: 18px;
@@ -112,6 +117,7 @@
     </svg>
   </div>
   <div id="label">idle</div>
+  <div id="prompt"></div>
   <div id="said"></div>
 </div>
 
@@ -126,7 +132,7 @@
   <div id="turns"></div>
 </div>
 
-<div id="hint"><kbd>d</kbd> dev trace</div>
+<div id="hint"><kbd>space</kbd> talk &nbsp;·&nbsp; <kbd>d</kbd> dev trace</div>
 
 <script>
 const $ = (s) => document.querySelector(s);
@@ -134,6 +140,7 @@ const CIRC = $("#ring").getTotalLength();   // measured, so reshaping the egg is
 let CUES = {};
 let turns = new Map();
 let dwellUntil = 0, pending = null, exitTimer = null, fillTimer = null;
+let uiState = "IDLE", flashTimer = null;
 
 $("#ring").style.strokeDasharray = CIRC;
 $("#ring").style.strokeDashoffset = 0;
@@ -164,6 +171,8 @@ function paint(state) {
   }
   stage.classList.add(cue.motion);
   $("#label").textContent = state.toLowerCase();
+  uiState = state;
+  showPrompt();
 
   if (cue.motion === "fill") growTowardsTheRing(cue.period_ms);
   dwellUntil = performance.now() + (cue.min_dwell_ms || 0);
@@ -276,7 +285,35 @@ function connect() {
 }
 connect();
 
+/* Space here does what Enter does in the terminal, and goes through the same
+   queue on the device (trigger.py) — the console is not a second route into
+   the loop, it is a second caller of the one route. */
+function flash(msg) {
+  const el = $("#prompt");
+  el.textContent = msg;
+  el.classList.add("flash");
+  clearTimeout(flashTimer);
+  flashTimer = setTimeout(() => { el.classList.remove("flash"); showPrompt(); }, 1600);
+}
+
+function showPrompt() {
+  if (flashTimer && $("#prompt").classList.contains("flash")) return;
+  $("#prompt").textContent = uiState === "IDLE" ? "press space to talk" : "";
+}
+
+async function talk() {
+  try {
+    const r = await fetch("/trigger", { method: "POST" });
+    if (r.status === 409) flash("still answering\u2026");
+  } catch {
+    flash("device unreachable");
+  }
+}
+
+$("#ringwrap").addEventListener("click", talk);   // tap works on a tablet too
+
 addEventListener("keydown", (e) => {
+  if (e.code === "Space") { e.preventDefault(); talk(); return; }
   if (e.key === "d" || e.key === "D") document.body.classList.toggle("dev");
 });
 </script>
