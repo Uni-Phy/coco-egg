@@ -132,7 +132,7 @@ measured inside the release container:
 | ASR (whisper-server) | 2.07s | streaming; the encoder is a **fixed 30s-window cost** whatever the utterance length |
 | LLM → first sentence | 3.53s (1.52–5.51) | Qwen3-1.7B: prefill ~56 tok/s, decode ~9.8 tok/s |
 | TTS (Piper) | 1.36s (0.88–1.65) | scales with sentence length, RTF ≈ 0.09. `preload()` keeps the ~2.1s voice load off the learner's turn |
-| **end-of-speech → first audio** | **8.32s (5.57–10.02)** | includes the `silence_stop_s` = 1.2s hangover the learner waits through |
+| **end-of-speech → first audio** | **8.32s (5.57–10.02)** | includes the `silence_stop_s` = 1.1s hangover the learner waits through |
 
 **Model choice is a deliberate accuracy-over-speed trade.** Qwen3-0.6B runs the
 same loop at ~5.0s, but it answers "Yes" to yes/no questions regardless of the
@@ -177,8 +177,14 @@ goes now:
    Behaviour fine-tuning a smaller model is the way back down; see
    `docs/model-notes.md`.
 2. **ASR** — 2.07s, a fixed 30s-window encoder cost. `ggml-tiny.en` is the lever.
-3. **Silence hangover** — 1.2s of dead air before work starts. A push-to-talk
-   button (spec decision #5) removes it outright.
+3. **Silence hangover** — 1.1s of dead air before work starts. A push-to-talk
+   button (spec decision #5) removes it outright. (It was documented as 1.2s
+   until v0.6: `int(1.2 / 0.1)` is 11, not 12, so the device had always used
+   1.1s. The arithmetic is `round()` now and the default says 1.1.)
+
+Say nothing after pressing and the device gives up after **`no_speech_s` = 4s**,
+rather than recording to `max_utterance_s`. It used to hold the room for 30
+seconds, which reads as a hang rather than a miss.
 
 **On a grounded turn the LLM stage is prefill-bound, not decode-bound** — 186
 prompt tokens / 3756 ms of prefill against 28 tokens / 2822 ms of decode, so 57%
