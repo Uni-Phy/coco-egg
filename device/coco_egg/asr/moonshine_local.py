@@ -20,6 +20,8 @@ import wave
 
 import numpy as np
 
+from moonshine_voice import TranscriptEventListener
+
 from .. import events
 
 # Module-level singleton — the model is expensive to load and hot after the
@@ -44,10 +46,15 @@ def _to_float32(audio_int16: np.ndarray) -> np.ndarray:
     return audio_int16.astype(np.float32) / 32768.0
 
 
-class _Collector:
-    """Listener that captures completed lines and emits partials."""
+class _Collector(TranscriptEventListener):
+    """Listener that captures completed lines and emits partials.
+
+    Inherits TranscriptEventListener so moonshine can call() the object; a
+    plain class with only on_line_* methods raises "object is not callable".
+    """
 
     def __init__(self, on_partial=None):
+        super().__init__()
         self._lines: list[str] = []
         self._on_partial = on_partial
 
@@ -85,12 +92,26 @@ def transcribe(wav_path: str, cfg: dict) -> str:
     return _run(_to_float32(audio_int16), sr, cfg)
 
 
-def _run(audio_f32: np.ndarray, sr: int, cfg: dict) -> str:
-    t = _get_transcriber(cfg)
+def _begin_session(t, collector) -> None:
+    """Attach the collector and start a fresh session.
+
+    Defensively stops any prior session first — main.one_turn() early-returns
+    on empty audio without calling flush(), which leaves the singleton in a
+    "started" state that a naive start() would double-open.
+    """
+    try:
+        t.stop()
+    except Exception:
+        pass  # not previously started; the following start() is authoritative
     t.remove_all_listeners()
-    collector = _Collector()
     t.add_listener(collector)
     t.start()
+
+
+def _run(audio_f32: np.ndarray, sr: int, cfg: dict) -> str:
+    t = _get_transcriber(cfg)
+    collector = _Collector()
+    _begin_session(t, collector)
     # 100 ms chunks mirror the streaming example in moonshine's README and
     # match the block size the mic path uses in production.
     chunk = int(0.1 * sr)
@@ -112,11 +133,8 @@ class StreamingTranscriber:
     def __init__(self, cfg: dict):
         self._sr = cfg["audio"]["sample_rate"]
         self._transcriber = _get_transcriber(cfg)
-        # A stale listener from the last turn would double-count lines.
-        self._transcriber.remove_all_listeners()
         self._collector = _Collector(on_partial=self._emit_partial)
-        self._transcriber.add_listener(self._collector)
-        self._transcriber.start()
+        _begin_session(self._transcriber, self._collector)
         self._stopped = False
 
     def push(self, chunk: np.ndarray, is_silent: bool) -> None:
