@@ -362,3 +362,71 @@ instead. And the verdict originally spliced the answer after "the answer is",
 which spoke as *"The answer is The two points where..."* — answers are full
 sentences, several of them proper nouns, so the answer now follows as its own
 sentence.
+
+## 12. Three faults found in a real session, not by reading code (v0.5)
+
+The device logs and transcripts from 2026-07-29 are the source for all of this.
+Each fault was invisible in tests and obvious in a transcript, which is the
+argument for having built the transcripts.
+
+**A named subject returned the previous answer, word for word.** After two turns
+about kickboxing, the single word *"Astrology."* came back with the kickboxing
+reply verbatim. The transcript shows retrieval had done its job — it grounded on
+`planets` at 0.659 — and the model ignored it entirely:
+
+    heard      : "Astrology."
+    retrieved  : planets (0.659), celestial-motion (0.642), both kept
+    llm_first_sentence: 10.335s
+    reply      : "Kickboxing is a sport where you use your fists and feet..."
+
+A bare noun carries no instruction. With nothing telling it what to do, the
+strongest thing in context wins, and that is whatever the tutor last said.
+`is_topic_nomination()` now catches one or two content words with no
+interrogative, adds an explicit "this is a NEW subject" instruction, and **drops
+the history for that turn**. Instruction alone was not enough on a 1.7B; the
+previous answer is right there and repeating it is the path of least resistance.
+
+The eval guard immediately caught the rule over-reaching: *"is zero just
+nothing"* reduces to one content token, because `nothing` is a stopword, and
+looked like a bare noun. Yes/no questions open with an auxiliary, so those are
+excluded — anchored at the start, since mid-sentence they are ordinary words
+("let's DO maths"), which is why they were kept out of `_WH` in §10.
+
+**The history window destroyed the prompt cache on every turn once full.** §5
+claimed computed tokens "stay flat as a conversation deepens". That was only ever
+true *while the window was still filling*. `History` was a deque with `maxlen=3`,
+so from the fourth turn on every append evicted one — shifting the prefix
+immediately after the system message and re-prefilling the whole conversation.
+The module docstring had even named the failure mode ("a window that turns over
+every turn would defeat the point") without noticing it described the code.
+
+Measured against the live server:
+
+| history | prefill | time |
+|---|---|---|
+| `[h1 h2 h3]` appending, nothing evicted | 74 tokens | 1550 ms |
+| `[h2 h3 h4]` one turn evicted | 203 tokens | 4039 ms |
+
+About **2.5s per turn, forever**, and the reason that astrology turn took 10.3s
+to its first sentence. Eviction is now batched: the window grows to the cap and
+then drops back in one go, so most turns are pure appends onto a cached prefix —
+one expensive turn in three instead of three in three.
+
+**Retrieval missed the question the course exists to answer.** *"Do the stars
+decide my future"* retrieved `stars-and-light`, `star-patterns` and
+`celestial-motion` — the sky course — and never reached Jyotisha. The
+`jyotisha-and-science` chunk covers precisely this, but in the words of a study:
+"personality or life events", "the predictive side". Nobody asks it that way.
+
+This is the shape of the recall plateau in §7 made concrete. Semantic retrieval
+matches meaning, not telepathy, and no floor was going to bridge "decide my
+future" to "predict life events". The fix is content: a chunk saying the same
+true thing in the vocabulary a learner brings — future, horoscope, lucky, exam,
+marry. **When a question is important and retrieval misses it, write the chunk
+that answers it in the asker's words.** Cheaper and more reliable than tuning.
+
+Corollary worth keeping: an ungrounded question is not a neutral outcome on a
+subject like this one. Before the fix the model answered the future question
+from its own knowledge, unframed — *"astrology is a way people have used to
+understand the connections between the stars and our lives"*. After it:
+*"The stars don't decide your future. Your choices and effort matter more."*
