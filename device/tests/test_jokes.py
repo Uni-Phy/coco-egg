@@ -48,6 +48,10 @@ def _fresh():
     "say something funny",
     "got a joke for me",
     "tell me another joke",
+    # ASR punctuates. These are transcripts, not typed input.
+    "Another joke.",
+    "Jokes!",
+    "tell me a joke?",
 ])
 def test_these_ask_for_a_joke(said):
     assert jokes.is_request(said)

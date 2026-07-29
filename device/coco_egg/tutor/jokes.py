@@ -30,7 +30,10 @@ from .deck import Deck
 # "another" and "again" only count once a joke has just been told, so "tell me
 # again" after a lesson still means repeat the lesson.
 _ASK = re.compile(
-    r"\b(tell|say|know|got|give)\b.{0,18}\bjokes?\b|\bjokes?\b\s*$|^\s*jokes?\b"
+    # [\s.!?]* rather than \s* before the anchor: ASR punctuates, so "Another
+    # joke." never reached the end-of-string alternative and the second-most
+    # natural way to ask for one silently did nothing.
+    r"\b(tell|say|know|got|give)\b.{0,18}\bjokes?\b|\bjokes?\b[\s.!?]*$|^\s*jokes?\b"
     r"|\bmake me laugh\b|\bsomething funny\b|\bbe funny\b|\bmore jokes?\b", re.I)
 _ANOTHER = re.compile(
     r"^\s*(another|one more|again|more|next|keep going|another one)\b", re.I)
