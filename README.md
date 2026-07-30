@@ -391,6 +391,51 @@ corpus: a punchline that can be retrieved will eventually be retrieved for a
 real question. Setup and punchline are spoken as two sentences, because the
 device speaks one at a time and that split is the comic pause.
 
+## No speaker, no microphone: use a phone
+
+Open **`https://egg.local:8090`** on a phone and it becomes the egg's audio
+hardware — tap the egg to talk into the phone, tap **listen** to hear the answer
+come back out of it. Several people can listen at once, which one small speaker
+cannot do. The device needs no USB speakerphone at all.
+
+It is the same pipeline, not a browser-shaped copy of one. `/listen` puts the
+recording on the same trigger queue the button and the space bar use, and
+everything after the transcript — retrieval, the tutor, TTS — neither knows nor
+cares where the question was recorded.
+
+```yaml
+audio:
+  output: browser     # device | browser | both
+```
+
+**Two constraints worth knowing before you demo it.**
+
+**HTTPS is required, and the warning is unavoidable.** A browser refuses
+`getUserMedia` outside a secure context, so the microphone simply does not exist
+on `http://`. The console therefore serves HTTPS with a certificate it generates
+itself into `state/`, and the first visit on each phone shows a "not private"
+warning to tap through. There is no way around that without a real domain and a
+real CA, which an offline classroom device does not have. Plain HTTP still
+serves the page and the speaker — only the microphone needs the certificate.
+
+**The certificate must name the address people type.** `hostname -I` runs inside
+the container and returns the *container's* address, so the LAN address is
+invisible from in there. Name it yourself, then delete the cert to regenerate:
+
+```yaml
+console:
+  cert_hosts: [egg.local, 10.10.10.186]
+```
+
+Both phone-hotspot ranges (`172.20.10.x`, `192.168.43.x`) are covered
+automatically, so moving between a WiFi network and a hotspot does not mean a
+new certificate and a fresh warning.
+
+**`egg.local` needs mDNS on the device** — `avahi-daemon` plus a hostname of
+`egg`. On DietPi also set `AUTO_SETUP_NET_HOSTNAME=egg` in `/boot/dietpi.txt`,
+or a rebuild reasserts the old name and the URL stops resolving. Note Android's
+mDNS support is patchier than iOS's; the IP always works.
+
 ## Content packs (curriculum RAG)
 
 A pack is chunks + spoken explanations + a lesson plan (spec §7). Build one
