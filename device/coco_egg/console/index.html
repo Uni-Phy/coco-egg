@@ -490,26 +490,51 @@ function micStop(nothingHeard) {
    sentence is far better than stalling the queue behind it. */
 let listening = false;
 const queue = [];
-let audio = null;
+let playing = false;
+
+/* ONE element, reused for every sentence. iOS grants the autoplay unlock to
+   the ELEMENT that played during the user gesture, not to the page, so a fresh
+   new Audio() per clip throws the unlock away and every sentence is blocked. */
+const player = new Audio();
+player.preload = "auto";
+player.onended = playNext;
+player.onerror = playNext;             // expired clip: skip, do not stall
+
+/* 50 ms of actual silence, because `new Audio()` with no src rejects
+   immediately on iOS and unlocks nothing — the exact bug this replaces. The
+   button read "listening", the device published every clip, the phone played
+   none of them, and the failure looked like a network problem. */
+const SILENCE = "data:audio/wav;base64,UklGRkQDAABXQVZFZm10IBAAAAABAAEAQB8AAIA+AAACABAAZG"
+  + "F0YSADAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+  + "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+  + "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+  + "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+  + "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+  + "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+  + "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+  + "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+  + "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+  + "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+  + "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+  + "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+  + "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+  + "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+  + "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==";
 
 function enqueue(clip) {
   if (!listening || !clip) return;
   queue.push(`/clip/${clip}.wav`);
-  if (!audio) playNext();
+  if (!playing) playNext();
 }
 
 function playNext() {
   const url = queue.shift();
-  if (!url) { audio = null; $("#listen").classList.remove("playing"); return; }
-  audio = new Audio(url);
+  if (!url) { playing = false; $("#listen").classList.remove("playing"); return; }
+  playing = true;
   $("#listen").classList.add("playing");
-  audio.onended = playNext;
-  audio.onerror = playNext;              // expired clip: skip, do not stall
-  audio.play().catch(() => {             // gesture lost (tab restored, etc.)
-    listening = false;
+  player.src = url;
+  player.play().catch(() => {            // gesture lost (tab restored, etc.)
     setListen(false);
-    queue.length = 0;
-    audio = null;
   });
 }
 
@@ -520,7 +545,8 @@ function setListen(on) {
   b.textContent = on ? "listening" : "listen on this phone";
   if (!on) {
     queue.length = 0;
-    if (audio) { audio.pause(); audio = null; }
+    playing = false;
+    player.pause();
     b.classList.remove("playing");
   }
 }
@@ -528,11 +554,10 @@ function setListen(on) {
 $("#listen").addEventListener("click", () => {
   const on = !listening;
   setListen(on);
-  // Unlock playback on THIS gesture. A silent clip is enough to satisfy the
-  // autoplay policy, so the first real sentence plays without a second tap.
+  // Unlock on THIS gesture, using audio that actually exists — see SILENCE.
   if (on) {
-    const a = new Audio();
-    a.play().catch(() => {});
+    player.src = SILENCE;
+    player.play().catch(() => {});
   }
 });
 

@@ -57,17 +57,25 @@ class Handler(BaseHTTPRequestHandler):
         """Silence. The access log would scroll the voice loop off the screen,
         and this shares a terminal with it."""
 
-    def _send(self, code: int, body: bytes, ctype: str) -> None:
+    def _send(self, code: int, body: bytes, ctype: str,
+              no_store: bool = False) -> None:
         self.send_response(code)
         self.send_header("Content-Type", ctype)
         self.send_header("Content-Length", str(len(body)))
+        if no_store:
+            self.send_header("Cache-Control", "no-store")
         self.end_headers()
         self.wfile.write(body)
 
     def do_GET(self) -> None:      # noqa: N802  (BaseHTTPRequestHandler's name)
         match self.path.split("?")[0]:
             case "/":
-                self._send(200, INDEX.read_bytes(), "text/html; charset=utf-8")
+                # no-store because the page is edited between demos and a phone
+                # holding yesterday's JavaScript against today's device looks
+                # like a device fault, not a cache. It is one small file on a
+                # LAN; there is nothing to save by caching it.
+                self._send(200, INDEX.read_bytes(), "text/html; charset=utf-8",
+                           no_store=True)
             case "/cues":
                 body = json.dumps(presentation.table()).encode()
                 self._send(200, body, "application/json")

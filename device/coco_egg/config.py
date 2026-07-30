@@ -191,9 +191,17 @@ def summary(cfg: dict) -> str:
     backend = cfg["asr"].get("backend", "whisper")
     asr = (f"{backend} (in-process)" if backend == "moonshine"
            else f"{backend} {cfg['asr']['whisper_url']}")
+    # The same trap as the ASR line above, and it cost a debugging session: this
+    # named an ALSA device while audio.output was "browser", so the one line you
+    # read to find out where sound comes out said "the eMeet" about a speaker
+    # that was deliberately silent. Name the routing, not just the hardware.
+    where = cfg["audio"].get("output", "device")
+    speaker = cfg["audio"]["output_device"]
+    out = {"browser": "browser only — device speaker is SILENT",
+           "both": f"{speaker} + browser"}.get(where, speaker)
     return "\n".join([
         f"  audio in:   {cfg['audio']['input_device']}",
-        f"  audio out:  {cfg['audio']['output_device']}",
+        f"  audio out:  {out}",
         f"  asr:        {asr}",
         f"  llama:      {cfg['tutor']['llama_url']}",
         f"  embed:      {cfg['tutor']['embed_url']}",
