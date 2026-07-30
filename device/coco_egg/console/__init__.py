@@ -33,6 +33,7 @@ from __future__ import annotations
 
 import json
 import pathlib
+import socket
 import ssl
 import sys
 import threading
@@ -71,13 +72,31 @@ class Handler(BaseHTTPRequestHandler):
                 body = json.dumps(presentation.table()).encode()
                 self._send(200, body, "application/json")
             case "/health":
-                self._send(200, b'{"ok":true}', "application/json")
+                self._health()
             case "/events":
                 self._stream()
             case path if path.startswith("/clip/"):
                 self._clip(path[len("/clip/"):])
             case _:
                 self._send(404, b"not found", "text/plain")
+
+    def _health(self) -> None:
+        """Alive, and whether the egg has a microphone of its own.
+
+        The page needs the second part before anybody taps anything: on a
+        device with no capture hardware the default action cannot work, and a
+        phone holding a perfectly good microphone is the obvious fallback.
+        Imported here rather than at module scope so a console can still be
+        served on a machine where the audio stack will not import.
+        """
+        mic = False
+        try:
+            from ..audio.io import has_input
+            mic = has_input()
+        except Exception:      # noqa: BLE001 — health must answer, always
+            pass
+        self._send(200, json.dumps({"ok": True, "mic": mic}).encode(),
+                   "application/json")
 
     def _clip(self, clip_id: str) -> None:
         """A spoken sentence, so a phone can be the speaker.
@@ -159,19 +178,93 @@ class Handler(BaseHTTPRequestHandler):
                             event = {**event, "dropped": stream.dropped}
                         self.wfile.write(f"data: {json.dumps(event)}\n\n".encode())
                     self.wfile.flush()
-        except (BrokenPipeError, ConnectionResetError):
-            pass       # the tab closed; the `with` has already unsubscribed
+        except (BrokenPipeError, ConnectionResetError, ssl.SSLError):
+            # The tab closed; the `with` has already unsubscribed. Over TLS the
+            # same event arrives as SSLEOFError rather than a broken pipe, which
+            # is why that is here: a closed tab is not an error to report.
+            pass
+
+
+class _Redirect(BaseHTTPRequestHandler):
+    """Answers a plain-HTTP request on the TLS port with "go to https".
+
+    Without this the port is TLS-only, and a phone given `egg.local:8090` with
+    no scheme tries http:// first, gets its connection dropped mid-request, and
+    reports "cannot open the page" — the same message it shows for a device
+    that is not there at all. Somebody debugging that looks at the network, the
+    hotspot and the mDNS name before they think to type eight more characters.
+
+    302 rather than 301: a permanent redirect is cached hard by browsers, and
+    would keep forcing https on a device whose console was later run without a
+    certificate — a confusing failure to inherit from a demo.
+    """
+
+    protocol_version = "HTTP/1.1"
+    server_version = "coco-egg"
+
+    def log_message(self, fmt, *args):
+        """Silence, for the reason Handler is silent: shared terminal."""
+
+    def _go(self) -> None:
+        # Host carries the port the user actually typed, which is what the
+        # redirect has to preserve; falling back to the socket's own address
+        # covers an HTTP/1.0 client with no Host header.
+        host = self.headers.get("Host") or "%s:%d" % self.server.server_address
+        self.send_response(302)
+        self.send_header("Location", f"https://{host}{self.path}")
+        self.send_header("Content-Length", "0")
+        self.end_headers()
+
+    do_GET = do_POST = do_HEAD = _go      # noqa: N815  (stdlib's naming)
+
+
+# A browser opens speculative connections it never writes to, so this is a
+# thread parking rather than the accept loop stalling — but it still has to end.
+SNIFF_TIMEOUT_S = 10.0
 
 
 class _Server(ThreadingHTTPServer):
-    """Silences the traceback socketserver prints when a client TCP-hangs up
-    before or during the request. Browsers open speculative connections and
-    tabs close mid-SSE; neither is actionable."""
+    """Serves HTTPS and an http->https redirect on one port.
+
+    Sniffing beats a second listener because the port is the part people are
+    given, and they cannot be told a different one for the mistake they are
+    about to make. A TLS ClientHello begins with 0x16 (handshake); every HTTP
+    request begins with an ASCII method. One peeked byte separates them.
+
+    Also silences the traceback socketserver prints when a client TCP-hangs up
+    before or during a request: browsers open speculative connections and tabs
+    close mid-SSE, and neither is actionable.
+    """
+
+    ssl_ctx: ssl.SSLContext | None = None
+
+    def finish_request(self, request, client_address) -> None:
+        # Runs on the worker thread (ThreadingMixIn), so a peek that waits
+        # cannot hold up anybody else's connection.
+        if self.ssl_ctx is not None:
+            try:
+                request.settimeout(SNIFF_TIMEOUT_S)
+                first = request.recv(1, socket.MSG_PEEK)
+                request.settimeout(None)     # SSE needs a blocking socket back
+            except OSError:
+                return                        # hung up, or never spoke
+            if first != b"\x16":
+                if first:
+                    _Redirect(request, client_address, self)
+                return
+            try:
+                request = self.ssl_ctx.wrap_socket(request, server_side=True)
+            except (ssl.SSLError, OSError):
+                return                        # a failed handshake is not news
+        super().finish_request(request, client_address)
 
     def handle_error(self, request, client_address) -> None:
         exc = sys.exc_info()[1]
+        # ssl.SSLError included because a tab closing mid-stream over TLS raises
+        # SSLEOFError, not a broken pipe. A bad certificate fails earlier, at
+        # load_cert_chain, so nothing diagnostic is being swallowed here.
         if isinstance(exc, (ConnectionResetError, BrokenPipeError,
-                            ConnectionAbortedError)):
+                            ConnectionAbortedError, ssl.SSLError)):
             return
         super().handle_error(request, client_address)
 
@@ -203,7 +296,10 @@ def serve(cfg: dict) -> ThreadingHTTPServer | None:
         if pair:
             ctx = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
             ctx.load_cert_chain(*pair)
-            httpd.socket = ctx.wrap_socket(httpd.socket, server_side=True)
+            # Per-connection, not on the listening socket: the server sniffs
+            # each connection so plain http on this port gets a redirect
+            # instead of a dropped connection (_Server).
+            httpd.ssl_ctx = ctx
             scheme = "https"
         else:
             print("  console: no certificate — phone microphone will not work",

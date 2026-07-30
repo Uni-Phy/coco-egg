@@ -43,6 +43,23 @@ def resolve_input(cfg: dict) -> int | None:
     return index
 
 
+def has_input() -> bool:
+    """Whether this device has any capture device at all.
+
+    The console asks so a phone can default to being the microphone when the
+    egg has none. Without it the obvious action — tap the egg — fails with
+    "no capture devices found", which is true, unactionable from a phone, and
+    reads to a visitor as the whole device being broken.
+
+    Answers False rather than raising: this is a question about hardware, and
+    every caller wants a fallback, not an exception.
+    """
+    try:
+        return any(d["max_input_channels"] > 0 for d in sd.query_devices())
+    except (OSError, sd.PortAudioError):
+        return False
+
+
 def record_utterance(cfg: dict, on_block: BlockCallback | None = None) -> tuple[np.ndarray, float]:
     """Record until trailing silence or max length.
 

@@ -5,6 +5,7 @@ wants it, and the files must not accumulate — tts.synthesize() opens its WAV
 with delete=False and nothing removed them, so a device left running grew one
 temp file per sentence spoken, forever.
 """
+import json
 import pathlib
 import urllib.error
 import urllib.request
@@ -233,6 +234,52 @@ def test_tls_is_on_by_default_because_the_microphone_needs_it(tmp_path):
         httpd.shutdown()
         httpd.server_close()
     assert (tmp_path / "console-cert.pem").is_file()
+
+
+def test_plain_http_on_the_tls_port_is_redirected_not_dropped(tmp_path):
+    """The failure this prevents cost an evening of debugging the network.
+
+    A phone given `egg.local:8090` with no scheme tries http:// first. Against
+    a TLS-only socket that is an empty reply, which Safari reports as "cannot
+    open the page" — identical to the device being absent. So the port sniffs:
+    a TLS ClientHello starts 0x16, an HTTP request starts with a method.
+    """
+    cfg = {"console": {"enabled": True, "host": "127.0.0.1", "port": 0,
+                       "cert_dir": str(tmp_path)}}
+    httpd = console.serve(cfg)
+    assert httpd is not None
+    port = httpd.server_address[1]
+    try:
+        class NoFollow(urllib.request.HTTPRedirectHandler):
+            def redirect_request(self, *a, **k):
+                return None           # inspect the 302 itself
+
+        opener = urllib.request.build_opener(NoFollow)
+        with pytest.raises(urllib.error.HTTPError) as exc:
+            opener.open(f"http://127.0.0.1:{port}/", timeout=5)
+        assert exc.value.code == 302
+        assert exc.value.headers["Location"] == f"https://127.0.0.1:{port}/"
+    finally:
+        httpd.shutdown()
+        httpd.server_close()
+
+
+def test_health_says_whether_the_egg_has_a_microphone(tmp_path):
+    """The page defaults to the phone's mic when the egg has none, so it has
+    to be able to ask before anybody taps anything."""
+    cfg = {"console": {"enabled": True, "host": "127.0.0.1", "port": 0,
+                       "tls": False}}
+    httpd = console.serve(cfg)
+    assert httpd is not None
+    try:
+        url = f"http://127.0.0.1:{httpd.server_address[1]}/health"
+        with urllib.request.urlopen(url, timeout=5) as r:
+            body = json.loads(r.read())
+        assert body["ok"] is True
+        assert isinstance(body["mic"], bool)
+    finally:
+        httpd.shutdown()
+        httpd.server_close()
 
 
 def test_the_certificate_is_reused_not_regenerated(tmp_path):

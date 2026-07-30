@@ -536,6 +536,11 @@ $("#listen").addEventListener("click", () => {
   }
 });
 
+function setUseMic(on) {
+  $("#usemic").setAttribute("aria-pressed", String(on));
+  $("#usemic").textContent = on ? "using this phone's mic" : "use this phone's mic";
+}
+
 $("#usemic").addEventListener("click", async () => {
   const on = $("#usemic").getAttribute("aria-pressed") !== "true";
   if (on && location.protocol !== "https:") {
@@ -544,9 +549,23 @@ $("#usemic").addEventListener("click", async () => {
     flash("needs https for mic");
     return;
   }
-  $("#usemic").setAttribute("aria-pressed", String(on));
-  $("#usemic").textContent = on ? "using this phone's mic" : "use this phone's mic";
+  setUseMic(on);
 });
+
+/* If the egg has no microphone, this phone is the only one in the room, so
+   default to it. Otherwise the obvious first action — tap the egg — fails with
+   a hardware error a visitor holding a phone cannot do anything about.
+   Permission is still requested on the tap, which is the user gesture Safari
+   wants; this only decides where the tap sends us. */
+fetch("/health")
+  .then((r) => r.json())
+  .then((h) => {
+    if (h.mic === false && location.protocol === "https:") {
+      setUseMic(true);
+      flash("no mic on the egg — using this phone's");
+    }
+  })
+  .catch(() => {});
 
 $("#ringwrap").addEventListener("click", talk);   // tap works on a tablet too
 
