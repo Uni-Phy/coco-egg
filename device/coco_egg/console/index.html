@@ -368,9 +368,25 @@ function useMyMic() {
    Recording stops on silence rather than on a second tap, mirroring the
    device's own silence_stop_s, so a stranger who taps once and speaks gets the
    same behaviour they would get from the egg's own microphone. */
+/* The silence gate MEASURES the room instead of assuming it. It used to copy
+   the device's audio.silence_rms of 0.005, which is right for the eMeet —
+   that hardware does noise suppression before the sample reaches us — and
+   wrong for a phone, whose noise floor with AGC sits well above it. The gate
+   was never crossed downward, no pause was ever detected, and every question
+   ran to the 15s cap before it was sent. Waiting fifteen seconds after you
+   stop talking reads as a hang, not a long pause.
+
+   The floor is a running minimum, so it self-corrects: if somebody starts
+   speaking the instant they tap, the first real pause drops the floor and the
+   gate follows it down. */
 const MIC = {
   RATE: 16000,
-  SILENCE_RMS: 0.005,      // the device's audio.silence_rms
+  FLOOR_MIN: 0.006,        // a digital-silence stream must not gate at zero
+  GATE_MAX: 0.03,          // and speaking the instant you tap must not either:
+                           // the floor is then speech-level, and an uncapped
+                           // gate would sit above your own voice and hear
+                           // nothing at all
+  MARGIN: 4,               // speech has to beat the measured room by this much
   SILENCE_MS: 1100,        // the device's silence_stop_s
   NO_SPEECH_MS: 4000,      // the device's no_speech_s
   MAX_MS: 15000,
@@ -379,6 +395,7 @@ const MIC = {
 let micStream = null, micCtx = null, micNode = null, micSource = null;
 let micChunks = [], micRate = 48000, micVoiced = false;
 let micQuietSince = 0, micStarted = 0, micStopping = false;
+let micFloor = Infinity, micHitCap = false;
 
 function wavBlob(samples, rate) {
   const buf = new ArrayBuffer(44 + samples.length * 2);
@@ -453,6 +470,7 @@ async function micStart() {
   // file served alongside the page for no behavioural gain here.
   micNode = micCtx.createScriptProcessor(4096, 1, 1);
   micChunks = []; micVoiced = false; micStopping = false;
+  micFloor = Infinity; micHitCap = false;
   micStarted = performance.now(); micQuietSince = micStarted;
 
   micNode.onaudioprocess = (e) => {
@@ -464,12 +482,22 @@ async function micStart() {
     const rms = Math.sqrt(sum / input.length);
     const now = performance.now();
 
-    if (rms >= MIC.SILENCE_RMS) { micVoiced = true; micQuietSince = now; }
+    micFloor = Math.min(micFloor, rms);
+    const gate = Math.min(MIC.GATE_MAX,
+                          Math.max(MIC.FLOOR_MIN, micFloor * MIC.MARGIN));
+    if (rms >= gate) {
+      // Say so the first time. Otherwise a phone held at arm's length looks
+      // identical whether it is hearing you or not, and people repeat
+      // themselves into a recording that was already listening.
+      if (!micVoiced) $("#prompt").textContent = "listening… got you";
+      micVoiced = true;
+      micQuietSince = now;
+    }
     // Same two timers the device uses: one for an utterance that ended, one
     // for an utterance that never began.
     if (micVoiced && now - micQuietSince > MIC.SILENCE_MS) micStop();
     else if (!micVoiced && now - micStarted > MIC.NO_SPEECH_MS) micStop(true);
-    else if (now - micStarted > MIC.MAX_MS) micStop();
+    else if (now - micStarted > MIC.MAX_MS) { micHitCap = true; micStop(); }
   };
   micSource.connect(micNode);
   micNode.connect(micCtx.destination);
@@ -492,6 +520,10 @@ function micStop(nothingHeard) {
     flash("didn't catch that");
     return;
   }
+  // Hitting the cap means no pause was ever detected, which is a room problem
+  // rather than a device one. Say it, or the only symptom is a long wait that
+  // looks like the egg hanging.
+  if (micHitCap) flash("no pause heard — stopped at 15s");
   const blob = wavBlob(downsample(chunks, from, MIC.RATE), MIC.RATE);
   $("#prompt").textContent = "thinking…";
   fetch("/listen", { method: "POST", body: blob,
