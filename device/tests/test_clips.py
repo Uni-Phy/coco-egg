@@ -18,7 +18,9 @@ from coco_egg.audio import clips
 
 @pytest.fixture
 def server():
-    cfg = {"console": {"enabled": True, "host": "127.0.0.1", "port": 0}}
+    # tls off: these exercise the routes, and TLS has its own test.
+    cfg = {"console": {"enabled": True, "host": "127.0.0.1",
+                       "port": 0, "tls": False}}
     httpd = console.serve(cfg)
     assert httpd is not None
     yield f"http://127.0.0.1:{httpd.server_address[1]}"
@@ -150,3 +152,95 @@ def test_the_page_offers_the_listen_control():
     # A queue, not one Audio per sentence: overlapping playback would make a
     # multi-sentence answer unintelligible.
     assert "playNext" in page
+
+
+# --- the phone as the microphone -------------------------------------------
+
+def test_a_phone_recording_runs_as_an_ordinary_turn(server):
+    """/listen puts the audio on the SAME queue the button and space bar use.
+
+    The point is one pipeline: everything after the transcript — retrieval, the
+    tutor, TTS, playback — must not know or care where the question was
+    recorded.
+    """
+    from coco_egg import trigger
+    trigger.end()
+    while trigger.wait(timeout=0) is not None:
+        pass
+
+    wav = b"RIFF" + b"\x00" * 500
+    req = urllib.request.Request(f"{server}/listen", method="POST", data=wav,
+                                 headers={"Content-Type": "audio/wav"})
+    with urllib.request.urlopen(req, timeout=5) as r:
+        assert r.status == 200
+
+    event = trigger.wait(timeout=1)
+    assert event["source"] == "browser"
+    assert event["audio"] == wav
+
+
+def test_an_upload_during_a_turn_is_refused(server):
+    from coco_egg import trigger
+    trigger.begin()
+    try:
+        req = urllib.request.Request(f"{server}/listen", method="POST",
+                                     data=b"RIFF" + b"\x00" * 100)
+        with pytest.raises(urllib.error.HTTPError) as exc:
+            urllib.request.urlopen(req, timeout=5)
+        assert exc.value.code == 409
+    finally:
+        trigger.end()
+
+
+def test_an_absurd_upload_is_rejected_before_being_read(server):
+    """A Pi should not read an arbitrary body into memory on an open port."""
+    req = urllib.request.Request(f"{server}/listen", method="POST", data=b"")
+    with pytest.raises(urllib.error.HTTPError) as exc:
+        urllib.request.urlopen(req, timeout=5)
+    assert exc.value.code == 413
+
+
+def test_uploaded_audio_is_decoded_like_the_microphone_path(tmp_path, monkeypatch):
+    """A phone sends 16 kHz mono WAV; it must arrive as the same int16 array
+    record_utterance() produces, so the rest of the turn is unchanged."""
+    from coco_egg import main
+
+    src = a_wav(tmp_path, "upload.wav")
+    monkeypatch.setattr(main, "transcribe", lambda path, cfg: "what is a nakshatra")
+    audio, question = main._uploaded(src.read_bytes(), {})
+
+    assert question == "what is a nakshatra"
+    assert audio.dtype.name == "int16"
+    assert audio.ndim == 1 and audio.size == 800
+
+
+def test_tls_is_on_by_default_because_the_microphone_needs_it(tmp_path):
+    """Without a secure context a browser refuses getUserMedia outright, so a
+    console serving plain HTTP cannot be a microphone however well it works."""
+    import ssl as _ssl
+    cfg = {"console": {"enabled": True, "host": "127.0.0.1", "port": 0,
+                       "cert_dir": str(tmp_path)}}
+    httpd = console.serve(cfg)
+    assert httpd is not None
+    try:
+        ctx = _ssl.create_default_context()
+        ctx.check_hostname = False
+        ctx.verify_mode = _ssl.CERT_NONE
+        url = f"https://127.0.0.1:{httpd.server_address[1]}/health"
+        with urllib.request.urlopen(url, context=ctx, timeout=5) as r:
+            assert r.status == 200
+    finally:
+        httpd.shutdown()
+        httpd.server_close()
+    assert (tmp_path / "console-cert.pem").is_file()
+
+
+def test_the_certificate_is_reused_not_regenerated(tmp_path):
+    """Regenerating on every boot would retrain people to click through
+    warnings, which is the wrong habit even for a demo."""
+    from coco_egg.console import tls
+    first = tls.ensure(str(tmp_path), ["127.0.0.1"])
+    body = pathlib.Path(first[0]).read_bytes()
+    second = tls.ensure(str(tmp_path), ["127.0.0.1"])
+    assert first == second
+    assert pathlib.Path(second[0]).read_bytes() == body

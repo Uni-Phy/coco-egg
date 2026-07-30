@@ -33,10 +33,12 @@ from __future__ import annotations
 
 import json
 import pathlib
+import ssl
 import sys
 import threading
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
+from . import tls
 from .. import events, presentation, trigger
 from ..audio import clips
 
@@ -96,7 +98,11 @@ class Handler(BaseHTTPRequestHandler):
         self._send(200, body, "audio/wav")
 
     def do_POST(self) -> None:     # noqa: N802  (BaseHTTPRequestHandler's name)
-        if self.path.split("?")[0] != "/trigger":
+        route = self.path.split("?")[0]
+        if route == "/listen":
+            self._listen()
+            return
+        if route != "/trigger":
             self._send(404, b"not found", "text/plain")
             return
         # The console is the demo surface, so space bar here has to do what
@@ -104,6 +110,31 @@ class Handler(BaseHTTPRequestHandler):
         # runs, so the page can say "still answering" instead of silently
         # banking presses (trigger.py).
         started = trigger.request("console")
+        body = json.dumps({"ok": started,
+                           "reason": "" if started else "busy"}).encode()
+        self._send(200 if started else 409, body, "application/json")
+
+    # A phone recording is a few seconds of 16 kHz mono; anything much larger is
+    # not a question and should not be read into memory on a Pi.
+    MAX_UPLOAD = 4 * 1024 * 1024
+
+    def _listen(self) -> None:
+        """A recording made on a phone, run as an ordinary turn.
+
+        This is what lets the egg work with no microphone of its own. The audio
+        goes onto the SAME trigger queue the button and the space bar use, so
+        everything after it — ASR, retrieval, the tutor, TTS — is one pipeline
+        rather than a browser-shaped copy of one.
+        """
+        try:
+            length = int(self.headers.get("Content-Length") or 0)
+        except ValueError:
+            length = 0
+        if not 0 < length <= self.MAX_UPLOAD:
+            self._send(413, b'{"ok":false,"reason":"size"}', "application/json")
+            return
+        audio = self.rfile.read(length)
+        started = trigger.request("browser", audio=audio)
         body = json.dumps({"ok": started,
                            "reason": "" if started else "busy"}).encode()
         self._send(200 if started else 409, body, "application/json")
@@ -161,8 +192,27 @@ def serve(cfg: dict) -> ThreadingHTTPServer | None:
     except OSError as e:
         print(f"  console: not started ({e.__class__.__name__}: {e})", flush=True)
         return None
+
+    # HTTPS is not decoration here: a browser refuses getUserMedia outside a
+    # secure context, so without it a phone cannot be the microphone at all.
+    # Falling back to plain HTTP keeps the page and the speaker working.
+    scheme = "http"
+    if c.get("tls", True):
+        pair = tls.ensure(c.get("cert_dir", "state"), tls.local_addresses())
+        if pair:
+            ctx = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
+            ctx.load_cert_chain(*pair)
+            httpd.socket = ctx.wrap_socket(httpd.socket, server_side=True)
+            scheme = "https"
+        else:
+            print("  console: no certificate — phone microphone will not work",
+                  flush=True)
+
     httpd.daemon_threads = True
     threading.Thread(target=httpd.serve_forever, daemon=True).start()
-    print(f"  console: http://{host}:{port}  "
+    print(f"  console: {scheme}://{host}:{port}  "
           f"(no auth yet — LAN only, live events only)", flush=True)
+    if scheme == "https":
+        print("  console: self-signed — accept the warning once per phone",
+              flush=True)
     return httpd

@@ -110,6 +110,14 @@
   /* The egg may have no speaker at all, so this is the speaker. It has to be a
      real tap: no browser autoplays audio without a gesture, which is why this
      is a button and not a setting that could be on by default. */
+  #usemic {
+    position: fixed; top: 14px; left: 16px; z-index: 6;
+    font: inherit; font-size: 12px; padding: 8px 14px; border-radius: 999px;
+    background: #ffffff0d; color: #ffffff88; border: 1px solid #ffffff1f;
+    cursor: pointer; -webkit-tap-highlight-color: transparent;
+  }
+  #usemic[aria-pressed="true"] { background: #3FBF6F22; color: #7FE0A8; border-color: #3FBF6F55; }
+  #usemic:focus-visible, #listen:focus-visible { outline: 2px solid #3FA0E0; outline-offset: 2px; }
   #listen {
     position: fixed; top: 14px; right: 16px; z-index: 6;
     font: inherit; font-size: 12px; padding: 8px 14px; border-radius: 999px;
@@ -144,6 +152,7 @@
   <div id="turns"></div>
 </div>
 
+<button id="usemic" aria-pressed="false">use this phone's mic</button>
 <button id="listen" aria-pressed="false">listen on this phone</button>
 
 <div id="hint"><kbd>space</kbd> talk &nbsp;·&nbsp; <kbd>d</kbd> dev trace</div>
@@ -328,13 +337,150 @@ function showPrompt() {
   $("#prompt").textContent = uiState === "IDLE" ? "press space to talk" : "";
 }
 
+/* Tapping the egg records HERE when the browser can open a microphone, and
+   otherwise asks the device to use its own. Same turn either way — the audio
+   just enters the pipeline through /listen instead of the mic. */
 async function talk() {
+  if (micCtx) { micStop(); return; }          // tap again to send early
+  if (useMyMic()) { micStart(); return; }
   try {
     const r = await fetch("/trigger", { method: "POST" });
     if (r.status === 409) flash("still answering\u2026");
   } catch {
     flash("device unreachable");
   }
+}
+
+function useMyMic() {
+  return $("#usemic").getAttribute("aria-pressed") === "true";
+}
+
+/* --- the phone as the microphone -----------------------------------------
+   Raw PCM, not MediaRecorder. MediaRecorder yields WebM/Opus on Chrome and
+   MP4/AAC on Safari, neither of which whisper-server reads, so it would mean a
+   transcode on the Pi. Capturing float samples and writing the WAV header here
+   sends exactly the 16 kHz mono the pipeline already expects.
+
+   Recording stops on silence rather than on a second tap, mirroring the
+   device's own silence_stop_s, so a stranger who taps once and speaks gets the
+   same behaviour they would get from the egg's own microphone. */
+const MIC = {
+  RATE: 16000,
+  SILENCE_RMS: 0.005,      // the device's audio.silence_rms
+  SILENCE_MS: 1100,        // the device's silence_stop_s
+  NO_SPEECH_MS: 4000,      // the device's no_speech_s
+  MAX_MS: 15000,
+};
+
+let micStream = null, micCtx = null, micNode = null, micSource = null;
+let micChunks = [], micRate = 48000, micVoiced = false;
+let micQuietSince = 0, micStarted = 0, micStopping = false;
+
+function wavBlob(samples, rate) {
+  const buf = new ArrayBuffer(44 + samples.length * 2);
+  const view = new DataView(buf);
+  const str = (off, s) => [...s].forEach((c, i) => view.setUint8(off + i, c.charCodeAt(0)));
+  str(0, "RIFF"); view.setUint32(4, 36 + samples.length * 2, true); str(8, "WAVE");
+  str(12, "fmt "); view.setUint32(16, 16, true);
+  view.setUint16(20, 1, true); view.setUint16(22, 1, true);
+  view.setUint32(24, rate, true); view.setUint32(28, rate * 2, true);
+  view.setUint16(32, 2, true); view.setUint16(34, 16, true);
+  str(36, "data"); view.setUint32(40, samples.length * 2, true);
+  for (let i = 0; i < samples.length; i++) {
+    const s = Math.max(-1, Math.min(1, samples[i]));
+    view.setInt16(44 + i * 2, s < 0 ? s * 0x8000 : s * 0x7fff, true);
+  }
+  return new Blob([buf], { type: "audio/wav" });
+}
+
+/* Average rather than pick every Nth sample: decimation without a filter
+   aliases, and on a phone in a noisy room that shows up as hiss the ASR then
+   has to see through. */
+function downsample(chunks, from, to) {
+  const flat = new Float32Array(chunks.reduce((n, c) => n + c.length, 0));
+  let at = 0;
+  for (const c of chunks) { flat.set(c, at); at += c.length; }
+  if (from === to) return flat;
+  const ratio = from / to;
+  const out = new Float32Array(Math.floor(flat.length / ratio));
+  for (let i = 0; i < out.length; i++) {
+    const start = Math.floor(i * ratio), end = Math.min(flat.length, Math.floor((i + 1) * ratio));
+    let sum = 0;
+    for (let j = start; j < end; j++) sum += flat[j];
+    out[i] = sum / Math.max(1, end - start);
+  }
+  return out;
+}
+
+async function micStart() {
+  if (micCtx) return;
+  if (!navigator.mediaDevices?.getUserMedia) {
+    // The usual cause is not a permission but the page being served over
+    // plain HTTP: getUserMedia does not exist outside a secure context.
+    flash(location.protocol === "https:" ? "no microphone" : "needs https");
+    return;
+  }
+  try {
+    micStream = await navigator.mediaDevices.getUserMedia({
+      audio: { echoCancellation: true, noiseSuppression: true, channelCount: 1 },
+    });
+  } catch {
+    flash("microphone blocked");
+    return;
+  }
+  micCtx = new (window.AudioContext || window.webkitAudioContext)();
+  micRate = micCtx.sampleRate;
+  micSource = micCtx.createMediaStreamSource(micStream);
+  // ScriptProcessorNode is deprecated but works on every phone we care about,
+  // including older iOS Safari. An AudioWorklet would need a separate module
+  // file served alongside the page for no behavioural gain here.
+  micNode = micCtx.createScriptProcessor(4096, 1, 1);
+  micChunks = []; micVoiced = false; micStopping = false;
+  micStarted = performance.now(); micQuietSince = micStarted;
+
+  micNode.onaudioprocess = (e) => {
+    if (micStopping) return;
+    const input = e.inputBuffer.getChannelData(0);
+    micChunks.push(new Float32Array(input));
+    let sum = 0;
+    for (let i = 0; i < input.length; i++) sum += input[i] * input[i];
+    const rms = Math.sqrt(sum / input.length);
+    const now = performance.now();
+
+    if (rms >= MIC.SILENCE_RMS) { micVoiced = true; micQuietSince = now; }
+    // Same two timers the device uses: one for an utterance that ended, one
+    // for an utterance that never began.
+    if (micVoiced && now - micQuietSince > MIC.SILENCE_MS) micStop();
+    else if (!micVoiced && now - micStarted > MIC.NO_SPEECH_MS) micStop(true);
+    else if (now - micStarted > MIC.MAX_MS) micStop();
+  };
+  micSource.connect(micNode);
+  micNode.connect(micCtx.destination);
+  show("LISTENING");
+  $("#prompt").textContent = "listening… speak now";
+}
+
+function micStop(nothingHeard) {
+  if (micStopping || !micCtx) return;
+  micStopping = true;
+  const chunks = micChunks, from = micRate;
+  try { micSource.disconnect(); micNode.disconnect(); } catch {}
+  micStream.getTracks().forEach((t) => t.stop());
+  micCtx.close();
+  micCtx = micNode = micSource = micStream = null;
+  micChunks = [];
+
+  if (nothingHeard || !chunks.length) {
+    show("UNHEARD");
+    flash("didn't catch that");
+    return;
+  }
+  const blob = wavBlob(downsample(chunks, from, MIC.RATE), MIC.RATE);
+  $("#prompt").textContent = "thinking…";
+  fetch("/listen", { method: "POST", body: blob,
+                     headers: { "Content-Type": "audio/wav" } })
+    .then((r) => { if (r.status === 409) flash("still answering…"); })
+    .catch(() => flash("device unreachable"));
 }
 
 /* --- the phone as the speaker -------------------------------------------
@@ -388,6 +534,18 @@ $("#listen").addEventListener("click", () => {
     const a = new Audio();
     a.play().catch(() => {});
   }
+});
+
+$("#usemic").addEventListener("click", async () => {
+  const on = $("#usemic").getAttribute("aria-pressed") !== "true";
+  if (on && location.protocol !== "https:") {
+    // Worth saying plainly rather than letting the tap silently do nothing:
+    // this is a browser rule, not a device setting.
+    flash("needs https for mic");
+    return;
+  }
+  $("#usemic").setAttribute("aria-pressed", String(on));
+  $("#usemic").textContent = on ? "using this phone's mic" : "use this phone's mic";
 });
 
 $("#ringwrap").addEventListener("click", talk);   // tap works on a tablet too

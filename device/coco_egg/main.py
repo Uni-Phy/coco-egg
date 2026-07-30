@@ -10,6 +10,7 @@ lands at M1.
 """
 from __future__ import annotations
 
+import io as _io
 import pathlib
 import sys
 import termios
@@ -18,8 +19,10 @@ import time
 import tty
 import wave
 
+import numpy as np
+
 from . import config, console, events, trigger
-from .audio import clips, level, play_wav, record_utterance
+from .audio import clips, level, play_wav, record_utterance, write_wav
 from .states import UiState
 from .sync import transcript
 from .tutor import profile_builder
@@ -78,16 +81,46 @@ def _nudge(cfg: dict, reason: str) -> None:
     set_ui(UiState.IDLE)
 
 
-def one_turn(cfg: dict) -> None:
+def _uploaded(wav_bytes: bytes, cfg: dict):
+    """Decode a WAV recorded on a phone into the array the mic path produces.
+
+    Returns (audio, question) — the transcript is done here because the
+    streaming transcriber exists to overlap ASR with SPEECH, and speech that
+    already finished on somebody's phone has nothing left to overlap with.
+    """
+    with wave.open(_io.BytesIO(wav_bytes), "rb") as w:
+        frames = w.readframes(w.getnframes())
+        rate, channels = w.getframerate(), w.getnchannels()
+    audio = np.frombuffer(frames, dtype=np.int16)
+    if channels > 1:
+        audio = audio.reshape(-1, channels)[:, 0].copy()
+    path = write_wav(audio, rate)
+    return audio, transcribe(path, cfg)
+
+
+def one_turn(cfg: dict, recorded: bytes | None = None) -> None:
+    """One learner turn. `recorded` is audio captured somewhere other than the
+    device's microphone — a phone, via the console — which is what lets an egg
+    with no audio hardware still hold a conversation.
+
+    Everything after the transcript is shared: retrieval, the tutor, TTS and
+    playback do not know or care where the question was recorded.
+    """
     events.begin_turn()
     set_ui(UiState.LISTENING)
-    # Streaming ASR: partials POST during speech, and the final POST fires at
-    # first silence — its encoder runs in parallel with the hangover instead
-    # of chaining after it (asr/streaming.py).
-    txn = StreamingTranscriber(cfg)
-    # t0 is end-of-speech, not "recorder returned": the learner sits through
-    # the trailing-silence hangover too, so it counts as latency.
-    audio, t0 = record_utterance(cfg, on_block=txn.push)
+    if recorded is not None:
+        t0 = time.monotonic()
+        audio, uploaded_question = _uploaded(recorded, cfg)
+        txn = None
+    else:
+        uploaded_question = None
+        # Streaming ASR: partials POST during speech, and the final POST fires at
+        # first silence — its encoder runs in parallel with the hangover instead
+        # of chaining after it (asr/streaming.py).
+        txn = StreamingTranscriber(cfg)
+        # t0 is end-of-speech, not "recorder returned": the learner sits through
+        # the trailing-silence hangover too, so it counts as latency.
+        audio, t0 = record_utterance(cfg, on_block=txn.push)
     # How loud was it? The recording was the one stage with no measurement, so
     # a garbled transcript could not be told apart from a learner too far from
     # the mic. Compare rms against audio.silence_rms in the trace.
@@ -102,10 +135,13 @@ def one_turn(cfg: dict) -> None:
     # The hangover is dead air the learner waits through before any work
     # starts — 1.2s of the ~5s (README). It is a stage like the others.
     events.emit("stage", stage="hangover", seconds=round(time.monotonic() - t0, 3))
-    txn.flush()   # no-op unless recording ended without a trailing-silence run
-    t_asr = time.monotonic()
-    question = txn.result(timeout_s=cfg["asr"]["timeout_s"])
-    events.emit("stage", stage="asr", seconds=round(time.monotonic() - t_asr, 3))
+    if txn is None:
+        question = uploaded_question
+    else:
+        txn.flush()   # no-op unless recording ended without a trailing-silence run
+        t_asr = time.monotonic()
+        question = txn.result(timeout_s=cfg["asr"]["timeout_s"])
+        events.emit("stage", stage="asr", seconds=round(time.monotonic() - t_asr, 3))
     events.emit("heard", text=question)
     if not question:
         _nudge(cfg, "no-speech")
@@ -282,7 +318,7 @@ def run() -> None:
             try:
                 match key:
                     case "\r" | "\n":
-                        one_turn(cfg)
+                        one_turn(cfg, recorded=event.get("audio"))
                     case "w":
                         bench_turn(cfg, "wav", output_mode)
                     case "q":

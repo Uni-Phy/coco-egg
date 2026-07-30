@@ -26,12 +26,18 @@ _q: Queue = Queue(maxsize=1)
 _busy = threading.Event()
 
 
-def request(source: str, key: str = "") -> bool:
-    """Ask for a turn. False when one is already running or already queued."""
+def request(source: str, key: str = "", audio: bytes | None = None) -> bool:
+    """Ask for a turn. False when one is already running or already queued.
+
+    `audio` carries a recording made somewhere other than the device's own
+    microphone — a phone, over the console. It rides the same queue as every
+    other trigger so the turn that follows is the same turn, not a parallel
+    implementation of one.
+    """
     if _busy.is_set():
         return False
     try:
-        _q.put_nowait({"source": source, "key": key})
+        _q.put_nowait({"source": source, "key": key, "audio": audio})
         return True
     except Full:
         return False

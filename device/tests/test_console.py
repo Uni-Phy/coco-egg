@@ -17,7 +17,9 @@ from coco_egg import console, events, presentation, trigger
 @pytest.fixture
 def server():
     """Console on an ephemeral port, so tests never collide with a real one."""
-    cfg = {"console": {"enabled": True, "host": "127.0.0.1", "port": 0}}
+    # tls off: these exercise the routes, and TLS has its own test.
+    cfg = {"console": {"enabled": True, "host": "127.0.0.1",
+                       "port": 0, "tls": False}}
     httpd = console.serve(cfg)
     assert httpd is not None
     yield f"http://127.0.0.1:{httpd.server_address[1]}"
@@ -44,7 +46,8 @@ def test_disabled_means_no_server():
 def test_a_port_already_in_use_is_not_fatal(server):
     """A console that cannot bind must not stop a device from teaching."""
     port = int(server.rsplit(":", 1)[1])
-    assert console.serve({"console": {"host": "127.0.0.1", "port": port}}) is None
+    assert console.serve({"console": {"host": "127.0.0.1", "port": port,
+                                  "tls": False}}) is None
 
 
 def test_it_serves_the_page_and_the_cue_table(server):

@@ -140,6 +140,13 @@ DEFAULTS = {
         "enabled": True,
         "host": "0.0.0.0",
         "port": 8090,
+        # HTTPS with a self-signed certificate. Not decoration: a browser
+        # refuses getUserMedia outside a secure context, so without this a
+        # phone cannot be the egg's MICROPHONE at all. The cost is a "not
+        # private" warning to tap through once per phone. false serves plain
+        # HTTP — the page and the speaker still work, the microphone does not.
+        "tls": True,
+        "cert_dir": "state",
     },
     "trigger": {
         "mode": "keyboard",   # bench: Enter key. Device: "gpio" (M1, XVF3800 GPI)

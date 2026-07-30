@@ -30,7 +30,9 @@ def test_a_request_is_delivered_with_its_source():
 def test_the_keyboard_carries_which_key():
     """The bench keys stay keyboard-only; the console has one action."""
     assert trigger.request("keyboard", key="w")
-    assert trigger.wait(timeout=1) == {"source": "keyboard", "key": "w"}
+    event = trigger.wait(timeout=1)
+    assert event["source"] == "keyboard" and event["key"] == "w"
+    assert event["audio"] is None      # only a browser upload carries audio
 
 
 def test_a_press_during_a_turn_is_rejected_not_queued():
