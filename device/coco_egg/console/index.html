@@ -486,40 +486,36 @@ function micStop(nothingHeard) {
 /* --- the phone as the speaker -------------------------------------------
    Sentences arrive one at a time and must not overlap, so they queue rather
    than each calling play(). A clip that 404s has aged out of the device's ring
-   buffer — skip it and keep the rest of the answer going, because dropping one
-   sentence is far better than stalling the queue behind it. */
+   buffer -- skip it and keep the rest of the answer going, because losing one
+   sentence beats stalling the queue behind it.
+
+   fetch + Web Audio rather than an <audio src>, for one iOS-specific reason:
+   a media element loads through AVFoundation, which does NOT share Safari's
+   certificate exception. On a self-signed console that means the page renders
+   perfectly and every clip fails, which is indistinguishable from the device
+   being silent. fetch() goes through Safari's own network stack, where the
+   exception the user accepted actually applies. */
 let listening = false;
 const queue = [];
 let playing = false;
+let actx = null;
+let source = null;
 
-/* ONE element, reused for every sentence. iOS grants the autoplay unlock to
-   the ELEMENT that played during the user gesture, not to the page, so a fresh
-   new Audio() per clip throws the unlock away and every sentence is blocked. */
-const player = new Audio();
-player.preload = "auto";
-player.onended = playNext;
-player.onerror = playNext;             // expired clip: skip, do not stall
-
-/* 50 ms of actual silence, because `new Audio()` with no src rejects
-   immediately on iOS and unlocks nothing — the exact bug this replaces. The
-   button read "listening", the device published every clip, the phone played
-   none of them, and the failure looked like a network problem. */
-const SILENCE = "data:audio/wav;base64,UklGRkQDAABXQVZFZm10IBAAAAABAAEAQB8AAIA+AAACABAAZG"
-  + "F0YSADAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
-  + "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
-  + "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
-  + "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
-  + "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
-  + "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
-  + "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
-  + "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
-  + "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
-  + "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
-  + "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
-  + "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
-  + "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
-  + "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
-  + "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==";
+function audioReady() {
+  const AC = window.AudioContext || window.webkitAudioContext;
+  if (!AC) return null;
+  if (!actx) {
+    actx = new AC();
+    // iOS wants a buffer to have actually played, not merely a resumed
+    // context, so play one silent frame while we still hold the gesture.
+    const s = actx.createBufferSource();
+    s.buffer = actx.createBuffer(1, 1, 22050);
+    s.connect(actx.destination);
+    s.start(0);
+  }
+  if (actx.state === "suspended") actx.resume();
+  return actx;
+}
 
 function enqueue(clip) {
   if (!listening || !clip) return;
@@ -527,15 +523,29 @@ function enqueue(clip) {
   if (!playing) playNext();
 }
 
-function playNext() {
+async function playNext() {
   const url = queue.shift();
   if (!url) { playing = false; $("#listen").classList.remove("playing"); return; }
   playing = true;
   $("#listen").classList.add("playing");
-  player.src = url;
-  player.play().catch(() => {            // gesture lost (tab restored, etc.)
-    setListen(false);
-  });
+  try {
+    const ctx = audioReady();
+    if (!ctx) throw new Error("no web audio");
+    const r = await fetch(url);
+    if (!r.ok) throw new Error("clip " + r.status);
+    const buf = await ctx.decodeAudioData(await r.arrayBuffer());
+    source = ctx.createBufferSource();
+    source.buffer = buf;
+    source.connect(ctx.destination);
+    source.onended = () => { source = null; playNext(); };
+    source.start();
+  } catch (e) {
+    // Loud, not silent. The previous version skipped a failed clip without a
+    // word, so a phone that played nothing looked like a network fault and
+    // sent an evening into checking the network instead of the audio.
+    flash("audio: " + ((e && e.message) || "failed"));
+    playNext();
+  }
 }
 
 function setListen(on) {
@@ -546,7 +556,7 @@ function setListen(on) {
   if (!on) {
     queue.length = 0;
     playing = false;
-    player.pause();
+    if (source) { try { source.stop(); } catch {} source = null; }
     b.classList.remove("playing");
   }
 }
@@ -554,11 +564,7 @@ function setListen(on) {
 $("#listen").addEventListener("click", () => {
   const on = !listening;
   setListen(on);
-  // Unlock on THIS gesture, using audio that actually exists — see SILENCE.
-  if (on) {
-    player.src = SILENCE;
-    player.play().catch(() => {});
-  }
+  if (on) audioReady();          // the unlock has to happen in THIS gesture
 });
 
 function setUseMic(on) {
