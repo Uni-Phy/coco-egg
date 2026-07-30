@@ -43,17 +43,34 @@ def resolve_input(cfg: dict) -> int | None:
     return index
 
 
+# What the last real recording attempt proved, or None before there has been
+# one. PortAudio enumerates devices ONCE per process, so in a daemon that has
+# been up for hours query_devices() answers "what was plugged in at startup" —
+# it happily listed a USB mic that had since been unplugged, /health repeated
+# that, and the page therefore never fell back to the phone. An actual capture
+# attempt cannot be stale, so it outranks the enumeration.
+_capture_worked: bool | None = None
+
+
+def note_capture(ok: bool) -> None:
+    """Record whether opening the microphone actually worked."""
+    global _capture_worked
+    _capture_worked = ok
+
+
 def has_input() -> bool:
-    """Whether this device has any capture device at all.
+    """Whether this device has a microphone that actually opens.
 
     The console asks so a phone can default to being the microphone when the
-    egg has none. Without it the obvious action — tap the egg — fails with
-    "no capture devices found", which is true, unactionable from a phone, and
-    reads to a visitor as the whole device being broken.
+    egg has none. Without it the obvious action — tap the egg — fails with a
+    hardware error that is true, unactionable from a phone, and reads to a
+    visitor as the whole device being broken.
 
     Answers False rather than raising: this is a question about hardware, and
     every caller wants a fallback, not an exception.
     """
+    if _capture_worked is not None:
+        return _capture_worked
     try:
         return any(d["max_input_channels"] > 0 for d in sd.query_devices())
     except (OSError, sd.PortAudioError):
@@ -90,14 +107,24 @@ def record_utterance(cfg: dict, on_block: BlockCallback | None = None) -> tuple[
     # 0 restores the old behaviour.
     give_up_blocks = round(a.get("no_speech_s", 0) / 0.1)
 
-    device = resolve_input(cfg)
+    # Opening the stream is the only honest test of whether a microphone is
+    # there: PortAudio's device list is enumerated once per process and goes
+    # stale the moment somebody unplugs the USB mic. Both outcomes are recorded
+    # so /health — and therefore the phone — learns from the attempt.
+    try:
+        device = resolve_input(cfg)
+        stream = sd.InputStream(samplerate=sr, channels=1, dtype="int16",
+                                device=device, blocksize=block)
+    except (RuntimeError, OSError, sd.PortAudioError):
+        note_capture(False)
+        raise
+    note_capture(True)
+
     chunks: list[np.ndarray] = []
     silent = 0
     voiced_yet = False
     speech_end = time.monotonic()
-    with sd.InputStream(samplerate=sr, channels=1, dtype="int16",
-                        device=device,
-                        blocksize=block) as stream:
+    with stream:
         for elapsed_blocks in range(max_blocks):
             data, _ = stream.read(block)
             mono = data[:, 0]

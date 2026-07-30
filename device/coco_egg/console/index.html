@@ -301,6 +301,10 @@ function handle(ev) {
       card().querySelector(".outcome").insertAdjacentHTML("beforeend",
         `<div class="warn">${esc(ev.error)}: ${esc(ev.message)}</div>`);
       show("ERROR");
+      // A microphone can be unplugged mid-demo, and asking only at page load
+      // means the page keeps sending turns to a device mic that has gone away.
+      // Re-ask on any failure: this is the moment the answer may have changed.
+      checkMic();
       break;
     case "turn.end":
       if (ev.reason === "no-audio" || ev.reason === "no-speech") show("UNHEARD");
@@ -424,8 +428,21 @@ async function micStart() {
     micStream = await navigator.mediaDevices.getUserMedia({
       audio: { echoCancellation: true, noiseSuppression: true, channelCount: 1 },
     });
-  } catch {
-    flash("microphone blocked");
+  } catch (e) {
+    // Name the cause. "blocked" covers three different problems with three
+    // different fixes, and guessing between them from the far end of an SSH
+    // session is exactly how an afternoon disappears.
+    const why = {
+      // Safari also throws this for a site it does not consider trustworthy,
+      // which a self-signed certificate is — accepting the warning lets the
+      // page load but does not always earn permission for the microphone.
+      NotAllowedError: "mic denied — Safari: aA menu > Website Settings > Microphone > Allow",
+      NotFoundError: "no microphone on this phone",
+      NotReadableError: "mic busy in another app",
+      SecurityError: "blocked: certificate not trusted for mic",
+      AbortError: "mic could not start",
+    }[e && e.name] || `mic error: ${(e && e.name) || "unknown"}`;
+    flash(why);
     return;
   }
   micCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -587,16 +604,22 @@ $("#usemic").addEventListener("click", async () => {
    default to it. Otherwise the obvious first action — tap the egg — fails with
    a hardware error a visitor holding a phone cannot do anything about.
    Permission is still requested on the tap, which is the user gesture Safari
-   wants; this only decides where the tap sends us. */
-fetch("/health")
-  .then((r) => r.json())
-  .then((h) => {
-    if (h.mic === false && location.protocol === "https:") {
-      setUseMic(true);
-      flash("no mic on the egg — using this phone's");
-    }
-  })
-  .catch(() => {});
+   wants; this only decides where the tap sends us.
+
+   Asked again after every failure, not just at load: a USB mic can be
+   unplugged mid-demo, and the device only finds out by trying to record. */
+function checkMic() {
+  return fetch("/health")
+    .then((r) => r.json())
+    .then((h) => {
+      if (h.mic === false && !useMyMic() && location.protocol === "https:") {
+        setUseMic(true);
+        flash("no mic on the egg — using this phone's");
+      }
+    })
+    .catch(() => {});
+}
+checkMic();
 
 $("#ringwrap").addEventListener("click", talk);   // tap works on a tablet too
 
