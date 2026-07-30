@@ -67,14 +67,21 @@ def ensure(cert_dir: str, hosts: list[str]) -> tuple[str, str] | None:
     return str(cert), str(key)
 
 
-def local_addresses() -> list[str]:
-    """Every address this device currently answers on, for the certificate SANs.
+def local_addresses(extra: list[str] | None = None) -> list[str]:
+    """Every address this device might answer on, for the certificate SANs.
 
-    The device moves between a WiFi network and a phone hotspot, so the address
-    a phone uses to reach it changes. Naming them all now avoids regenerating
-    the certificate — and re-accepting the warning — after every move.
+    `hostname -I` runs INSIDE the container and returns the container's address,
+    not the host's — so the LAN address a phone actually types is invisible from
+    here. That produced a certificate naming 172.18.0.5 and not 10.10.10.186,
+    and a name mismatch is a harsher browser warning than a plain self-signed
+    one. Hence `console.cert_hosts`: the addresses the device is reached on,
+    which only the operator knows.
+
+    The device also moves between a WiFi network and a phone hotspot, so both
+    common hotspot ranges are included up front — moving network should not mean
+    a new certificate and a warning to accept again.
     """
-    hosts = ["localhost", "127.0.0.1", "coco-egg.local"]
+    hosts = ["localhost", "127.0.0.1", "coco-egg.local"] + list(extra or [])
     try:
         out = subprocess.run(["hostname", "-I"], capture_output=True, text=True,
                              timeout=5).stdout

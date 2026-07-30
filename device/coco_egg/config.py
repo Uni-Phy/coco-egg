@@ -147,6 +147,12 @@ DEFAULTS = {
         # HTTP — the page and the speaker still work, the microphone does not.
         "tls": True,
         "cert_dir": "state",
+        # Addresses a phone will type. `hostname -I` sees only the CONTAINER's
+        # address, so the LAN address has to be named here or the certificate
+        # mismatches and the browser warning gets harsher. Both phone-hotspot
+        # ranges are already covered automatically. Delete state/console-cert.pem
+        # after changing this to force a regeneration.
+        "cert_hosts": [],
     },
     "trigger": {
         "mode": "keyboard",   # bench: Enter key. Device: "gpio" (M1, XVF3800 GPI)

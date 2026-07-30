@@ -198,7 +198,8 @@ def serve(cfg: dict) -> ThreadingHTTPServer | None:
     # Falling back to plain HTTP keeps the page and the speaker working.
     scheme = "http"
     if c.get("tls", True):
-        pair = tls.ensure(c.get("cert_dir", "state"), tls.local_addresses())
+        pair = tls.ensure(c.get("cert_dir", "state"),
+                          tls.local_addresses(c.get("cert_hosts")))
         if pair:
             ctx = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
             ctx.load_cert_chain(*pair)
