@@ -19,7 +19,7 @@ import tty
 import wave
 
 from . import config, console, events, trigger
-from .audio import level, play_wav, record_utterance
+from .audio import clips, level, play_wav, record_utterance
 from .states import UiState
 from .sync import transcript
 from .tutor import profile_builder
@@ -43,6 +43,26 @@ MENU = (
 )
 
 
+def speak(wav_path: str, index: int, text: str, cfg: dict) -> None:
+    """Play a synthesised sentence wherever audio.output says it should come out.
+
+    Browser playback publishes the same WAV aplay would have played and puts its
+    id on the event, so a phone on the LAN becomes the speaker — which is the
+    whole point: an egg then needs no speaker hardware, and a room full of
+    people can each hear it on their own device.
+
+    Browser-only deliberately does NOT block. play_wav() waits for aplay to
+    finish, which paces the turn; with the audio going to a browser there is
+    nothing local to wait for, and the page queues clips so they still play in
+    order.
+    """
+    where = cfg["audio"].get("output", "device")
+    clip = clips.publish(wav_path) if where in ("browser", "both") else None
+    events.emit("spoken", index=index, text=text, clip=clip)
+    if where in ("device", "both"):
+        play_wav(wav_path, cfg)
+
+
 def set_ui(state: UiState) -> None:
     # M1: drive the LED ring here (XVF3800 GPO / Pi GPIO). Bench: print.
     events.emit("state", state=state.name)
@@ -53,7 +73,8 @@ def _nudge(cfg: dict, reason: str) -> None:
     """Nothing came through — say so, so the learner isn't left in dead air."""
     events.end_turn(reason=reason)
     set_ui(UiState.SPEAKING)
-    play_wav(synthesize("Sorry, I didn't catch that. Try again.", cfg), cfg)
+    said = "Sorry, I didn't catch that. Try again."
+    speak(synthesize(said, cfg), 0, said, cfg)
     set_ui(UiState.IDLE)
 
 
@@ -104,8 +125,7 @@ def one_turn(cfg: dict) -> None:
             print(f"  latency (end-of-speech -> first-audio): {first_audio:.2f}s")
         spoken.append(sentence)
         set_ui(UiState.SPEAKING)
-        play_wav(speech, cfg)
-        events.emit("spoken", index=len(spoken) - 1, text=sentence)
+        speak(speech, len(spoken) - 1, sentence, cfg)
     reply = " ".join(spoken)
     print(f"  reply: {reply}")
     if reply:
@@ -143,8 +163,7 @@ def _speak(sentences, cfg: dict, output_mode: str, t0: float) -> tuple[list[str]
         set_ui(UiState.SPEAKING)
         match output_mode:
             case "device":
-                play_wav(speech, cfg)
-                events.emit("spoken", index=len(spoken) - 1, text=sentence)
+                speak(speech, len(spoken) - 1, sentence, cfg)
             case "file":
                 speech_paths.append(speech)
     if output_mode == "file" and speech_paths:

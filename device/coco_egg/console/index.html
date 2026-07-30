@@ -107,6 +107,18 @@
     body.dev #stage { transform: translateX(-280px) scale(.86); }
   }
   #hint { position: fixed; bottom: 14px; left: 16px; color: #ffffff33; font-size: 12px; }
+  /* The egg may have no speaker at all, so this is the speaker. It has to be a
+     real tap: no browser autoplays audio without a gesture, which is why this
+     is a button and not a setting that could be on by default. */
+  #listen {
+    position: fixed; top: 14px; right: 16px; z-index: 6;
+    font: inherit; font-size: 12px; padding: 8px 14px; border-radius: 999px;
+    background: #ffffff0d; color: #ffffff88; border: 1px solid #ffffff1f;
+    cursor: pointer; -webkit-tap-highlight-color: transparent;
+  }
+  #listen[aria-pressed="true"] { background: #3FA0E022; color: #9FD0F0; border-color: #3FA0E055; }
+  #listen:focus-visible { outline: 2px solid #3FA0E0; outline-offset: 2px; }
+  #listen.playing { border-color: #3FA0E0; }
 </style>
 
 <div id="stage">
@@ -131,6 +143,8 @@
   </div>
   <div id="turns"></div>
 </div>
+
+<button id="listen" aria-pressed="false">listen on this phone</button>
 
 <div id="hint"><kbd>space</kbd> talk &nbsp;·&nbsp; <kbd>d</kbd> dev trace</div>
 
@@ -256,6 +270,9 @@ function handle(ev) {
         `<div class="meta">${ev.kind === "opener" ? "opener" : "new subject"}` +
         ` — not grounded</div>`;
       break;
+    case "spoken":
+      enqueue(ev.clip);
+      break;
     case "sentence": {
       const r = card().querySelector(".reply");
       r.textContent = (r.textContent + " " + (ev.text || "")).trim();
@@ -319,6 +336,59 @@ async function talk() {
     flash("device unreachable");
   }
 }
+
+/* --- the phone as the speaker -------------------------------------------
+   Sentences arrive one at a time and must not overlap, so they queue rather
+   than each calling play(). A clip that 404s has aged out of the device's ring
+   buffer — skip it and keep the rest of the answer going, because dropping one
+   sentence is far better than stalling the queue behind it. */
+let listening = false;
+const queue = [];
+let audio = null;
+
+function enqueue(clip) {
+  if (!listening || !clip) return;
+  queue.push(`/clip/${clip}.wav`);
+  if (!audio) playNext();
+}
+
+function playNext() {
+  const url = queue.shift();
+  if (!url) { audio = null; $("#listen").classList.remove("playing"); return; }
+  audio = new Audio(url);
+  $("#listen").classList.add("playing");
+  audio.onended = playNext;
+  audio.onerror = playNext;              // expired clip: skip, do not stall
+  audio.play().catch(() => {             // gesture lost (tab restored, etc.)
+    listening = false;
+    setListen(false);
+    queue.length = 0;
+    audio = null;
+  });
+}
+
+function setListen(on) {
+  listening = on;
+  const b = $("#listen");
+  b.setAttribute("aria-pressed", String(on));
+  b.textContent = on ? "listening" : "listen on this phone";
+  if (!on) {
+    queue.length = 0;
+    if (audio) { audio.pause(); audio = null; }
+    b.classList.remove("playing");
+  }
+}
+
+$("#listen").addEventListener("click", () => {
+  const on = !listening;
+  setListen(on);
+  // Unlock playback on THIS gesture. A silent clip is enough to satisfy the
+  // autoplay policy, so the first real sentence plays without a second tap.
+  if (on) {
+    const a = new Audio();
+    a.play().catch(() => {});
+  }
+});
 
 $("#ringwrap").addEventListener("click", talk);   // tap works on a tablet too
 

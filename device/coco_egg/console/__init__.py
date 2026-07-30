@@ -38,6 +38,7 @@ import threading
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
 from .. import events, presentation, trigger
+from ..audio import clips
 
 INDEX = pathlib.Path(__file__).parent / "index.html"
 
@@ -71,8 +72,28 @@ class Handler(BaseHTTPRequestHandler):
                 self._send(200, b'{"ok":true}', "application/json")
             case "/events":
                 self._stream()
+            case path if path.startswith("/clip/"):
+                self._clip(path[len("/clip/"):])
             case _:
                 self._send(404, b"not found", "text/plain")
+
+    def _clip(self, clip_id: str) -> None:
+        """A spoken sentence, so a phone can be the speaker.
+
+        404 on an unknown id is ordinary rather than exceptional: clips age out
+        of a small ring buffer, and a browser that reconnected after a gap will
+        ask for one that has already gone. The page skips and moves on.
+        """
+        wav = clips.path(clip_id.removesuffix(".wav"))
+        if wav is None or not wav.is_file():
+            self._send(404, b"expired", "text/plain")
+            return
+        try:
+            body = wav.read_bytes()
+        except OSError:
+            self._send(404, b"unreadable", "text/plain")
+            return
+        self._send(200, body, "audio/wav")
 
     def do_POST(self) -> None:     # noqa: N802  (BaseHTTPRequestHandler's name)
         if self.path.split("?")[0] != "/trigger":

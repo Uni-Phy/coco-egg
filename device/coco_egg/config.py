@@ -34,6 +34,14 @@ DEFAULTS = {
         # draw breath and short enough that a miss reads as a miss rather than
         # as a hang. 0 disables it.
         "no_speech_s": 4.0,
+        # Where the spoken reply comes out.
+        #   "device"  aplay only, the way it has always worked
+        #   "browser" the console plays it, so a phone is the speaker and an
+        #             egg needs no speaker hardware at all
+        #   "both"    for a demo where the room hears it and phones do too
+        # Browser playback needs a tap on the page first: no browser will
+        # autoplay audio without a gesture, whatever we do here.
+        "output": "device",
     },
     "asr": {
         # "whisper" (whisper.cpp via whisper-server) or "moonshine" (in-process
