@@ -368,7 +368,7 @@ python tools/console_demo.py          # space advances a scripted turn
 python tools/console_demo.py --auto   # free-run
 ```
 
-**No authentication yet (v0.6).** It serves only live events — never stored
+**No authentication yet — it lands in v0.7.** It serves only live events — never stored
 transcripts — and says so on the page, but it is a LAN port carrying what
 children said aloud. Demo it while you are watching it; set `console.enabled:
 false` in `egg.yaml` for anything else.
@@ -415,8 +415,15 @@ audio:
 on `http://`. The console therefore serves HTTPS with a certificate it generates
 itself into `state/`, and the first visit on each phone shows a "not private"
 warning to tap through. There is no way around that without a real domain and a
-real CA, which an offline classroom device does not have. Plain HTTP still
-serves the page and the speaker — only the microphone needs the certificate.
+real CA, which an offline classroom device does not have.
+
+You do not have to type the scheme. The port sniffs its first byte — a TLS
+handshake starts `0x16`, an HTTP request starts with a method — and answers
+plain HTTP with a redirect to HTTPS. Before that it was TLS-only, so a phone
+given `egg.local:8090` tried `http://` first, had its connection dropped, and
+showed *"cannot open the page"* — the same message it shows for a device that
+is not on the network at all. That cost an evening of debugging mDNS and the
+subnet for a missing eight characters.
 
 **The certificate must name the address people type.** `hostname -I` runs inside
 the container and returns the *container's* address, so the LAN address is
@@ -435,6 +442,38 @@ new certificate and a fresh warning.
 `egg`. On DietPi also set `AUTO_SETUP_NET_HOSTNAME=egg` in `/boot/dietpi.txt`,
 or a rebuild reasserts the old name and the URL stops resolving. Note Android's
 mDNS support is patchier than iOS's; the IP always works.
+
+### When it answers but you hear nothing
+
+Every one of these has happened, and none of them looked like what it was. Read
+the log first: if it printed `reply:`, the pipeline is fine and the problem is
+purely where the audio went.
+
+**Check the mixer before anything else.** A USB speakerphone can come up at
+zero, and `aplay` reports success while playing into it:
+
+```shell
+amixer -c 0 sset PCM 90% unmute && sudo alsactl store   # store, or a reboot re-mutes
+```
+
+**Check the routing.** `audio.output: browser` deliberately skips `play_wav`,
+so the device speaker is silent by design. The startup banner names the routing
+rather than the ALSA device, because a line reading `audio out: plughw:…` about
+a speaker that is off by configuration is worse than no line at all:
+
+```
+audio out:  plughw:CARD=Plus,DEV=0 + browser
+```
+
+**On iOS, reload the page before you conclude anything.** Clips are fetched and
+played through Web Audio, not an `<audio src>`, because a media element on iOS
+loads through AVFoundation — which does *not* share Safari's certificate
+exception. On a self-signed console that renders the page perfectly and fails
+every clip. The page is served `no-store` so a phone cannot hold yesterday's
+JavaScript against today's device.
+
+Clip failures are flashed on the page. They used to be skipped silently, which
+is the single reason this class of bug kept looking like a network fault.
 
 ## Content packs (curriculum RAG)
 
