@@ -15,3 +15,6 @@ models/
 .env
 transcripts/
 egg.yaml
+
+# rendered hardware artifacts — regenerate with `make -C hardware`
+hardware/out/

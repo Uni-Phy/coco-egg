@@ -24,6 +24,7 @@ device/     Python device app (state machine, audio, ASR, tutor, TTS, sync)
 os/         image provisioning: first-boot, WiFi manager, ShellHub agent
 deploy/     Dockerfile + compose (app updates = image pulls)
 docs/       spec.md — the engineering scope & design doc
+hardware/   egg.scad — parametric enclosure v3 (OpenSCAD), `make -C hardware stl`
 ```
 
 ## Bench quickstart (M0: Pi 5 + eMeet M0 Plus)
