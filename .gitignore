@@ -20,3 +20,4 @@ egg.yaml
 hardware/out/
 .DS_Store
 hardware/.venv-cad/
+hardware.zip
