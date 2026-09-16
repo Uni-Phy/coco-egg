@@ -19,3 +19,4 @@ egg.yaml
 # rendered hardware artifacts — regenerate with `make -C hardware`
 hardware/out/
 .DS_Store
+hardware/.venv-cad/

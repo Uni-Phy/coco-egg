@@ -4,11 +4,20 @@ Parametric OpenSCAD design for the coco-egg zero shell (spec §6). Everything
 is in [`egg.scad`](egg.scad); every dimension is a named parameter at the top.
 
 ```
-make stl        # out/egg_v4_{bowl,platform,dome}.stl
+make stl        # out/egg_v4_{bowl,platform,dome}.stl        (printing)
 make preview    # out/assembly.png, out/section.png
+make step       # out/egg_v4_{bowl,platform,dome,assembly}.step (CAD exchange)
 ```
-Needs OpenSCAD 2025+ with the manifold backend
-(`brew install --cask openscad@snapshot`).
+STL/preview need OpenSCAD 2025+ with the manifold backend
+(`brew install --cask openscad@snapshot`). STEP needs CadQuery:
+`python3.11 -m venv hardware/.venv-cad && hardware/.venv-cad/bin/pip install cadquery`.
+
+`egg_step.py` is a port of the same geometry to CadQuery (OpenCascade), so
+the STEP files are true B-rep solids — real revolved surfaces, cylindrical
+holes, planar faces — not triangulated meshes. Verified equal to the STL
+exports within 0.1 % by volume. **Parameters are duplicated between
+`egg.scad` and `egg_step.py`; change both.** The SCAD file is the print
+source of truth; the STEP is what you hand to Fusion/FreeCAD or a moulder.
 
 ## Three parts, all support-free
 
